@@ -1,8 +1,17 @@
-import { Document, Page, Text, View, StyleSheet, renderToBuffer } from "@react-pdf/renderer";
+import path from "path";
+import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import { calculateTax, type TaxMode } from "./tax";
 
+Font.register({
+  family: "NotoSansTC",
+  fonts: [
+    { src: path.join(process.cwd(), "src/fonts/NotoSansTC-Regular.otf"), fontWeight: 400 },
+    { src: path.join(process.cwd(), "src/fonts/NotoSansTC-Bold.otf"), fontWeight: 700 },
+  ],
+});
+
 const styles = StyleSheet.create({
-  page: { padding: 40, fontSize: 11, color: "#1f1d1a" },
+  page: { padding: 40, fontSize: 11, color: "#1f1d1a", fontFamily: "NotoSansTC" },
   title: { fontSize: 18, marginBottom: 4 },
   subtitle: { fontSize: 11, color: "#6b6760", marginBottom: 24 },
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 4 },
