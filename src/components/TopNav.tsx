@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const navItems = [
   { href: "/dashboard", label: "總覽" },
@@ -43,6 +44,7 @@ export function TopNav({ active }: { active: string }) {
         </nav>
       </div>
       <div className="flex items-center gap-3">
+        <ThemeToggle />
         <button
           onClick={handleLogout}
           className="text-sm text-foreground-muted hover:text-foreground"

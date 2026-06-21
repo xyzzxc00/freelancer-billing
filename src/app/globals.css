@@ -34,8 +34,16 @@
   --font-mono: var(--font-geist-mono);
 }
 
+:root[data-theme="dark"] {
+  --background: #181715;
+  --surface: #24221f;
+  --foreground: #ece9e2;
+  --foreground-muted: #a8a399;
+  --border: #3a372f;
+}
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
     --background: #181715;
     --surface: #24221f;
     --foreground: #ece9e2;
