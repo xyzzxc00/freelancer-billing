@@ -74,7 +74,7 @@ export default async function PublicQuotePage({
             ))}
           </div>
           <div className="border-t border-border pt-3 flex flex-col gap-1.5 text-sm">
-            {breakdown.lines.map((line) => (
+            {breakdown.clientLines.map((line) => (
               <div key={line.label} className="flex justify-between text-foreground-muted">
                 <span>{line.label}</span>
                 <span className="font-mono">{currency.format(line.amount)}</span>

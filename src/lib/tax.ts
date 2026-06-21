@@ -4,7 +4,8 @@ export interface TaxBreakdown {
   subtotal: number;
   clientTotal: number; // 客戶實際要付的金額
   freelancerNet: number; // 自己實拿金額
-  lines: { label: string; amount: number }[];
+  clientLines: { label: string; amount: number }[]; // 加總會等於 clientTotal
+  freelancerLines: { label: string; amount: number }[]; // 加總會等於 freelancerNet
 }
 
 const HEALTH_SUPPLEMENT_THRESHOLD = 20000;
@@ -19,10 +20,11 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
       subtotal,
       clientTotal: subtotal + tax,
       freelancerNet: subtotal,
-      lines: [
+      clientLines: [
         { label: "未稅金額", amount: subtotal },
-        { label: "營業稅 5%（向客戶收取，需開發票）", amount: tax },
+        { label: "營業稅 5%（需開發票）", amount: tax },
       ],
+      freelancerLines: [{ label: "未稅金額（實拿）", amount: subtotal }],
     };
   }
 
@@ -34,8 +36,9 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
       subtotal,
       clientTotal: subtotal,
       freelancerNet: subtotal - withholding - healthSupplement,
-      lines: [
-        { label: "報價金額", amount: subtotal },
+      clientLines: [{ label: "委託報酬總額", amount: subtotal }],
+      freelancerLines: [
+        { label: "委託報酬總額", amount: subtotal },
         { label: "代扣勞務報酬所得稅 10%", amount: -withholding },
         ...(healthSupplement > 0
           ? [{ label: "二代健保補充保費 2.11%（單筆逾 2 萬）", amount: -healthSupplement }]
@@ -48,7 +51,8 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
     subtotal,
     clientTotal: subtotal,
     freelancerNet: subtotal,
-    lines: [{ label: "金額", amount: subtotal }],
+    clientLines: [{ label: "金額", amount: subtotal }],
+    freelancerLines: [{ label: "金額", amount: subtotal }],
   };
 }
 

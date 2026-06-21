@@ -158,7 +158,7 @@ export default async function QuoteDetailPage({
               ))}
             </div>
             <div className="bg-surface rounded-lg p-4 flex flex-col gap-1.5 text-sm">
-              {breakdown.lines.map((line) => (
+              {breakdown.clientLines.map((line) => (
                 <div key={line.label} className="flex justify-between text-foreground-muted">
                   <span>{line.label}</span>
                   <span className="font-mono">{currency.format(line.amount)}</span>
@@ -168,7 +168,16 @@ export default async function QuoteDetailPage({
                 <span>客戶看到金額</span>
                 <span className="font-mono">{currency.format(breakdown.clientTotal)}</span>
               </div>
-              <div className="flex justify-between font-medium">
+            </div>
+
+            <div className="bg-surface rounded-lg p-4 flex flex-col gap-1.5 text-sm mt-2">
+              {breakdown.freelancerLines.map((line) => (
+                <div key={line.label} className="flex justify-between text-foreground-muted">
+                  <span>{line.label}</span>
+                  <span className="font-mono">{currency.format(line.amount)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between font-medium pt-1.5 border-t border-border mt-1">
                 <span>自己實拿金額</span>
                 <span className="font-mono">{currency.format(breakdown.freelancerNet)}</span>
               </div>

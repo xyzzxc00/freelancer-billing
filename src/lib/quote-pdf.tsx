@@ -57,7 +57,7 @@ function QuotePdfDocument({ title, clientName, freelancerName, items, taxMode }:
 
         <View style={styles.divider} />
 
-        {breakdown.lines.map((line, i) => (
+        {breakdown.clientLines.map((line, i) => (
           <View key={i} style={styles.row}>
             <Text style={styles.muted}>{line.label}</Text>
             <Text style={styles.muted}>{currency.format(line.amount)}</Text>
