@@ -68,9 +68,17 @@ export default async function TransactionsPage({
               </Link>
             </div>
           </div>
-          <Link href="/transactions/new" className="text-sm text-accent hover:underline">
-            + 新增記錄
-          </Link>
+          <div className="flex items-center gap-3">
+            <a
+              href={`/transactions/export?year=${year}`}
+              className="text-sm text-foreground-muted hover:text-foreground"
+            >
+              匯出 CSV
+            </a>
+            <Link href="/transactions/new" className="text-sm text-accent hover:underline">
+              + 新增記錄
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-7">

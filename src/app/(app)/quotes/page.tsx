@@ -39,9 +39,17 @@ export default async function QuotesPage() {
       <div className="px-6 py-6">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">報價單</h1>
-          <Link href="/quotes/new" className="text-sm text-accent hover:underline">
-            + 新增報價單
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/quotes/templates"
+              className="text-sm text-foreground-muted hover:text-foreground"
+            >
+              範本
+            </Link>
+            <Link href="/quotes/new" className="text-sm text-accent hover:underline">
+              + 新增報價單
+            </Link>
+          </div>
         </div>
 
         {quotes.length === 0 ? (

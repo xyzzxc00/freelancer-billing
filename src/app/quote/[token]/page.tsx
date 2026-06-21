@@ -52,7 +52,13 @@ export default async function PublicQuotePage({
           {quote.profile.name ?? quote.profile.email} 提供的報價單
         </p>
         <h1 className="text-xl font-medium mb-1">{quote.title}</h1>
-        <p className="text-sm text-foreground-muted mb-6">給 {quote.client.name}</p>
+        <div className="flex items-center gap-2 mb-6">
+          <p className="text-sm text-foreground-muted">給 {quote.client.name}</p>
+          <span className="text-foreground-muted">·</span>
+          <a href={`/quote/${token}/pdf`} className="text-sm text-accent hover:underline">
+            下載 PDF
+          </a>
+        </div>
 
         <div className="border border-border rounded-lg p-5 mb-6">
           <div className="flex flex-col gap-2 mb-4">

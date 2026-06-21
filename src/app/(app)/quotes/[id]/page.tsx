@@ -75,7 +75,13 @@ export default async function QuoteDetailPage({
             返回
           </Link>
         </div>
-        <p className="text-sm text-foreground-muted mb-5">{statusLabel[quote.status]}</p>
+        <div className="flex items-center gap-2 mb-5">
+          <p className="text-sm text-foreground-muted">{statusLabel[quote.status]}</p>
+          <span className="text-foreground-muted">·</span>
+          <a href={`/quotes/${quote.id}/pdf`} className="text-sm text-accent hover:underline">
+            下載 PDF
+          </a>
+        </div>
 
         <div className="mb-6">
           <label className="text-sm text-foreground-muted block mb-1.5">分享連結（給客戶看）</label>

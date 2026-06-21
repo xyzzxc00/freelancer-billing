@@ -14,6 +14,12 @@ interface ItemRow {
   quantity: string;
 }
 
+interface TemplateOption {
+  id: string;
+  name: string;
+  items: ItemRow[];
+}
+
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
   currency: "TWD",
@@ -28,6 +34,7 @@ export function QuoteForm({
   defaultTaxMode = "NONE",
   defaultItems = [{ name: "", unitPrice: "", quantity: "1" }],
   showClientField = true,
+  templates = [],
 }: {
   clients: ClientOption[];
   action: (formData: FormData) => void;
@@ -36,6 +43,7 @@ export function QuoteForm({
   defaultTaxMode?: TaxMode;
   defaultItems?: ItemRow[];
   showClientField?: boolean;
+  templates?: TemplateOption[];
 }) {
   const [items, setItems] = useState<ItemRow[]>(defaultItems);
   const [taxMode, setTaxMode] = useState<TaxMode>(defaultTaxMode);
@@ -102,7 +110,29 @@ export function QuoteForm({
       )}
 
       <div>
-        <label className="text-sm text-foreground-muted block mb-2">項目</label>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-sm text-foreground-muted">項目</label>
+          {templates.length > 0 && (
+            <select
+              defaultValue=""
+              onChange={(e) => {
+                const template = templates.find((t) => t.id === e.target.value);
+                if (template) setItems(template.items);
+                e.target.value = "";
+              }}
+              className="border border-border rounded-md px-2 py-1 text-xs bg-background"
+            >
+              <option value="" disabled>
+                套用範本…
+              </option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
         <div className="flex flex-col gap-2">
           {items.map((item, i) => (
             <div key={i} className="flex gap-2 items-center">

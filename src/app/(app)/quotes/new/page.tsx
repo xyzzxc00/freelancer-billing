@@ -8,11 +8,28 @@ import { createQuoteAction } from "../actions";
 export default async function NewQuotePage() {
   const userId = await requireUserId();
 
-  const clients = await prisma.client.findMany({
-    where: { userId },
-    orderBy: { name: "asc" },
-    select: { id: true, name: true },
-  });
+  const [clients, templates] = await Promise.all([
+    prisma.client.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.quoteTemplate.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+      include: { items: { orderBy: { sortOrder: "asc" } } },
+    }),
+  ]);
+
+  const templateOptions = templates.map((t) => ({
+    id: t.id,
+    name: t.name,
+    items: t.items.map((item) => ({
+      name: item.name,
+      unitPrice: String(item.unitPrice),
+      quantity: String(item.quantity),
+    })),
+  }));
 
   return (
     <div>
@@ -35,7 +52,7 @@ export default async function NewQuotePage() {
             ，才能建立報價單。
           </p>
         ) : (
-          <QuoteForm clients={clients} action={createQuoteAction} />
+          <QuoteForm clients={clients} action={createQuoteAction} templates={templateOptions} />
         )}
       </div>
     </div>
