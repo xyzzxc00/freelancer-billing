@@ -5,7 +5,7 @@
       "schedule": "0 1 * * *"
     },
     {
-      "path": "/api/cron/recurring-expenses",
+      "path": "/api/cron/recurring-transactions",
       "schedule": "0 1 * * *"
     }
   ]

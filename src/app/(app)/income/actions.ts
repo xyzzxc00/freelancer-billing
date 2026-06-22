@@ -9,7 +9,7 @@ export async function createIncomeAction(formData: FormData) {
   const userId = await requireUserId();
 
   const amount = Number(formData.get("amount") ?? 0);
-  const category = String(formData.get("category") ?? "").trim();
+  const incomeCategoryId = String(formData.get("incomeCategoryId") ?? "") || null;
   const note = String(formData.get("note") ?? "").trim();
   const occurredAtRaw = String(formData.get("occurredAt") ?? "");
 
@@ -22,7 +22,7 @@ export async function createIncomeAction(formData: FormData) {
       userId,
       type: "INCOME",
       amount,
-      category: category || null,
+      incomeCategoryId,
       note: note || null,
       occurredAt: new Date(occurredAtRaw),
     },

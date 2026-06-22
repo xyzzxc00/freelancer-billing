@@ -25,6 +25,8 @@ model Profile {
   quoteTemplates    QuoteTemplate[]
   expenseCategories ExpenseCategory[]
   recurringExpenses RecurringExpense[]
+  incomeCategories  IncomeCategory[]
+  recurringIncomes  RecurringIncome[]
 
   @@map("profiles")
 }
@@ -153,18 +155,21 @@ model Transaction {
   userId      String
   type        TransactionType
   amount      Decimal         @db.Decimal(12, 2)
-  category    String? // 自由文字分類（收入或舊資料用），支出建議改用 categoryId
-  categoryId  String?
-  note        String?
-  occurredAt  DateTime
-  createdAt   DateTime        @default(now())
+  category        String? // 自由文字分類（舊資料、自動產生的記錄用）
+  categoryId      String? // 支出分類
+  incomeCategoryId String? // 收入分類
+  note            String?
+  occurredAt      DateTime
+  createdAt       DateTime        @default(now())
 
   profile         Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenseCategory ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  incomeCategory  IncomeCategory?  @relation(fields: [incomeCategoryId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([occurredAt])
   @@index([categoryId])
+  @@index([incomeCategoryId])
   @@map("transactions")
 }
 
@@ -199,4 +204,37 @@ model RecurringExpense {
 
   @@index([userId])
   @@map("recurring_expenses")
+}
+
+model IncomeCategory {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  createdAt DateTime @default(now())
+
+  profile          Profile           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions     Transaction[]
+  recurringIncomes RecurringIncome[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("income_categories")
+}
+
+model RecurringIncome {
+  id                     String   @id @default(uuid())
+  userId                 String
+  name                   String
+  amount                 Decimal  @db.Decimal(12, 2)
+  categoryId             String?
+  dayOfMonth             Int // 1-28，每月固定哪天自動產生收入記錄
+  active                 Boolean  @default(true)
+  lastGeneratedYearMonth String? // "2026-06"，避免同月重複產生
+  createdAt              DateTime @default(now())
+
+  profile  Profile         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category IncomeCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@map("recurring_incomes")
 }

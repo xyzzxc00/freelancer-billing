@@ -15,16 +15,18 @@ export async function GET(request: NextRequest) {
   const yearMonth = currentYearMonth(now);
   const today = now.getDate();
 
-  const due = await prisma.recurringExpense.findMany({
-    where: {
-      active: true,
-      dayOfMonth: { lte: today },
-      NOT: { lastGeneratedYearMonth: yearMonth },
-    },
-  });
+  const [dueExpenses, dueIncomes] = await Promise.all([
+    prisma.recurringExpense.findMany({
+      where: { active: true, dayOfMonth: { lte: today }, NOT: { lastGeneratedYearMonth: yearMonth } },
+    }),
+    prisma.recurringIncome.findMany({
+      where: { active: true, dayOfMonth: { lte: today }, NOT: { lastGeneratedYearMonth: yearMonth } },
+    }),
+  ]);
 
   let created = 0;
-  for (const r of due) {
+
+  for (const r of dueExpenses) {
     await prisma.$transaction([
       prisma.transaction.create({
         data: {
@@ -44,5 +46,29 @@ export async function GET(request: NextRequest) {
     created += 1;
   }
 
-  return Response.json({ checked: due.length, created });
+  for (const r of dueIncomes) {
+    await prisma.$transaction([
+      prisma.transaction.create({
+        data: {
+          userId: r.userId,
+          type: "INCOME",
+          amount: r.amount,
+          incomeCategoryId: r.categoryId,
+          note: r.name,
+          occurredAt: now,
+        },
+      }),
+      prisma.recurringIncome.update({
+        where: { id: r.id },
+        data: { lastGeneratedYearMonth: yearMonth },
+      }),
+    ]);
+    created += 1;
+  }
+
+  return Response.json({
+    checkedExpenses: dueExpenses.length,
+    checkedIncomes: dueIncomes.length,
+    created,
+  });
 }

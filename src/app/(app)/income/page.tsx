@@ -29,13 +29,14 @@ export default async function IncomePage({
       occurredAt: { gte: rangeStart, lt: rangeEnd },
     },
     orderBy: { occurredAt: "desc" },
+    include: { incomeCategory: true },
   });
 
   const total = income.reduce((sum, i) => sum + Number(i.amount), 0);
 
   const bySource = new Map<string, number>();
   for (const i of income) {
-    const label = i.category ?? "未分類";
+    const label = i.incomeCategory?.name ?? i.category ?? "未分類";
     bySource.set(label, (bySource.get(label) ?? 0) + Number(i.amount));
   }
   const sourceRows = Array.from(bySource.entries()).sort((a, b) => b[1] - a[1]);
@@ -61,9 +62,23 @@ export default async function IncomePage({
             </Link>
           </div>
         </div>
-        <Link href="/income/new" className="text-sm text-accent hover:underline">
-          + 新增收入
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/income/categories"
+            className="text-sm text-foreground-muted hover:text-foreground"
+          >
+            分類管理
+          </Link>
+          <Link
+            href="/income/recurring"
+            className="text-sm text-foreground-muted hover:text-foreground"
+          >
+            定期收入
+          </Link>
+          <Link href="/income/new" className="text-sm text-accent hover:underline">
+            + 新增收入
+          </Link>
+        </div>
       </div>
 
       <div className="bg-surface rounded-lg p-4 mb-7">
@@ -106,7 +121,9 @@ export default async function IncomePage({
                 className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">{i.category ?? "未分類"}</p>
+                  <p className="text-sm font-medium truncate">
+                    {i.incomeCategory?.name ?? i.category ?? "未分類"}
+                  </p>
                   <p className="text-xs text-foreground-muted mt-0.5 truncate">
                     {i.occurredAt.toLocaleDateString("zh-TW")}
                     {i.note ? ` · ${i.note}` : ""}

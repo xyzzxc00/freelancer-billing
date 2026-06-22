@@ -21,10 +21,16 @@ export default async function NewIncomePage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const income = await prisma.transaction.aggregate({
-    where: { userId, type: "INCOME", occurredAt: { gte: monthStart, lt: monthEnd } },
-    _sum: { amount: true },
-  });
+  const [income, categories] = await Promise.all([
+    prisma.transaction.aggregate({
+      where: { userId, type: "INCOME", occurredAt: { gte: monthStart, lt: monthEnd } },
+      _sum: { amount: true },
+    }),
+    prisma.incomeCategory.findMany({
+      where: { userId },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   return (
     <div className="px-4 sm:px-6 py-6">
@@ -53,12 +59,28 @@ export default async function NewIncomePage() {
               />
             </div>
             <div>
-              <label className="text-sm text-foreground-muted block mb-1">來源（選填）</label>
-              <input
-                name="category"
-                placeholder="例如：接案收入、出售二手設備"
+              <label className="text-sm text-foreground-muted block mb-1">分類</label>
+              <select
+                name="incomeCategoryId"
+                defaultValue=""
                 className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
-              />
+              >
+                <option value="">不分類</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+              {categories.length === 0 && (
+                <p className="text-xs text-foreground-muted mt-1">
+                  還沒有分類，去
+                  <Link href="/income/categories" className="text-accent hover:underline mx-1">
+                    新增分類
+                  </Link>
+                  方便之後統計。
+                </p>
+              )}
             </div>
             <div>
               <label className="text-sm text-foreground-muted block mb-1">日期</label>
@@ -93,8 +115,8 @@ export default async function NewIncomePage() {
           itemsLabel="本月概況"
           steps={[
             "接案的主要收入建議都走報價單流程，會自動記帳又能追蹤待收款",
-            "這裡只需要記非報價單來源的零星收入",
-            "支出請改到「支出」頁面記錄，可以分類、也能設定定期自動產生",
+            "這裡只需要記非報價單來源的零星收入，記得選對分類方便之後統計",
+            "長期固定收入可以改用「定期收入」，設定一次就不用每月手動記",
           ]}
         >
           <div className="border border-border rounded-md p-3">
