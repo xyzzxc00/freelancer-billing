@@ -37,7 +37,7 @@ export default async function ClientDetailPage({
   const deleteAction = deleteClientAction.bind(null, client.id);
 
   return (
-    <div className="px-6 py-6 max-w-md">
+    <div className="px-4 sm:px-6 py-6 max-w-md">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">編輯客戶</h1>
           <Link href="/clients" className="text-sm text-foreground-muted hover:text-foreground">
@@ -103,10 +103,10 @@ export default async function ClientDetailPage({
               return (
                 <div
                   key={quote.id}
-                  className="border border-border rounded-lg px-4 py-3 flex items-center justify-between"
+                  className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
                 >
-                  <p className="text-sm font-medium">{quote.title}</p>
-                  <div className="flex items-center gap-2.5">
+                  <p className="text-sm font-medium truncate min-w-0">{quote.title}</p>
+                  <div className="flex items-center gap-2.5 shrink-0">
                     <span className="text-sm font-mono">
                       {new Intl.NumberFormat("zh-TW", {
                         style: "currency",

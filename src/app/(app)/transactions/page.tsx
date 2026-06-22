@@ -44,7 +44,7 @@ export default async function TransactionsPage({
   const yearExpense = monthly.reduce((sum, m) => sum + m.expense, 0);
 
   return (
-    <div className="px-6 py-6">
+    <div className="px-4 sm:px-6 py-6">
         <div className="flex items-baseline justify-between mb-4">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-medium">收支</h1>
@@ -77,7 +77,7 @@ export default async function TransactionsPage({
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 mb-7">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
           <div className="bg-surface rounded-lg p-4">
             <p className="text-sm text-foreground-muted mb-1.5">{year} 年總收入</p>
             <p className="text-2xl font-medium">{currency.format(yearIncome)}</p>
@@ -93,8 +93,8 @@ export default async function TransactionsPage({
         </div>
 
         <h2 className="text-base font-medium mb-3">月度彙整</h2>
-        <div className="border border-border rounded-lg overflow-hidden mb-7">
-          <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+        <div className="border border-border rounded-lg overflow-x-auto mb-7">
+          <table className="w-full text-sm min-w-[420px]" style={{ tableLayout: "fixed" }}>
             <thead>
               <tr className="bg-surface text-foreground-muted text-xs">
                 <th className="text-left px-3 py-2 w-16">月份</th>
@@ -132,16 +132,16 @@ export default async function TransactionsPage({
               return (
                 <div
                   key={t.id}
-                  className="border border-border rounded-lg px-4 py-3 flex items-center justify-between"
+                  className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
                 >
-                  <div>
-                    <p className="text-sm font-medium">{t.category ?? (t.type === "INCOME" ? "收入" : "支出")}</p>
-                    <p className="text-xs text-foreground-muted mt-0.5">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{t.category ?? (t.type === "INCOME" ? "收入" : "支出")}</p>
+                    <p className="text-xs text-foreground-muted mt-0.5 truncate">
                       {t.occurredAt.toLocaleDateString("zh-TW")}
                       {t.note ? ` · ${t.note}` : ""}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <span
                       className={`text-sm font-mono ${
                         t.type === "INCOME" ? "" : "text-[color:var(--danger-fg)]"

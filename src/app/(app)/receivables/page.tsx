@@ -32,7 +32,7 @@ export default async function ReceivablesPage() {
   const pendingTotal = pending.reduce((sum, r) => sum + Number(r.amount), 0);
 
   return (
-    <div className="px-6 py-6">
+    <div className="px-4 sm:px-6 py-6">
         <h1 className="text-lg font-medium mb-4">待收款</h1>
 
         <div className="grid grid-cols-2 gap-3 mb-7">
@@ -60,13 +60,13 @@ export default async function ReceivablesPage() {
               return (
                 <div
                   key={r.id}
-                  className="border border-border rounded-lg px-4 py-3.5 flex items-center justify-between gap-4"
+                  className="border border-border rounded-lg px-4 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                 >
-                  <div>
-                    <p className="text-sm font-medium">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">
                       {r.quote.client.name} — {r.quote.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <DueDateInput action={setDueDate} defaultValue={toDateInputValue(r.dueDate)} />
                       {isOverdue && (
                         <span className="text-xs px-2 py-0.5 rounded-full bg-danger-bg text-danger-fg">
@@ -75,7 +75,7 @@ export default async function ReceivablesPage() {
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <span className="text-sm font-medium font-mono">
                       {currency.format(Number(r.amount))}
                     </span>

@@ -62,7 +62,7 @@ export default async function QuoteDetailPage({
   const deleteAction = deleteQuoteAction.bind(null, quote.id);
 
   return (
-    <div className="px-6 py-6 max-w-lg">
+    <div className="px-4 sm:px-6 py-6 max-w-lg">
         <div className="flex items-baseline justify-between mb-1">
           <h1 className="text-lg font-medium">
             {quote.client.name} — {quote.title}
@@ -84,7 +84,7 @@ export default async function QuoteDetailPage({
           <CopyLinkButton url={shareUrl} />
         </div>
 
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           {quote.status === "DRAFT" && (
             <form action={sentAction}>
               <button
@@ -115,7 +115,7 @@ export default async function QuoteDetailPage({
               </form>
             </>
           )}
-          <form action={deleteAction}>
+          <form action={deleteAction} className="self-center">
             <button
               type="submit"
               className="text-sm text-[color:var(--danger-fg)] hover:underline px-1"

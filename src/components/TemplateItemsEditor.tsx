@@ -47,35 +47,40 @@ export function TemplateItemsEditor({
         <label className="text-sm text-foreground-muted block mb-2">項目</label>
         <div className="flex flex-col gap-2">
           {items.map((item, i) => (
-            <div key={i} className="flex gap-2 items-center">
+            <div
+              key={i}
+              className="flex flex-col sm:flex-row gap-2 sm:items-center border border-border sm:border-none rounded-md p-2 sm:p-0"
+            >
               <input
                 placeholder="項目名稱"
                 value={item.name}
                 onChange={(e) => updateItem(i, "name", e.target.value)}
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
+                className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1 min-w-0"
               />
-              <input
-                type="number"
-                placeholder="單價"
-                value={item.unitPrice}
-                onChange={(e) => updateItem(i, "unitPrice", e.target.value)}
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-24 font-mono"
-              />
-              <input
-                type="number"
-                placeholder="數量"
-                value={item.quantity}
-                onChange={(e) => updateItem(i, "quantity", e.target.value)}
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-20 font-mono"
-              />
-              <button
-                type="button"
-                onClick={() => removeItem(i)}
-                aria-label="移除項目"
-                className="text-foreground-muted hover:text-[color:var(--danger-fg)] px-1"
-              >
-                ✕
-              </button>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="number"
+                  placeholder="單價"
+                  value={item.unitPrice}
+                  onChange={(e) => updateItem(i, "unitPrice", e.target.value)}
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full sm:w-24 font-mono"
+                />
+                <input
+                  type="number"
+                  placeholder="數量"
+                  value={item.quantity}
+                  onChange={(e) => updateItem(i, "quantity", e.target.value)}
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full sm:w-20 font-mono"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeItem(i)}
+                  aria-label="移除項目"
+                  className="text-foreground-muted hover:text-[color:var(--danger-fg)] px-1 shrink-0"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
           ))}
         </div>

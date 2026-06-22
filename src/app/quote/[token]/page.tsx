@@ -46,7 +46,7 @@ export default async function PublicQuotePage({
   const rejectAction = respondToQuoteAction.bind(null, token, "REJECTED");
 
   return (
-    <div className="flex flex-1 justify-center px-6 py-12">
+    <div className="flex flex-1 justify-center px-4 sm:px-6 py-8 sm:py-12">
       <div className="w-full max-w-lg">
         <p className="text-sm text-foreground-muted mb-1">
           {quote.profile.name ?? quote.profile.email} 提供的報價單
@@ -87,7 +87,7 @@ export default async function PublicQuotePage({
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <span className="text-sm text-foreground-muted">
             目前狀態：{statusLabel[quote.status]}
           </span>

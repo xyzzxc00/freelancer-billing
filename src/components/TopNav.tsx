@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { usePathname } from "next/navigation";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LogoutButton } from "@/components/LogoutButton";
 
 const navItems = [
   { href: "/dashboard", label: "總覽" },
@@ -14,21 +14,13 @@ const navItems = [
 ];
 
 export function TopNav({ displayName }: { displayName: string }) {
-  const router = useRouter();
   const pathname = usePathname();
 
-  async function handleLogout() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
-    router.push("/login");
-    router.refresh();
-  }
-
   return (
-    <header className="flex items-center justify-between px-6 py-4 border-b border-border">
+    <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
       <div className="flex items-center gap-6">
         <span className="text-base font-medium">接案帳本</span>
-        <nav className="flex gap-5 text-sm text-foreground-muted">
+        <nav className="hidden md:flex gap-5 text-sm text-foreground-muted">
           {navItems.map((item) => {
             const isActive =
               pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -48,14 +40,9 @@ export function TopNav({ displayName }: { displayName: string }) {
           })}
         </nav>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <ThemeToggle />
-        <button
-          onClick={handleLogout}
-          className="text-sm text-foreground-muted hover:text-foreground"
-        >
-          登出
-        </button>
+        <LogoutButton className="hidden sm:inline text-sm text-foreground-muted hover:text-foreground" />
         <Link
           href="/settings"
           aria-label="帳戶設定"

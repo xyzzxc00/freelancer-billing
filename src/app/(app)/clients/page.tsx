@@ -19,7 +19,7 @@ export default async function ClientsPage() {
   });
 
   return (
-    <div className="px-6 py-6">
+    <div className="px-4 sm:px-6 py-6">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">客戶</h1>
           <Link href="/clients/new" className="text-sm text-accent hover:underline">
@@ -32,7 +32,7 @@ export default async function ClientsPage() {
             還沒有客戶資料，先新增一個吧。
           </p>
         ) : (
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {clients.map((client, i) => (
               <Link
                 key={client.id}

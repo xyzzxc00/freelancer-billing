@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
+import { LogoutButton } from "@/components/LogoutButton";
 import { updateProfileAction } from "./actions";
 
 export default async function SettingsPage() {
@@ -11,7 +12,7 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="px-6 py-6 max-w-sm">
+    <div className="px-4 sm:px-6 py-6 max-w-sm">
       <h1 className="text-lg font-medium mb-6">帳戶設定</h1>
 
       <section className="mb-8">
@@ -46,9 +47,13 @@ export default async function SettingsPage() {
         </form>
       </section>
 
-      <section>
+      <section className="mb-8">
         <h2 className="text-sm font-medium mb-3">變更密碼</h2>
         <PasswordChangeForm />
+      </section>
+
+      <section>
+        <LogoutButton className="text-sm text-[color:var(--danger-fg)] hover:underline" />
       </section>
     </div>
   );

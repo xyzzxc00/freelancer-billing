@@ -19,7 +19,7 @@ export default async function TemplatesPage() {
   });
 
   return (
-    <div className="px-6 py-6 max-w-lg">
+    <div className="px-4 sm:px-6 py-6 max-w-lg">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">報價單範本</h1>
           <Link href="/quotes/templates/new" className="text-sm text-accent hover:underline">

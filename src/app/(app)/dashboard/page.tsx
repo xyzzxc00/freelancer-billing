@@ -68,8 +68,8 @@ export default async function DashboardPage() {
     .reduce((sum, r) => sum + Number(r.amount), 0);
 
   return (
-    <div className="px-6 py-6">
-        <div className="grid grid-cols-3 gap-3 mb-8">
+    <div className="px-4 sm:px-6 py-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
           <div className="bg-surface rounded-lg p-4">
             <p className="text-sm text-foreground-muted mb-1.5">本月已收款</p>
             <p className="text-2xl font-medium">
@@ -110,17 +110,17 @@ export default async function DashboardPage() {
                 <Link
                   key={quote.id}
                   href={`/quotes/${quote.id}`}
-                  className="bg-background border border-border rounded-lg px-4.5 py-3.5 flex items-center justify-between hover:bg-surface transition-colors"
+                  className="bg-background border border-border rounded-lg px-4.5 py-3.5 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
                 >
-                  <div>
-                    <p className="text-sm font-medium">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">
                       {quote.client.name} — {quote.title}
                     </p>
                     <p className="text-xs text-foreground-muted mt-0.5">
                       {new Date(quote.createdAt).toLocaleDateString("zh-TW")}
                     </p>
                   </div>
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 shrink-0">
                     <span className="text-sm font-medium font-mono">
                       {currency.format(total)}
                     </span>
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
         {clients.length === 0 ? (
           <p className="text-sm text-foreground-muted">還沒有客戶資料。</p>
         ) : (
-          <div className="grid grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {clients.map((client, i) => (
               <Link
                 key={client.id}
