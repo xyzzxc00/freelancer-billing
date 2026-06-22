@@ -17,14 +17,14 @@ export default async function NewClientPage() {
   const recentClients = await prisma.client.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    take: 3,
+    take: 4,
     include: { _count: { select: { quotes: true } } },
   });
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-3xl">
-      <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
-        <div className="max-w-md w-full">
+    <div className="px-4 sm:px-6 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[420px_minmax(0,1fr)] gap-8 items-start">
+        <div>
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">新增客戶</h1>
             <Link href="/clients" className="text-sm text-foreground-muted hover:text-foreground">
@@ -69,24 +69,33 @@ export default async function NewClientPage() {
           </form>
         </div>
 
-        <TipPanel title="先建好客戶，開單更快" description="之後開報價單時可以直接選這位客戶，不用每次重新打聯絡資訊。">
-          {recentClients.length > 0 && (
-            <>
-              {recentClients.map((client, i) => (
-                <div key={client.id} className="flex items-center gap-2.5">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${avatarTones[i % avatarTones.length]}`}
-                  >
-                    {client.name.slice(0, 1)}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{client.name}</p>
-                    <p className="text-xs text-foreground-muted">{client._count.quotes} 個案件</p>
-                  </div>
+        <TipPanel
+          title="先建好客戶，開單更快"
+          description="之後開報價單時可以直接選這位客戶，不用每次重新打聯絡資訊。"
+          itemsLabel="你的客戶"
+          steps={[
+            "填好名稱跟聯絡方式，按下新增客戶",
+            "開報價單時直接從清單選這位客戶，不用重打資訊",
+            "案件累積後，到客戶頁面就能看到完整合作歷史",
+          ]}
+        >
+          {recentClients.length > 0 &&
+            recentClients.map((client, i) => (
+              <div
+                key={client.id}
+                className="border border-border rounded-md p-3 flex items-center gap-2.5"
+              >
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium shrink-0 ${avatarTones[i % avatarTones.length]}`}
+                >
+                  {client.name.slice(0, 1)}
                 </div>
-              ))}
-            </>
-          )}
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{client.name}</p>
+                  <p className="text-xs text-foreground-muted">{client._count.quotes} 個案件</p>
+                </div>
+              </div>
+            ))}
         </TipPanel>
       </div>
     </div>

@@ -18,9 +18,9 @@ export default async function NewExpensePage() {
   });
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-3xl">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-8 items-start">
-        <div className="max-w-sm w-full">
+    <div className="px-4 sm:px-6 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[420px_minmax(0,1fr)] gap-8 items-start">
+        <div>
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">新增支出</h1>
             <Link href="/expenses" className="text-sm text-foreground-muted hover:text-foreground">
@@ -94,10 +94,19 @@ export default async function NewExpensePage() {
         <TipPanel
           title="先分類，之後統計更清楚"
           description="記支出時選好分類，之後在支出報表就能直接看到各分類佔比，不用自己手動加總。"
+          itemsLabel="你的分類"
+          steps={[
+            "把常見的花費歸成幾個分類（軟體訂閱、交通、設備等）",
+            "每筆支出記錄時選對分類",
+            "到「支出」頁面看年度分類佔比，抓大頭開銷一目了然",
+          ]}
         >
           {categories.length > 0 &&
             categories.map((c) => (
-              <div key={c.id} className="flex items-center justify-between">
+              <div
+                key={c.id}
+                className="border border-border rounded-md p-3 flex items-center justify-between"
+              >
                 <span className="text-sm">{c.name}</span>
                 <span className="text-xs text-foreground-muted">{c._count.transactions} 筆</span>
               </div>

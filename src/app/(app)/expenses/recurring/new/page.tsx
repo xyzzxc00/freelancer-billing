@@ -25,9 +25,9 @@ export default async function NewRecurringExpensePage() {
   ]);
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-3xl">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.9fr] gap-8 items-start">
-        <div className="max-w-sm w-full">
+    <div className="px-4 sm:px-6 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[420px_minmax(0,1fr)] gap-8 items-start">
+        <div>
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">新增定期支出</h1>
             <Link
@@ -100,10 +100,19 @@ export default async function NewRecurringExpensePage() {
         <TipPanel
           title="設定一次，之後不用再手動記"
           description="系統會在每月指定日期自動建立這筆支出記錄，適合訂閱制的固定花費。"
+          itemsLabel="目前啟用中"
+          steps={[
+            "填好金額跟每月扣款日（1-28 號）",
+            "系統每天會檢查一次，到日期自動建立支出記錄",
+            "不用的時候到列表裡停用，資料會保留但不再自動產生",
+          ]}
         >
           {existing.length > 0 &&
             existing.map((r) => (
-              <div key={r.id} className="flex items-center justify-between gap-3">
+              <div
+                key={r.id}
+                className="border border-border rounded-md p-3 flex items-center justify-between gap-3"
+              >
                 <p className="text-sm truncate">
                   {r.name}
                   <span className="text-foreground-muted"> · 每月 {r.dayOfMonth} 號</span>
