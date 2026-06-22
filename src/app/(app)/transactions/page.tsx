@@ -65,6 +65,12 @@ export default async function TransactionsPage({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Link
+              href="/expenses"
+              className="text-sm text-foreground-muted hover:text-foreground"
+            >
+              支出管理
+            </Link>
             <a
               href={`/transactions/export?year=${year}`}
               className="text-sm text-foreground-muted hover:text-foreground"

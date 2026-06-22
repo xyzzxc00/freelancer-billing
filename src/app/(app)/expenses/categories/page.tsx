@@ -1,0 +1,71 @@
+import Link from "next/link";
+import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/auth";
+import { createCategoryAction, deleteCategoryAction } from "./actions";
+
+export default async function ExpenseCategoriesPage() {
+  const userId = await requireUserId();
+
+  const categories = await prisma.expenseCategory.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    include: { _count: { select: { transactions: true } } },
+  });
+
+  return (
+    <div className="px-4 sm:px-6 py-6 max-w-sm">
+      <div className="flex items-baseline justify-between mb-4">
+        <h1 className="text-lg font-medium">支出分類</h1>
+        <Link href="/expenses" className="text-sm text-foreground-muted hover:text-foreground">
+          返回
+        </Link>
+      </div>
+
+      <form action={createCategoryAction} className="flex gap-2 mb-6">
+        <input
+          name="name"
+          required
+          placeholder="例如：軟體訂閱"
+          className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
+        />
+        <button
+          type="submit"
+          className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
+        >
+          新增
+        </button>
+      </form>
+
+      {categories.length === 0 ? (
+        <p className="text-sm text-foreground-muted">還沒有分類，先新增一個吧。</p>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {categories.map((category) => {
+            const deleteAction = deleteCategoryAction.bind(null, category.id);
+            return (
+              <div
+                key={category.id}
+                className="border border-border rounded-lg px-4 py-3 flex items-center justify-between"
+              >
+                <div>
+                  <p className="text-sm font-medium">{category.name}</p>
+                  <p className="text-xs text-foreground-muted mt-0.5">
+                    {category._count.transactions} 筆記錄
+                  </p>
+                </div>
+                <form action={deleteAction}>
+                  <button
+                    type="submit"
+                    className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                  >
+                    刪除
+                  </button>
+                </form>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
