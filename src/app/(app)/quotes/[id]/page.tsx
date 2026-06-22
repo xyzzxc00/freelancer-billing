@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { headers } from "next/headers";
-import { TopNav } from "@/components/TopNav";
 import { QuoteForm } from "@/components/QuoteForm";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
 import { prisma } from "@/lib/prisma";
@@ -63,10 +62,7 @@ export default async function QuoteDetailPage({
   const deleteAction = deleteQuoteAction.bind(null, quote.id);
 
   return (
-    <div>
-      <TopNav active="報價單" />
-
-      <div className="px-6 py-6 max-w-lg">
+    <div className="px-6 py-6 max-w-lg">
         <div className="flex items-baseline justify-between mb-1">
           <h1 className="text-lg font-medium">
             {quote.client.name} — {quote.title}
@@ -184,7 +180,6 @@ export default async function QuoteDetailPage({
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 }

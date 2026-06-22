@@ -1,13 +1,9 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { createClientAction } from "../actions";
 
 export default function NewClientPage() {
   return (
-    <div>
-      <TopNav active="客戶" />
-
-      <div className="px-6 py-6 max-w-md">
+    <div className="px-6 py-6 max-w-md">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">新增客戶</h1>
           <Link href="/clients" className="text-sm text-foreground-muted hover:text-foreground">
@@ -50,7 +46,6 @@ export default function NewClientPage() {
             新增客戶
           </button>
         </form>
-      </div>
     </div>
   );
 }

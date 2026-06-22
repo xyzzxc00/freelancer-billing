@@ -1,0 +1,55 @@
+import { prisma } from "@/lib/prisma";
+import { requireUserId } from "@/lib/auth";
+import { PasswordChangeForm } from "@/components/PasswordChangeForm";
+import { updateProfileAction } from "./actions";
+
+export default async function SettingsPage() {
+  const userId = await requireUserId();
+
+  const profile = await prisma.profile.findUnique({
+    where: { id: userId },
+  });
+
+  return (
+    <div className="px-6 py-6 max-w-sm">
+      <h1 className="text-lg font-medium mb-6">帳戶設定</h1>
+
+      <section className="mb-8">
+        <h2 className="text-sm font-medium mb-3">個人資料</h2>
+        <form action={updateProfileAction} className="flex flex-col gap-3">
+          <div>
+            <label className="text-sm text-foreground-muted block mb-1">顯示名稱</label>
+            <input
+              name="name"
+              defaultValue={profile?.name ?? ""}
+              placeholder="例如：王小明"
+              className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+            />
+            <p className="text-xs text-foreground-muted mt-1">
+              會顯示在右上角的帳戶圖示，留空則用 email 開頭字母代替。
+            </p>
+          </div>
+          <div>
+            <label className="text-sm text-foreground-muted block mb-1">Email</label>
+            <input
+              disabled
+              value={profile?.email ?? ""}
+              className="border border-border rounded-md px-3 py-2 text-sm bg-surface w-full text-foreground-muted"
+            />
+          </div>
+          <button
+            type="submit"
+            className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium self-start px-4"
+          >
+            儲存
+          </button>
+        </form>
+      </section>
+
+      <section>
+        <h2 className="text-sm font-medium mb-3">變更密碼</h2>
+        <PasswordChangeForm />
+      </section>
+    </div>
+  );
+}

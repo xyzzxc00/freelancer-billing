@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { deleteTransactionAction } from "./actions";
@@ -45,10 +44,7 @@ export default async function TransactionsPage({
   const yearExpense = monthly.reduce((sum, m) => sum + m.expense, 0);
 
   return (
-    <div>
-      <TopNav active="收支" />
-
-      <div className="px-6 py-6">
+    <div className="px-6 py-6">
         <div className="flex items-baseline justify-between mb-4">
           <div className="flex items-center gap-3">
             <h1 className="text-lg font-medium">收支</h1>
@@ -169,7 +165,6 @@ export default async function TransactionsPage({
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

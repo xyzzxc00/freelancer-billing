@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { createTransactionAction } from "../actions";
 
 function todayInputValue() {
@@ -8,10 +7,7 @@ function todayInputValue() {
 
 export default function NewTransactionPage() {
   return (
-    <div>
-      <TopNav active="收支" />
-
-      <div className="px-6 py-6 max-w-sm">
+    <div className="px-6 py-6 max-w-sm">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">新增收支記錄</h1>
           <Link
@@ -78,7 +74,6 @@ export default function NewTransactionPage() {
             儲存
           </button>
         </form>
-      </div>
     </div>
   );
 }

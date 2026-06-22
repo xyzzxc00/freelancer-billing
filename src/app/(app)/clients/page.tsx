@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 
@@ -20,10 +19,7 @@ export default async function ClientsPage() {
   });
 
   return (
-    <div>
-      <TopNav active="客戶" />
-
-      <div className="px-6 py-6">
+    <div className="px-6 py-6">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">客戶</h1>
           <Link href="/clients/new" className="text-sm text-accent hover:underline">
@@ -56,7 +52,6 @@ export default async function ClientsPage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 }

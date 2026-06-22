@@ -1,4 +1,3 @@
-import { TopNav } from "@/components/TopNav";
 import { DueDateInput } from "@/components/DueDateInput";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
@@ -33,10 +32,7 @@ export default async function ReceivablesPage() {
   const pendingTotal = pending.reduce((sum, r) => sum + Number(r.amount), 0);
 
   return (
-    <div>
-      <TopNav active="待收款" />
-
-      <div className="px-6 py-6">
+    <div className="px-6 py-6">
         <h1 className="text-lg font-medium mb-4">待收款</h1>
 
         <div className="grid grid-cols-2 gap-3 mb-7">
@@ -121,7 +117,6 @@ export default async function ReceivablesPage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 }

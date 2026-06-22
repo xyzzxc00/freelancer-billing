@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { deleteTemplateAction } from "./actions";
@@ -20,10 +19,7 @@ export default async function TemplatesPage() {
   });
 
   return (
-    <div>
-      <TopNav active="報價單" />
-
-      <div className="px-6 py-6 max-w-lg">
+    <div className="px-6 py-6 max-w-lg">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">報價單範本</h1>
           <Link href="/quotes/templates/new" className="text-sm text-accent hover:underline">
@@ -69,7 +65,6 @@ export default async function TemplatesPage() {
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

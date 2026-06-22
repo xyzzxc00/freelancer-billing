@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 
@@ -69,10 +68,7 @@ export default async function DashboardPage() {
     .reduce((sum, r) => sum + Number(r.amount), 0);
 
   return (
-    <div>
-      <TopNav active="總覽" />
-
-      <div className="px-6 py-6">
+    <div className="px-6 py-6">
         <div className="grid grid-cols-3 gap-3 mb-8">
           <div className="bg-surface rounded-lg p-4">
             <p className="text-sm text-foreground-muted mb-1.5">本月已收款</p>
@@ -170,7 +166,6 @@ export default async function DashboardPage() {
             ))}
           </div>
         )}
-      </div>
     </div>
   );
 }

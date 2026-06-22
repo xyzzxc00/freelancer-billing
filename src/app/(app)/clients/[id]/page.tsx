@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { TopNav } from "@/components/TopNav";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { updateClientAction, deleteClientAction } from "../actions";
@@ -38,10 +37,7 @@ export default async function ClientDetailPage({
   const deleteAction = deleteClientAction.bind(null, client.id);
 
   return (
-    <div>
-      <TopNav active="客戶" />
-
-      <div className="px-6 py-6 max-w-md">
+    <div className="px-6 py-6 max-w-md">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">編輯客戶</h1>
           <Link href="/clients" className="text-sm text-foreground-muted hover:text-foreground">
@@ -127,7 +123,6 @@ export default async function ClientDetailPage({
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

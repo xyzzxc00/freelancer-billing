@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 
@@ -33,10 +32,7 @@ export default async function QuotesPage() {
   });
 
   return (
-    <div>
-      <TopNav active="報價單" />
-
-      <div className="px-6 py-6">
+    <div className="px-6 py-6">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">報價單</h1>
           <div className="flex items-center gap-3">
@@ -92,7 +88,6 @@ export default async function QuotesPage() {
             })}
           </div>
         )}
-      </div>
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TopNav } from "@/components/TopNav";
 import { QuoteForm } from "@/components/QuoteForm";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
@@ -32,10 +31,7 @@ export default async function NewQuotePage() {
   }));
 
   return (
-    <div>
-      <TopNav active="報價單" />
-
-      <div className="px-6 py-6 max-w-lg">
+    <div className="px-6 py-6 max-w-lg">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">新增報價單</h1>
           <Link href="/quotes" className="text-sm text-foreground-muted hover:text-foreground">
@@ -54,7 +50,6 @@ export default async function NewQuotePage() {
         ) : (
           <QuoteForm clients={clients} action={createQuoteAction} templates={templateOptions} />
         )}
-      </div>
     </div>
   );
 }

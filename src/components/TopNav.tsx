@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -13,8 +13,9 @@ const navItems = [
   { href: "/transactions", label: "收支" },
 ];
 
-export function TopNav({ active }: { active: string }) {
+export function TopNav({ displayName }: { displayName: string }) {
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleLogout() {
     const supabase = createClient();
@@ -28,19 +29,23 @@ export function TopNav({ active }: { active: string }) {
       <div className="flex items-center gap-6">
         <span className="text-base font-medium">接案帳本</span>
         <nav className="flex gap-5 text-sm text-foreground-muted">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={
-                item.label === active
-                  ? "text-foreground font-medium border-b-2 border-accent pb-0.5"
-                  : "hover:text-foreground"
-              }
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) => {
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  isActive
+                    ? "text-foreground font-medium border-b-2 border-accent pb-0.5"
+                    : "hover:text-foreground"
+                }
+              >
+                {item.label}
+              </Link>
+            );
+          })}
         </nav>
       </div>
       <div className="flex items-center gap-3">
@@ -51,9 +56,13 @@ export function TopNav({ active }: { active: string }) {
         >
           登出
         </button>
-        <div className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-sm font-medium">
-          阿
-        </div>
+        <Link
+          href="/settings"
+          aria-label="帳戶設定"
+          className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-sm font-medium hover:bg-[color:var(--border)] transition-colors"
+        >
+          {displayName.slice(0, 1).toUpperCase()}
+        </Link>
       </div>
     </header>
   );
