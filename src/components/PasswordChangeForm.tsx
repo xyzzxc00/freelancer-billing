@@ -32,8 +32,8 @@ export function PasswordChangeForm() {
       <input
         type="password"
         required
-        minLength={6}
-        placeholder="新密碼（至少 6 個字元）"
+        minLength={8}
+        placeholder="新密碼（至少 8 個字元）"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
         className="border border-border rounded-md px-3 py-2 text-sm bg-background"
