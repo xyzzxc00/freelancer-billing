@@ -29,7 +29,7 @@ export async function createExpenseAction(formData: FormData) {
   });
 
   revalidatePath("/expenses");
-  revalidatePath("/transactions");
+  revalidatePath("/income");
   revalidatePath("/dashboard");
   redirect("/expenses");
 }
@@ -40,6 +40,6 @@ export async function deleteExpenseAction(transactionId: string) {
   await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "EXPENSE" } });
 
   revalidatePath("/expenses");
-  revalidatePath("/transactions");
+  revalidatePath("/income");
   revalidatePath("/dashboard");
 }

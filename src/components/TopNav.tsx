@@ -10,7 +10,7 @@ const navItems = [
   { href: "/clients", label: "客戶" },
   { href: "/quotes", label: "報價單" },
   { href: "/receivables", label: "待收款" },
-  { href: "/transactions", label: "收支" },
+  { href: "/income", label: "收入" },
   { href: "/expenses", label: "支出" },
 ];
 

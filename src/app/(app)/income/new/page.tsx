@@ -33,7 +33,7 @@ export default async function NewIncomePage() {
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">新增收入</h1>
             <Link
-              href="/transactions"
+              href="/income"
               className="text-sm text-foreground-muted hover:text-foreground"
             >
               取消

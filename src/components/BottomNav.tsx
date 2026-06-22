@@ -53,15 +53,13 @@ const navItems = [
     ),
   },
   {
-    href: "/transactions",
-    label: "收支",
+    href: "/income",
+    label: "收入",
     icon: (
-      <path
-        d="M5 19V10M11 19V5M17 19v-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
+      <>
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
+        <path d="M12 9v6M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </>
     ),
   },
   {

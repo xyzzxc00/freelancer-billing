@@ -21,13 +21,14 @@ export async function GET(request: NextRequest) {
       occurredAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) },
     },
     orderBy: { occurredAt: "asc" },
+    include: { expenseCategory: true },
   });
 
   const header = ["日期", "類型", "分類", "金額", "備註"];
   const rows = transactions.map((t) => [
     t.occurredAt.toISOString().slice(0, 10),
     t.type === "INCOME" ? "收入" : "支出",
-    t.category ?? "",
+    t.expenseCategory?.name ?? t.category ?? "",
     String(t.amount),
     t.note ?? "",
   ]);
@@ -38,7 +39,7 @@ export async function GET(request: NextRequest) {
   return new Response(csvWithBom, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="transactions-${year}.csv"`,
+      "Content-Disposition": `attachment; filename="收支報表-${year}.csv"`,
     },
   });
 }

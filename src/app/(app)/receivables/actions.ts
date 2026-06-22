@@ -32,7 +32,7 @@ export async function markReceivablePaidAction(receivableId: string) {
   });
 
   revalidatePath("/receivables");
-  revalidatePath("/transactions");
+  revalidatePath("/income");
   revalidatePath("/dashboard");
 }
 

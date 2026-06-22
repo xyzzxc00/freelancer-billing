@@ -133,7 +133,7 @@ export async function acceptQuoteAction(quoteId: string) {
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
-  revalidatePath("/transactions");
+  revalidatePath("/income");
 }
 
 export async function rejectQuoteAction(quoteId: string) {

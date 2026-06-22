@@ -28,16 +28,16 @@ export async function createIncomeAction(formData: FormData) {
     },
   });
 
-  revalidatePath("/transactions");
+  revalidatePath("/income");
   revalidatePath("/dashboard");
-  redirect("/transactions");
+  redirect("/income");
 }
 
-export async function deleteTransactionAction(transactionId: string) {
+export async function deleteIncomeAction(transactionId: string) {
   const userId = await requireUserId();
 
-  await prisma.transaction.deleteMany({ where: { id: transactionId, userId } });
+  await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "INCOME" } });
 
-  revalidatePath("/transactions");
+  revalidatePath("/income");
   revalidatePath("/dashboard");
 }
