@@ -64,6 +64,16 @@ const navItems = [
       />
     ),
   },
+  {
+    href: "/expenses",
+    label: "支出",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
+        <path d="M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      </>
+    ),
+  },
 ];
 
 export function BottomNav() {

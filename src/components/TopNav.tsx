@@ -11,6 +11,7 @@ const navItems = [
   { href: "/quotes", label: "報價單" },
   { href: "/receivables", label: "待收款" },
   { href: "/transactions", label: "收支" },
+  { href: "/expenses", label: "支出" },
 ];
 
 export function TopNav({ displayName }: { displayName: string }) {
