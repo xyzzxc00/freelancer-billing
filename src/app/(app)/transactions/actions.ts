@@ -5,10 +5,9 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 
-export async function createTransactionAction(formData: FormData) {
+export async function createIncomeAction(formData: FormData) {
   const userId = await requireUserId();
 
-  const type = String(formData.get("type") ?? "EXPENSE") as "INCOME" | "EXPENSE";
   const amount = Number(formData.get("amount") ?? 0);
   const category = String(formData.get("category") ?? "").trim();
   const note = String(formData.get("note") ?? "").trim();
@@ -21,7 +20,7 @@ export async function createTransactionAction(formData: FormData) {
   await prisma.transaction.create({
     data: {
       userId,
-      type,
+      type: "INCOME",
       amount,
       category: category || null,
       note: note || null,

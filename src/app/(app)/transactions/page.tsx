@@ -72,7 +72,7 @@ export default async function TransactionsPage({
               匯出 CSV
             </a>
             <Link href="/transactions/new" className="text-sm text-accent hover:underline">
-              + 新增記錄
+              + 新增收入
             </Link>
           </div>
         </div>
