@@ -20,7 +20,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const displayName = profile?.name || profile?.email || "U";
 
   return (
-    <div className="max-w-5xl w-full mx-auto pb-16 md:pb-0">
+    <div className="max-w-7xl w-full mx-auto pb-16 md:pb-0">
       <TopNav displayName={displayName} />
       {children}
       <BottomNav />
