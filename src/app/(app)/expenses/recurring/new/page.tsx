@@ -26,7 +26,7 @@ export default async function NewRecurringExpensePage() {
 
   return (
     <div className="px-4 sm:px-6 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-[420px_minmax(0,1fr)] gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div>
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">新增定期支出</h1>
