@@ -72,6 +72,18 @@ const navItems = [
       </>
     ),
   },
+  {
+    href: "/reports",
+    label: "報表",
+    icon: (
+      <path
+        d="M5 19V10M11 19V5M17 19v-6"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    ),
+  },
 ];
 
 export function BottomNav() {

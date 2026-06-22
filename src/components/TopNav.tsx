@@ -12,6 +12,7 @@ const navItems = [
   { href: "/receivables", label: "待收款" },
   { href: "/income", label: "收入" },
   { href: "/expenses", label: "支出" },
+  { href: "/reports", label: "報表" },
 ];
 
 export function TopNav({ displayName }: { displayName: string }) {
