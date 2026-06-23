@@ -115,7 +115,12 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="flex flex-1 items-center justify-center px-6">
+    <div className="flex flex-1 flex-col items-center justify-center px-6">
+      <div className="w-full max-w-sm mb-4">
+        <Link href="/" className="text-sm text-foreground-muted hover:text-foreground">
+          ← 返回首頁
+        </Link>
+      </div>
       <Suspense>
         <LoginForm />
       </Suspense>

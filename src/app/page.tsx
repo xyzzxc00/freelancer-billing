@@ -127,7 +127,6 @@ export default async function Home() {
         <span className="text-base font-medium">接案帳本</span>
         <Link
           href="/login"
-          replace
           className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
         >
           登入
@@ -144,14 +143,12 @@ export default async function Home() {
         <div className="flex items-center gap-3 mt-8">
           <Link
             href="/login?mode=signup"
-            replace
             className="bg-accent text-accent-foreground rounded-md px-6 py-2.5 text-sm font-medium"
           >
             註冊
           </Link>
           <Link
             href="/login"
-            replace
             className="border border-border rounded-md px-6 py-2.5 text-sm hover:bg-surface"
           >
             登入
@@ -187,7 +184,7 @@ export default async function Home() {
 
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted">
         <span>接案帳本</span>
-        <Link href="/privacy" replace className="hover:text-foreground">
+        <Link href="/privacy" className="hover:text-foreground">
           隱私權政策
         </Link>
       </footer>
