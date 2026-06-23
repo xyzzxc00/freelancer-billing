@@ -1,9 +1,10 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
+import type { ActionResult } from "@/lib/action-state";
 
 interface ItemInput {
   name: string;
@@ -22,14 +23,20 @@ function parseItems(raw: string): ItemInput[] {
     }));
 }
 
-export async function createTemplateAction(formData: FormData) {
+export async function createTemplateAction(
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const name = String(formData.get("name") ?? "").trim();
   const items = parseItems(String(formData.get("items") ?? "[]"));
 
-  if (!name || items.length === 0) {
-    throw new Error("請填寫範本名稱並至少新增一個項目");
+  if (!name) {
+    return { error: "請填寫範本名稱" };
+  }
+  if (items.length === 0) {
+    return { error: "請至少新增一個項目" };
   }
 
   await prisma.quoteTemplate.create({
@@ -48,7 +55,7 @@ export async function createTemplateAction(formData: FormData) {
   });
 
   revalidatePath("/quotes/templates");
-  redirect("/quotes/templates");
+  redirectWithToast("/quotes/templates", "已建立範本");
 }
 
 export async function deleteTemplateAction(templateId: string) {

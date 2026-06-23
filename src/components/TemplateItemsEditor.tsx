@@ -1,6 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState, useState } from "react";
+import { SubmitButton } from "@/components/SubmitButton";
+import { FormError } from "@/components/FormError";
+import type { ActionResult } from "@/lib/action-state";
 
 interface ItemRow {
   name: string;
@@ -11,9 +14,10 @@ interface ItemRow {
 export function TemplateItemsEditor({
   action,
 }: {
-  action: (formData: FormData) => void;
+  action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>;
 }) {
   const [items, setItems] = useState<ItemRow[]>([{ name: "", unitPrice: "", quantity: "1" }]);
+  const [state, formAction] = useActionState(action, undefined);
 
   function updateItem(index: number, field: keyof ItemRow, value: string) {
     setItems((prev) =>
@@ -30,7 +34,7 @@ export function TemplateItemsEditor({
   }
 
   return (
-    <form action={action} className="flex flex-col gap-4">
+    <form action={formAction} className="flex flex-col gap-4">
       <input type="hidden" name="items" value={JSON.stringify(items)} />
 
       <div>
@@ -63,14 +67,14 @@ export function TemplateItemsEditor({
                   placeholder="單價"
                   value={item.unitPrice}
                   onChange={(e) => updateItem(i, "unitPrice", e.target.value)}
-                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full sm:w-24 font-mono"
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1 min-w-0 sm:w-24 sm:flex-none font-mono"
                 />
                 <input
                   type="number"
                   placeholder="數量"
                   value={item.quantity}
                   onChange={(e) => updateItem(i, "quantity", e.target.value)}
-                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full sm:w-20 font-mono"
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1 min-w-0 sm:w-20 sm:flex-none font-mono"
                 />
                 <button
                   type="button"
@@ -93,12 +97,11 @@ export function TemplateItemsEditor({
         </button>
       </div>
 
-      <button
-        type="submit"
-        className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium"
-      >
+      <FormError message={state?.error} />
+
+      <SubmitButton className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium">
         儲存範本
-      </button>
+      </SubmitButton>
     </form>
   );
 }

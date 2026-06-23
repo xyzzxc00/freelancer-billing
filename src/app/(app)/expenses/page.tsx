@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { deleteExpenseAction } from "./actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -133,14 +134,12 @@ export default async function ExpensesPage({
                   <span className="text-sm font-mono text-[color:var(--danger-fg)]">
                     -{currency.format(Number(e.amount))}
                   </span>
-                  <form action={deleteAction}>
-                    <button
-                      type="submit"
-                      className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                    >
-                      刪除
-                    </button>
-                  </form>
+                  <ConfirmDeleteButton
+                    action={deleteAction}
+                    confirmMessage="確定要刪除這筆支出嗎？此操作無法復原。"
+                    successMessage="已刪除支出"
+                    className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                  />
                 </div>
               </div>
             );

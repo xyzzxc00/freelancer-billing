@@ -4,7 +4,9 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
 import type { TaxMode } from "@/lib/tax";
+import type { ActionResult } from "@/lib/action-state";
 
 interface ItemInput {
   name: string;
@@ -23,7 +25,10 @@ function parseItems(raw: string): ItemInput[] {
     }));
 }
 
-export async function createQuoteAction(formData: FormData) {
+export async function createQuoteAction(
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const clientId = String(formData.get("clientId") ?? "");
@@ -31,8 +36,14 @@ export async function createQuoteAction(formData: FormData) {
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
   const items = parseItems(String(formData.get("items") ?? "[]"));
 
-  if (!clientId || !title || items.length === 0) {
-    throw new Error("請選擇客戶、填寫標題並至少新增一個項目");
+  if (!clientId) {
+    return { error: "請選擇客戶" };
+  }
+  if (!title) {
+    return { error: "請填寫標題" };
+  }
+  if (items.length === 0) {
+    return { error: "請至少新增一個項目" };
   }
 
   const quote = await prisma.quote.create({
@@ -53,22 +64,31 @@ export async function createQuoteAction(formData: FormData) {
   });
 
   revalidatePath("/quotes");
-  redirect(`/quotes/${quote.id}`);
+  redirectWithToast(`/quotes/${quote.id}`, "已建立報價單");
 }
 
-export async function updateQuoteItemsAction(quoteId: string, formData: FormData) {
+export async function updateQuoteItemsAction(
+  quoteId: string,
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
   const items = parseItems(String(formData.get("items") ?? "[]"));
 
-  if (!title || items.length === 0) {
-    throw new Error("請填寫標題並至少新增一個項目");
+  if (!title) {
+    return { error: "請填寫標題" };
+  }
+  if (items.length === 0) {
+    return { error: "請至少新增一個項目" };
   }
 
   const quote = await prisma.quote.findFirst({ where: { id: quoteId, userId } });
-  if (!quote) throw new Error("找不到報價單");
+  if (!quote) {
+    return { error: "找不到報價單" };
+  }
 
   await prisma.$transaction([
     prisma.quoteItem.deleteMany({ where: { quoteId } }),
@@ -90,7 +110,7 @@ export async function updateQuoteItemsAction(quoteId: string, formData: FormData
   ]);
 
   revalidatePath(`/quotes/${quoteId}`);
-  redirect(`/quotes/${quoteId}`);
+  redirectWithToast(`/quotes/${quoteId}`, "已更新報價單");
 }
 
 export async function markQuoteSentAction(quoteId: string) {

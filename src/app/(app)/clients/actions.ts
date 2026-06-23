@@ -4,8 +4,13 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
+import type { ActionResult } from "@/lib/action-state";
 
-export async function createClientAction(formData: FormData) {
+export async function createClientAction(
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const name = String(formData.get("name") ?? "").trim();
@@ -13,7 +18,7 @@ export async function createClientAction(formData: FormData) {
   const note = String(formData.get("note") ?? "").trim();
 
   if (!name) {
-    throw new Error("客戶名稱不能為空");
+    return { error: "客戶名稱不能為空" };
   }
 
   await prisma.client.create({
@@ -26,10 +31,14 @@ export async function createClientAction(formData: FormData) {
   });
 
   revalidatePath("/clients");
-  redirect("/clients");
+  redirectWithToast("/clients", "已新增客戶");
 }
 
-export async function updateClientAction(clientId: string, formData: FormData) {
+export async function updateClientAction(
+  clientId: string,
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const name = String(formData.get("name") ?? "").trim();
@@ -37,7 +46,7 @@ export async function updateClientAction(clientId: string, formData: FormData) {
   const note = String(formData.get("note") ?? "").trim();
 
   if (!name) {
-    throw new Error("客戶名稱不能為空");
+    return { error: "客戶名稱不能為空" };
   }
 
   await prisma.client.updateMany({
@@ -51,7 +60,7 @@ export async function updateClientAction(clientId: string, formData: FormData) {
 
   revalidatePath("/clients");
   revalidatePath(`/clients/${clientId}`);
-  redirect("/clients");
+  redirectWithToast("/clients", "已更新客戶資料");
 }
 
 export async function deleteClientAction(clientId: string) {

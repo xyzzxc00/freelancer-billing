@@ -1,11 +1,15 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
+import type { ActionResult } from "@/lib/action-state";
 
-export async function createRecurringExpenseAction(formData: FormData) {
+export async function createRecurringExpenseAction(
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const name = String(formData.get("name") ?? "").trim();
@@ -13,8 +17,14 @@ export async function createRecurringExpenseAction(formData: FormData) {
   const dayOfMonth = Number(formData.get("dayOfMonth") ?? 1);
   const categoryId = String(formData.get("categoryId") ?? "") || null;
 
-  if (!name || !amount || amount <= 0 || dayOfMonth < 1 || dayOfMonth > 28) {
-    throw new Error("請填寫名稱、金額，並選擇 1-28 之間的每月日期");
+  if (!name) {
+    return { error: "請輸入名稱" };
+  }
+  if (!amount || amount <= 0) {
+    return { error: "請填寫大於 0 的金額" };
+  }
+  if (dayOfMonth < 1 || dayOfMonth > 28) {
+    return { error: "每月扣款日請選擇 1-28 之間" };
   }
 
   await prisma.recurringExpense.create({
@@ -22,7 +32,7 @@ export async function createRecurringExpenseAction(formData: FormData) {
   });
 
   revalidatePath("/expenses/recurring");
-  redirect("/expenses/recurring");
+  redirectWithToast("/expenses/recurring", "已新增定期支出");
 }
 
 export async function toggleRecurringExpenseAction(recurringId: string, active: boolean) {

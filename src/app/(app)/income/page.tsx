@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { deleteIncomeAction } from "./actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -131,14 +132,12 @@ export default async function IncomePage({
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
                   <span className="text-sm font-mono">+{currency.format(Number(i.amount))}</span>
-                  <form action={deleteAction}>
-                    <button
-                      type="submit"
-                      className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                    >
-                      刪除
-                    </button>
-                  </form>
+                  <ConfirmDeleteButton
+                    action={deleteAction}
+                    confirmMessage="確定要刪除這筆收入嗎？此操作無法復原。"
+                    successMessage="已刪除收入"
+                    className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                  />
                 </div>
               </div>
             );

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { calculateTax } from "@/lib/tax";
+import { SubmitButton } from "@/components/SubmitButton";
 import { respondToQuoteAction } from "../actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -63,11 +64,11 @@ export default async function PublicQuotePage({
         <div className="border border-border rounded-lg p-5 mb-6">
           <div className="flex flex-col gap-2 mb-4">
             {quote.items.map((item) => (
-              <div key={item.id} className="flex justify-between text-sm">
-                <span>
+              <div key={item.id} className="flex justify-between gap-3 text-sm">
+                <span className="min-w-0 break-words">
                   {item.name} × {Number(item.quantity)}
                 </span>
-                <span className="font-mono">
+                <span className="font-mono shrink-0">
                   {currency.format(Number(item.unitPrice) * Number(item.quantity))}
                 </span>
               </div>
@@ -94,20 +95,20 @@ export default async function PublicQuotePage({
           {quote.status === "SENT" && (
             <div className="flex gap-2">
               <form action={rejectAction}>
-                <button
-                  type="submit"
+                <SubmitButton
+                  pendingLabel="處理中…"
                   className="border border-border rounded-md px-4 py-2 text-sm hover:bg-surface"
                 >
                   拒絕
-                </button>
+                </SubmitButton>
               </form>
               <form action={acceptAction}>
-                <button
-                  type="submit"
+                <SubmitButton
+                  pendingLabel="處理中…"
                   className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
                 >
                   接受報價
-                </button>
+                </SubmitButton>
               </form>
             </div>
           )}

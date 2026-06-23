@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { TipPanel } from "@/components/TipPanel";
+import { RecurringForm } from "@/components/RecurringForm";
 import { createRecurringIncomeAction } from "../actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -38,63 +39,12 @@ export default async function NewRecurringIncomePage() {
             </Link>
           </div>
 
-          <form action={createRecurringIncomeAction} className="flex flex-col gap-3">
-            <div>
-              <label className="text-sm text-foreground-muted block mb-1">名稱</label>
-              <input
-                name="name"
-                required
-                placeholder="例如：顧問合約月費"
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-foreground-muted block mb-1">金額</label>
-              <input
-                name="amount"
-                type="number"
-                required
-                min="0"
-                step="1"
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
-              />
-            </div>
-            <div>
-              <label className="text-sm text-foreground-muted block mb-1">每月入帳日</label>
-              <input
-                name="dayOfMonth"
-                type="number"
-                required
-                min="1"
-                max="28"
-                defaultValue="1"
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
-              />
-              <p className="text-xs text-foreground-muted mt-1">限 1-28 號，避免遇到月底沒有的日期。</p>
-            </div>
-            <div>
-              <label className="text-sm text-foreground-muted block mb-1">分類（選填）</label>
-              <select
-                name="categoryId"
-                defaultValue=""
-                className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
-              >
-                <option value="">不分類</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium mt-2 self-start px-6"
-            >
-              儲存
-            </button>
-          </form>
+          <RecurringForm
+            action={createRecurringIncomeAction}
+            categories={categories}
+            namePlaceholder="例如：顧問合約月費"
+            dayLabel="每月入帳日"
+          />
         </div>
 
         <TipPanel

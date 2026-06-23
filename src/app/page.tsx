@@ -1,6 +1,63 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { siteName, siteUrl } from "@/lib/site";
+
+export const metadata: Metadata = {
+  title: "讓接案這件事，記帳跟報價都輕鬆一點",
+  description:
+    "接案帳本是給自由接案者跟小型工作室的輕量工具：開報價單、線上簽署、追蹤待收款、記錄收支——不用再用 Excel 東拼西湊。",
+  alternates: {
+    canonical: siteUrl,
+  },
+};
+
+const faqs = [
+  {
+    question: "接案帳本適合誰使用？",
+    answer: "適合自由接案者、SOHO 工作者與小型工作室，用來管理客戶、報價單、收支與待收款項目。",
+  },
+  {
+    question: "報價單可以線上簽署嗎？",
+    answer: "可以。建立報價單後會產生一個連結，客戶不用安裝任何軟體，直接在瀏覽器上接受報價。",
+  },
+  {
+    question: "報價單接受後會自動變成待收款嗎？",
+    answer: "會。報價單一經客戶接受，會自動轉成待收款項目，逾期未收款會清楚標示提醒。",
+  },
+  {
+    question: "收支報表可以匯出嗎？",
+    answer: "可以，年度收支報表能一鍵匯出 CSV，方便交給會計師處理。",
+  },
+];
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: siteName,
+  url: siteUrl,
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  description:
+    "給自由接案者跟小型工作室的輕量記帳與報價工具：開報價單、線上簽署、追蹤待收款、記錄收支，年度報表一鍵匯出。",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "TWD",
+  },
+  mainEntity: {
+    "@type": "FAQPage",
+    mainEntity: faqs.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.answer,
+      },
+    })),
+  },
+};
 
 const features = [
   {
@@ -62,10 +119,15 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
         <span className="text-base font-medium">接案帳本</span>
         <Link
           href="/login"
+          replace
           className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
         >
           登入
@@ -82,12 +144,14 @@ export default async function Home() {
         <div className="flex items-center gap-3 mt-8">
           <Link
             href="/login?mode=signup"
+            replace
             className="bg-accent text-accent-foreground rounded-md px-6 py-2.5 text-sm font-medium"
           >
-            免費開始使用
+            註冊
           </Link>
           <Link
             href="/login"
+            replace
             className="border border-border rounded-md px-6 py-2.5 text-sm hover:bg-surface"
           >
             登入
@@ -109,9 +173,21 @@ export default async function Home() {
         </div>
       </section>
 
+      <section className="px-4 sm:px-6 py-16 max-w-3xl w-full mx-auto">
+        <h2 className="text-xl font-medium mb-6 text-center">常見問題</h2>
+        <div className="flex flex-col gap-5">
+          {faqs.map((f) => (
+            <div key={f.question}>
+              <h3 className="text-base font-medium mb-1.5">{f.question}</h3>
+              <p className="text-sm text-foreground-muted leading-relaxed">{f.answer}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted">
         <span>接案帳本</span>
-        <Link href="/privacy" className="hover:text-foreground">
+        <Link href="/privacy" replace className="hover:text-foreground">
           隱私權政策
         </Link>
       </footer>

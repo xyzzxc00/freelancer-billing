@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { TipPanel } from "@/components/TipPanel";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { toggleRecurringIncomeAction, deleteRecurringIncomeAction } from "./actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -72,14 +73,12 @@ export default async function RecurringIncomePage() {
                           {r.active ? "已啟用" : "已停用"}
                         </button>
                       </form>
-                      <form action={deleteAction}>
-                        <button
-                          type="submit"
-                          className="text-xs text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                        >
-                          刪除
-                        </button>
-                      </form>
+                      <ConfirmDeleteButton
+                        action={deleteAction}
+                        confirmMessage="確定要刪除這個定期收入嗎？此操作無法復原。"
+                        successMessage="已刪除定期收入"
+                        className="text-xs text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                      />
                     </div>
                   </div>
                 );

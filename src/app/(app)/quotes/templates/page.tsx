@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { deleteTemplateAction } from "./actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -47,14 +48,12 @@ export default async function TemplatesPage() {
                       <span className="text-sm font-mono text-foreground-muted">
                         {currency.format(total)}
                       </span>
-                      <form action={deleteAction}>
-                        <button
-                          type="submit"
-                          className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                        >
-                          刪除
-                        </button>
-                      </form>
+                      <ConfirmDeleteButton
+                        action={deleteAction}
+                        confirmMessage="確定要刪除這個範本嗎？此操作無法復原。"
+                        successMessage="已刪除範本"
+                        className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                      />
                     </div>
                   </div>
                   <p className="text-xs text-foreground-muted mt-1">

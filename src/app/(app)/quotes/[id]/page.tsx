@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { headers } from "next/headers";
 import { QuoteForm } from "@/components/QuoteForm";
 import { CopyLinkButton } from "@/components/CopyLinkButton";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { calculateTax } from "@/lib/tax";
@@ -115,14 +116,14 @@ export default async function QuoteDetailPage({
               </form>
             </>
           )}
-          <form action={deleteAction} className="self-center">
-            <button
-              type="submit"
+          <div className="self-center">
+            <ConfirmDeleteButton
+              action={deleteAction}
+              confirmMessage="確定要刪除這張報價單嗎？此操作無法復原。"
+              successMessage="已刪除報價單"
               className="text-sm text-[color:var(--danger-fg)] hover:underline px-1"
-            >
-              刪除
-            </button>
-          </form>
+            />
+          </div>
         </div>
 
         {quote.status === "DRAFT" ? (

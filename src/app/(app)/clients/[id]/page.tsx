@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
+import { ClientForm } from "@/components/ClientForm";
 import { updateClientAction, deleteClientAction } from "../actions";
 
 const statusLabel: Record<string, string> = {
@@ -45,50 +47,23 @@ export default async function ClientDetailPage({
           </Link>
         </div>
 
-        <form action={updateAction} className="flex flex-col gap-3">
-          <div>
-            <label className="text-sm text-foreground-muted block mb-1">客戶名稱</label>
-            <input
-              name="name"
-              required
-              defaultValue={client.name}
-              className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-foreground-muted block mb-1">聯絡方式</label>
-            <input
-              name="contact"
-              defaultValue={client.contact ?? ""}
-              className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
-            />
-          </div>
-          <div>
-            <label className="text-sm text-foreground-muted block mb-1">備註</label>
-            <textarea
-              name="note"
-              rows={3}
-              defaultValue={client.note ?? ""}
-              className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
-            />
-          </div>
+        <ClientForm
+          action={updateAction}
+          defaultName={client.name}
+          defaultContact={client.contact ?? ""}
+          defaultNote={client.note ?? ""}
+          submitLabel="儲存變更"
+        />
 
-          <button
-            type="submit"
-            className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium mt-2"
-          >
-            儲存變更
-          </button>
-        </form>
-
-        <form action={deleteAction} className="mt-2">
-          <button
-            type="submit"
+        <div className="mt-2">
+          <ConfirmDeleteButton
+            action={deleteAction}
+            confirmMessage="確定要刪除這位客戶嗎？此操作無法復原。"
+            successMessage="已刪除客戶"
             className="text-sm text-[color:var(--danger-fg)] hover:underline"
-          >
-            刪除這位客戶
-          </button>
-        </form>
+            label="刪除這位客戶"
+          />
+        </div>
 
         <h2 className="text-base font-medium mt-8 mb-3">案件歷史</h2>
         {client.quotes.length === 0 ? (

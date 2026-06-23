@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { TipPanel } from "@/components/TipPanel";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
+import { CategoryForm } from "@/components/CategoryForm";
 import { createIncomeCategoryAction, deleteIncomeCategoryAction } from "./actions";
 
 export default async function IncomeCategoriesPage() {
@@ -24,20 +26,7 @@ export default async function IncomeCategoriesPage() {
             </Link>
           </div>
 
-          <form action={createIncomeCategoryAction} className="flex gap-2 mb-6">
-            <input
-              name="name"
-              required
-              placeholder="例如：接案收入"
-              className="border border-border rounded-md px-3 py-2 text-sm bg-background flex-1"
-            />
-            <button
-              type="submit"
-              className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
-            >
-              新增
-            </button>
-          </form>
+          <CategoryForm action={createIncomeCategoryAction} placeholder="例如：接案收入" />
 
           {categories.length === 0 ? (
             <p className="text-sm text-foreground-muted">還沒有分類，先新增一個吧。</p>
@@ -56,14 +45,12 @@ export default async function IncomeCategoriesPage() {
                         {category._count.transactions} 筆記錄
                       </p>
                     </div>
-                    <form action={deleteAction}>
-                      <button
-                        type="submit"
-                        className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                      >
-                        刪除
-                      </button>
-                    </form>
+                    <ConfirmDeleteButton
+                      action={deleteAction}
+                      confirmMessage="確定要刪除這個分類嗎？相關記錄會變回未分類。"
+                      successMessage="已刪除分類"
+                      className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                    />
                   </div>
                 );
               })}
