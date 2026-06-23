@@ -4,12 +4,22 @@ export const metadata = {
   title: "隱私權政策 - 接案帳本",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string }>;
+}) {
+  const { from } = await searchParams;
+  const back =
+    from === "login"
+      ? { href: "/login", label: "← 返回登入" }
+      : { href: "/", label: "← 返回首頁" };
+
   return (
     <div className="flex flex-1 justify-center px-4 sm:px-6 py-12">
       <div className="w-full max-w-2xl">
-        <Link href="/login" className="text-sm text-foreground-muted hover:text-foreground">
-          ← 返回
+        <Link href={back.href} className="text-sm text-foreground-muted hover:text-foreground">
+          {back.label}
         </Link>
         <h1 className="text-xl font-medium mt-4 mb-1">隱私權政策</h1>
         <p className="text-sm text-foreground-muted mb-8">最後更新：2026 年 6 月</p>

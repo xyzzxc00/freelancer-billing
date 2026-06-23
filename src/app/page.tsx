@@ -184,7 +184,7 @@ export default async function Home() {
 
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted">
         <span>接案帳本</span>
-        <Link href="/privacy" className="hover:text-foreground">
+        <Link href="/privacy?from=home" className="hover:text-foreground">
           隱私權政策
         </Link>
       </footer>

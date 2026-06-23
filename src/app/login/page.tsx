@@ -104,7 +104,7 @@ function LoginForm() {
 
       <p className="text-xs text-foreground-muted mt-6">
         建立帳號代表你同意我們的
-        <Link href="/privacy" className="text-accent hover:underline mx-1">
+        <Link href="/privacy?from=login" className="text-accent hover:underline mx-1">
           隱私權政策
         </Link>
         。

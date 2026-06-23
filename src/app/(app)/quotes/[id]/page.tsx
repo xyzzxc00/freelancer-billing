@@ -64,11 +64,14 @@ export default async function QuoteDetailPage({
 
   return (
     <div className="px-4 sm:px-6 py-6 max-w-lg">
-        <div className="flex items-baseline justify-between mb-1">
-          <h1 className="text-lg font-medium">
+        <div className="flex items-baseline justify-between gap-3 mb-1">
+          <h1 className="text-lg font-medium min-w-0 truncate">
             {quote.client.name} — {quote.title}
           </h1>
-          <Link href="/quotes" className="text-sm text-foreground-muted hover:text-foreground">
+          <Link
+            href="/quotes"
+            className="text-sm text-foreground-muted hover:text-foreground shrink-0"
+          >
             返回
           </Link>
         </div>
