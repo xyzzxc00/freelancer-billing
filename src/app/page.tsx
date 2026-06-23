@@ -125,12 +125,17 @@ export default async function Home() {
       />
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
         <span className="text-base font-medium">接案帳本</span>
-        <Link
-          href="/login"
-          className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
-        >
-          登入
-        </Link>
+        <div className="flex items-center gap-4 sm:gap-5">
+          <Link href="/guides" className="text-sm text-foreground-muted hover:text-foreground">
+            接案知識庫
+          </Link>
+          <Link
+            href="/login"
+            className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
+          >
+            登入
+          </Link>
+        </div>
       </header>
 
       <section className="flex flex-col items-center text-center px-4 sm:px-6 py-20">
