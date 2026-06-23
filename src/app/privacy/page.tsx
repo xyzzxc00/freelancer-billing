@@ -63,9 +63,13 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="text-base font-medium mb-2">資料保留與刪除</h2>
+            <h2 className="text-base font-medium mb-2">資料保留、刪除與聯絡方式</h2>
             <p className="text-foreground-muted">
-              你可以隨時在「設定」頁面修改個人資料，或自行刪除客戶、報價單、收支記錄等內容。若你想完整刪除帳號與所有相關資料，請透過下方聯絡方式與我們聯繫，我們會在合理時間內處理。
+              你可以隨時在「設定」頁面修改個人資料，或自行刪除客戶、報價單、收支記錄等內容。若你想完整刪除帳號與所有相關資料，或對資料使用方式有任何疑問，請寄信到{" "}
+              <a href="mailto:xyzzxc00@gmail.com" className="text-accent hover:underline">
+                xyzzxc00@gmail.com
+              </a>
+              ，我們會在合理時間內處理。
             </p>
           </section>
 
@@ -73,13 +77,6 @@ export default function PrivacyPage() {
             <h2 className="text-base font-medium mb-2">政策更新</h2>
             <p className="text-foreground-muted">
               若本政策內容有重大變更，我們會在這個頁面更新內容與日期。建議偶爾回來查看。
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-base font-medium mb-2">聯絡我們</h2>
-            <p className="text-foreground-muted">
-              對於資料使用方式有任何問題，或想要求刪除帳號資料，歡迎透過你註冊時使用的聯絡方式與我們聯繫。
             </p>
           </section>
         </div>

@@ -2,8 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { LogoutButton } from "@/components/LogoutButton";
+import { AccountMenu } from "@/components/AccountMenu";
 
 const navItems = [
   { href: "/dashboard", label: "總覽" },
@@ -42,17 +41,7 @@ export function TopNav({ displayName }: { displayName: string }) {
           })}
         </nav>
       </div>
-      <div className="flex items-center gap-2 sm:gap-3">
-        <ThemeToggle />
-        <LogoutButton className="hidden sm:inline text-sm text-foreground-muted hover:text-foreground" />
-        <Link
-          href="/settings"
-          aria-label="帳戶設定"
-          className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-sm font-medium hover:bg-[color:var(--border)] transition-colors"
-        >
-          {displayName.slice(0, 1).toUpperCase()}
-        </Link>
-      </div>
+      <AccountMenu displayName={displayName} />
     </header>
   );
 }
