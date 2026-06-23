@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -98,6 +99,14 @@ export default function LoginPage() {
         >
           {mode === "signin" ? "還沒有帳號？建立一個" : "已經有帳號了？登入"}
         </button>
+
+        <p className="text-xs text-foreground-muted mt-6">
+          建立帳號代表你同意我們的
+          <Link href="/privacy" className="text-accent hover:underline mx-1">
+            隱私權政策
+          </Link>
+          。
+        </p>
       </div>
     </div>
   );

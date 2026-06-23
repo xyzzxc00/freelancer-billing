@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
@@ -50,6 +51,12 @@ export default async function SettingsPage() {
       <section className="mb-8">
         <h2 className="text-sm font-medium mb-3">變更密碼</h2>
         <PasswordChangeForm />
+      </section>
+
+      <section className="mb-8">
+        <Link href="/privacy" className="text-sm text-foreground-muted hover:text-foreground">
+          隱私權政策
+        </Link>
       </section>
 
       <section>
