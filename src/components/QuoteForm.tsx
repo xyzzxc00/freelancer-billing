@@ -152,6 +152,7 @@ export function QuoteForm({
               <div className="flex gap-2 items-center">
                 <input
                   type="number"
+                  min="1"
                   placeholder="單價"
                   value={item.unitPrice}
                   onChange={(e) => updateItem(i, "unitPrice", e.target.value)}
@@ -159,6 +160,7 @@ export function QuoteForm({
                 />
                 <input
                   type="number"
+                  min="1"
                   placeholder="數量"
                   value={item.quantity}
                   onChange={(e) => updateItem(i, "quantity", e.target.value)}

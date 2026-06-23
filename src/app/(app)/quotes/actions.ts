@@ -14,15 +14,53 @@ interface ItemInput {
   quantity: number;
 }
 
-function parseItems(raw: string): ItemInput[] {
-  const parsed = JSON.parse(raw) as ItemInput[];
-  return parsed
-    .filter((item) => item.name?.trim())
-    .map((item) => ({
-      name: item.name.trim(),
-      unitPrice: Number(item.unitPrice) || 0,
-      quantity: Number(item.quantity) || 1,
-    }));
+interface RawItem {
+  name?: string;
+  unitPrice?: string | number;
+  quantity?: string | number;
+}
+
+type ParseItemsResult =
+  | { ok: true; items: ItemInput[] }
+  | { ok: false; error: string };
+
+function parseItems(raw: string): ParseItemsResult {
+  let parsed: RawItem[];
+  try {
+    parsed = JSON.parse(raw) as RawItem[];
+  } catch {
+    return { ok: false, error: "項目資料格式錯誤" };
+  }
+
+  // 完全空白的列（沒有名稱也沒有單價）直接忽略
+  const rows = parsed.filter(
+    (item) =>
+      String(item.name ?? "").trim() !== "" ||
+      String(item.unitPrice ?? "").trim() !== ""
+  );
+
+  if (rows.length === 0) {
+    return { ok: false, error: "請至少新增一個項目" };
+  }
+
+  const items: ItemInput[] = [];
+  for (const item of rows) {
+    const name = String(item.name ?? "").trim();
+    if (!name) {
+      return { ok: false, error: "每個項目都要填寫名稱" };
+    }
+    const unitPrice = Number(item.unitPrice);
+    if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
+      return { ok: false, error: `「${name}」的單價要填大於 0 的金額` };
+    }
+    const quantity = Number(item.quantity);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      return { ok: false, error: `「${name}」的數量要填大於 0 的數字` };
+    }
+    items.push({ name, unitPrice, quantity });
+  }
+
+  return { ok: true, items };
 }
 
 export async function createQuoteAction(
@@ -34,7 +72,6 @@ export async function createQuoteAction(
   const clientId = String(formData.get("clientId") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
-  const items = parseItems(String(formData.get("items") ?? "[]"));
 
   if (!clientId) {
     return { error: "請選擇客戶" };
@@ -42,9 +79,11 @@ export async function createQuoteAction(
   if (!title) {
     return { error: "請填寫標題" };
   }
-  if (items.length === 0) {
-    return { error: "請至少新增一個項目" };
+  const parsed = parseItems(String(formData.get("items") ?? "[]"));
+  if (!parsed.ok) {
+    return { error: parsed.error };
   }
+  const items = parsed.items;
 
   const quote = await prisma.quote.create({
     data: {
@@ -76,14 +115,15 @@ export async function updateQuoteItemsAction(
 
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
-  const items = parseItems(String(formData.get("items") ?? "[]"));
 
   if (!title) {
     return { error: "請填寫標題" };
   }
-  if (items.length === 0) {
-    return { error: "請至少新增一個項目" };
+  const parsed = parseItems(String(formData.get("items") ?? "[]"));
+  if (!parsed.ok) {
+    return { error: parsed.error };
   }
+  const items = parsed.items;
 
   const quote = await prisma.quote.findFirst({ where: { id: quoteId, userId } });
   if (!quote) {
