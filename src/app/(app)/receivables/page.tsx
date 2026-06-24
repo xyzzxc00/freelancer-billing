@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { DueDateInput } from "@/components/DueDateInput";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
@@ -63,9 +64,12 @@ export default async function ReceivablesPage() {
                   className="border border-border rounded-lg px-4 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">
+                    <Link
+                      href={`/quotes/${r.quote.id}`}
+                      className="text-sm font-medium truncate block hover:text-accent"
+                    >
                       {r.quote.client.name} — {r.quote.title}
-                    </p>
+                    </Link>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <DueDateInput action={setDueDate} defaultValue={toDateInputValue(r.dueDate)} />
                       {isOverdue && (
@@ -105,9 +109,12 @@ export default async function ReceivablesPage() {
                 className="border border-border rounded-lg px-4 py-3 flex items-center justify-between"
               >
                 <div>
-                  <p className="text-sm font-medium">
+                  <Link
+                    href={`/quotes/${r.quote.id}`}
+                    className="text-sm font-medium hover:text-accent"
+                  >
                     {r.quote.client.name} — {r.quote.title}
-                  </p>
+                  </Link>
                   <p className="text-xs text-foreground-muted mt-0.5">
                     {r.paidAt ? new Date(r.paidAt).toLocaleDateString("zh-TW") : ""} 收款
                   </p>

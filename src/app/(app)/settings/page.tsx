@@ -1,12 +1,20 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
 import { LogoutButton } from "@/components/LogoutButton";
 import { updateProfileAction } from "./actions";
 
 export default async function SettingsPage() {
   const userId = await requireUserId();
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+
+  // identities 裡只有 google（沒有 email）代表純 OAuth 用戶，沒有密碼
+  const isOAuthOnly =
+    data.user?.identities?.length === 1 &&
+    data.user.identities[0].provider !== "email";
 
   const profile = await prisma.profile.findUnique({
     where: { id: userId },
@@ -48,10 +56,19 @@ export default async function SettingsPage() {
         </form>
       </section>
 
-      <section className="mb-8">
-        <h2 className="text-sm font-medium mb-3">變更密碼</h2>
-        <PasswordChangeForm />
-      </section>
+      {isOAuthOnly ? (
+        <section className="mb-8">
+          <h2 className="text-sm font-medium mb-3">變更密碼</h2>
+          <p className="text-sm text-foreground-muted">
+            你是透過 Google 登入，不需要設定密碼。
+          </p>
+        </section>
+      ) : (
+        <section className="mb-8">
+          <h2 className="text-sm font-medium mb-3">變更密碼</h2>
+          <PasswordChangeForm />
+        </section>
+      )}
 
       <section className="mb-8">
         <Link href="/privacy" className="text-sm text-foreground-muted hover:text-foreground">

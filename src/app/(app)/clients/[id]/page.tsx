@@ -76,9 +76,10 @@ export default async function ClientDetailPage({
                 0
               );
               return (
-                <div
+                <Link
                   key={quote.id}
-                  className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
+                  href={`/quotes/${quote.id}`}
+                  className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
                 >
                   <p className="text-sm font-medium truncate min-w-0">{quote.title}</p>
                   <div className="flex items-center gap-2.5 shrink-0">
@@ -93,7 +94,7 @@ export default async function ClientDetailPage({
                       {statusLabel[quote.status]}
                     </span>
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>
