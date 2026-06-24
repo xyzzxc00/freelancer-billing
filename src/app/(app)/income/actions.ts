@@ -40,6 +40,31 @@ export async function createIncomeAction(
   redirectWithToast("/income", "已新增收入");
 }
 
+export async function updateIncomeAction(
+  transactionId: string,
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const userId = await requireUserId();
+
+  const amount = Number(formData.get("amount") ?? 0);
+  const incomeCategoryId = String(formData.get("incomeCategoryId") ?? "") || null;
+  const note = String(formData.get("note") ?? "").trim();
+  const occurredAtRaw = String(formData.get("occurredAt") ?? "");
+
+  if (!amount || amount <= 0) return { error: "請填寫大於 0 的金額" };
+  if (!occurredAtRaw) return { error: "請選擇日期" };
+
+  await prisma.transaction.updateMany({
+    where: { id: transactionId, userId, type: "INCOME" },
+    data: { amount, incomeCategoryId, note: note || null, occurredAt: new Date(occurredAtRaw) },
+  });
+
+  revalidatePath("/income");
+  revalidatePath("/dashboard");
+  redirectWithToast("/income", "已更新收入");
+}
+
 export async function deleteIncomeAction(transactionId: string) {
   const userId = await requireUserId();
 

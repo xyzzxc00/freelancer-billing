@@ -15,10 +15,18 @@ export function IncomeForm({
   action,
   categories,
   categoriesHref,
+  defaultAmount,
+  defaultCategoryId,
+  defaultOccurredAt,
+  defaultNote,
 }: {
   action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>;
   categories: CategoryOption[];
   categoriesHref: string;
+  defaultAmount?: string;
+  defaultCategoryId?: string;
+  defaultOccurredAt?: string;
+  defaultNote?: string;
 }) {
   const [state, formAction] = useActionState(action, undefined);
 
@@ -32,6 +40,7 @@ export function IncomeForm({
           required
           min="0"
           step="1"
+          defaultValue={defaultAmount}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
         />
       </div>
@@ -39,7 +48,7 @@ export function IncomeForm({
         <label className="text-sm text-foreground-muted block mb-1">分類</label>
         <select
           name="incomeCategoryId"
-          defaultValue=""
+          defaultValue={defaultCategoryId ?? ""}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         >
           <option value="">不分類</option>
@@ -65,7 +74,7 @@ export function IncomeForm({
           name="occurredAt"
           type="date"
           required
-          defaultValue={new Date().toISOString().slice(0, 10)}
+          defaultValue={defaultOccurredAt ?? new Date().toISOString().slice(0, 10)}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         />
       </div>
@@ -73,6 +82,7 @@ export function IncomeForm({
         <label className="text-sm text-foreground-muted block mb-1">備註</label>
         <input
           name="note"
+          defaultValue={defaultNote}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         />
       </div>

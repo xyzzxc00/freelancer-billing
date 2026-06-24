@@ -80,8 +80,42 @@ export default async function ReportsPage({
       </div>
 
       <h2 className="text-base font-medium mb-3">月度彙整</h2>
-      <div className="border border-border rounded-lg overflow-x-auto">
-        <table className="w-full text-sm min-w-[420px]" style={{ tableLayout: "fixed" }}>
+
+      {/* 手機：卡片 */}
+      <div className="sm:hidden flex flex-col gap-2">
+        {monthly.map((m) => {
+          const net = m.income - m.expense;
+          if (m.income === 0 && m.expense === 0) return null;
+          return (
+            <div key={m.month} className="border border-border rounded-lg px-4 py-3">
+              <p className="text-sm font-medium mb-2">{m.month} 月</p>
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div>
+                  <p className="text-foreground-muted mb-0.5">收入</p>
+                  <p className="font-mono">{currency.format(m.income)}</p>
+                </div>
+                <div>
+                  <p className="text-foreground-muted mb-0.5">支出</p>
+                  <p className="font-mono">{currency.format(m.expense)}</p>
+                </div>
+                <div>
+                  <p className="text-foreground-muted mb-0.5">淨收入</p>
+                  <p className={`font-mono ${net < 0 ? "text-[color:var(--danger-fg)]" : ""}`}>
+                    {currency.format(net)}
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        {monthly.every((m) => m.income === 0 && m.expense === 0) && (
+          <p className="text-sm text-foreground-muted">這一年還沒有收支記錄。</p>
+        )}
+      </div>
+
+      {/* 桌機：表格 */}
+      <div className="hidden sm:block border border-border rounded-lg overflow-hidden">
+        <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
           <thead>
             <tr className="bg-surface text-foreground-muted text-xs">
               <th className="text-left px-3 py-2 w-16">月份</th>

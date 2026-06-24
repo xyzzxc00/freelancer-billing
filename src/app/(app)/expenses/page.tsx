@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
-import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { deleteExpenseAction } from "./actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
@@ -114,36 +112,26 @@ export default async function ExpensesPage({
         <p className="text-sm text-foreground-muted">這一年還沒有支出記錄。</p>
       ) : (
         <div className="flex flex-col gap-2">
-          {expenses.map((e) => {
-            const deleteAction = deleteExpenseAction.bind(null, e.id);
-            return (
-              <div
-                key={e.id}
-                className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3"
-              >
-                <div className="min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {e.expenseCategory?.name ?? e.category ?? "未分類"}
-                  </p>
-                  <p className="text-xs text-foreground-muted mt-0.5 truncate">
-                    {e.occurredAt.toLocaleDateString("zh-TW")}
-                    {e.note ? ` · ${e.note}` : ""}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-sm font-mono text-[color:var(--danger-fg)]">
-                    -{currency.format(Number(e.amount))}
-                  </span>
-                  <ConfirmDeleteButton
-                    action={deleteAction}
-                    confirmMessage="確定要刪除這筆支出嗎？此操作無法復原。"
-                    successMessage="已刪除支出"
-                    className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                  />
-                </div>
+          {expenses.map((e) => (
+            <Link
+              key={e.id}
+              href={`/expenses/${e.id}`}
+              className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
+            >
+              <div className="min-w-0">
+                <p className="text-sm font-medium truncate">
+                  {e.expenseCategory?.name ?? e.category ?? "未分類"}
+                </p>
+                <p className="text-xs text-foreground-muted mt-0.5 truncate">
+                  {e.occurredAt.toLocaleDateString("zh-TW")}
+                  {e.note ? ` · ${e.note}` : ""}
+                </p>
               </div>
-            );
-          })}
+              <span className="text-sm font-mono shrink-0 text-[color:var(--danger-fg)]">
+                -{currency.format(Number(e.amount))}
+              </span>
+            </Link>
+          ))}
         </div>
       )}
     </div>

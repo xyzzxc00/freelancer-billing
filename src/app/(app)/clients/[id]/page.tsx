@@ -41,7 +41,7 @@ export default async function ClientDetailPage({
   return (
     <div className="px-4 sm:px-6 py-6 max-w-md">
         <div className="flex items-baseline justify-between mb-4">
-          <h1 className="text-lg font-medium">編輯客戶</h1>
+          <h1 className="text-lg font-medium">客戶資料</h1>
           <Link href="/clients" className="text-sm text-foreground-muted hover:text-foreground">
             返回
           </Link>
