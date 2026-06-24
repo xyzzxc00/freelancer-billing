@@ -55,15 +55,14 @@ const navItems = [
   {
     href: "/income",
     label: "收支",
-    // 收支用雙箭頭上下的圖示
     icon: (
       <>
         <path d="M12 5v14M7 9l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M7 15l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </>
     ),
-    // 在 /income、/expenses、/reports 都算 active
     matchPrefixes: ["/income", "/expenses", "/reports"],
+    subLabels: { "/income": "收入", "/expenses": "支出", "/reports": "報表" },
   },
 ];
 
@@ -77,6 +76,11 @@ export function BottomNav() {
         const isActive = prefixes.some(
           (p) => pathname === p || pathname.startsWith(`${p}/`)
         );
+        const subLabels = "subLabels" in item ? item.subLabels as Record<string, string> : undefined;
+        const activePrefix = subLabels
+          ? prefixes.find((p) => pathname === p || pathname.startsWith(`${p}/`))
+          : undefined;
+        const label = (activePrefix && subLabels?.[activePrefix]) ?? item.label;
         return (
           <Link
             key={item.href}
@@ -88,7 +92,7 @@ export function BottomNav() {
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               {item.icon}
             </svg>
-            {item.label}
+            {label}
           </Link>
         );
       })}
