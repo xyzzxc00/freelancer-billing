@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { TopNav } from "@/components/TopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { ToastListener } from "@/components/ToastListener";
+import { GlobalKeyboardShortcuts } from "@/components/GlobalKeyboardShortcuts";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -33,6 +34,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <TopNav displayName={displayName} avatarUrl={avatarUrl} />
       {children}
       <BottomNav />
+      <GlobalKeyboardShortcuts />
     </div>
   );
 }

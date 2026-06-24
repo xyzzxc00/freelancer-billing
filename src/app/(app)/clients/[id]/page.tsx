@@ -26,7 +26,7 @@ export default async function ClientDetailPage({
     include: {
       quotes: {
         orderBy: { createdAt: "desc" },
-        include: { items: true },
+        include: { items: true, receivable: true },
       },
     },
   });
@@ -34,6 +34,27 @@ export default async function ClientDetailPage({
   if (!client) {
     notFound();
   }
+
+  const currency = new Intl.NumberFormat("zh-TW", {
+    style: "currency",
+    currency: "TWD",
+    maximumFractionDigits: 0,
+  });
+
+  const totalRevenue = client.quotes
+    .filter((q) => q.status === "ACCEPTED")
+    .reduce(
+      (sum, q) => sum + q.items.reduce((s, i) => s + Number(i.unitPrice) * Number(i.quantity), 0),
+      0
+    );
+  const pendingAmount = client.quotes
+    .map((q) => q.receivable)
+    .filter((r) => r?.status === "PENDING")
+    .reduce((sum, r) => sum + Number(r!.amount), 0);
+  const paidAmount = client.quotes
+    .map((q) => q.receivable)
+    .filter((r) => r?.status === "PAID")
+    .reduce((sum, r) => sum + Number(r!.amount), 0);
 
   const updateAction = updateClientAction.bind(null, client.id);
   const deleteAction = deleteClientAction.bind(null, client.id);
@@ -46,6 +67,23 @@ export default async function ClientDetailPage({
             返回
           </Link>
         </div>
+
+        {totalRevenue > 0 && (
+          <div className="grid grid-cols-3 gap-2 mb-5">
+            <div className="bg-surface rounded-lg p-3">
+              <p className="text-xs text-foreground-muted mb-1">已接受總額</p>
+              <p className="text-sm font-medium font-mono">{currency.format(totalRevenue)}</p>
+            </div>
+            <div className="bg-surface rounded-lg p-3">
+              <p className="text-xs text-foreground-muted mb-1">待收款</p>
+              <p className="text-sm font-medium font-mono">{currency.format(pendingAmount)}</p>
+            </div>
+            <div className="bg-surface rounded-lg p-3">
+              <p className="text-xs text-foreground-muted mb-1">已收款</p>
+              <p className="text-sm font-medium font-mono">{currency.format(paidAmount)}</p>
+            </div>
+          </div>
+        )}
 
         <ClientForm
           action={updateAction}

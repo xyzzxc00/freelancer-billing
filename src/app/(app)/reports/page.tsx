@@ -9,21 +9,31 @@ const currency = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 0,
 });
 
+const quarters = [
+  { label: "Q1", from: 1, to: 3 },
+  { label: "Q2", from: 4, to: 6 },
+  { label: "Q3", from: 7, to: 9 },
+  { label: "Q4", from: 10, to: 12 },
+];
+
 export default async function ReportsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string }>;
+  searchParams: Promise<{ year?: string; from?: string; to?: string }>;
 }) {
   const userId = await requireUserId();
-  const { year: yearParam } = await searchParams;
+  const { year: yearParam, from: fromParam, to: toParam } = await searchParams;
 
   const now = new Date();
   const year = yearParam ? Number(yearParam) : now.getFullYear();
-  const yearStart = new Date(year, 0, 1);
-  const yearEnd = new Date(year + 1, 0, 1);
+  const fromMonth = fromParam ? Math.max(1, Math.min(12, Number(fromParam))) : 1;
+  const toMonth = toParam ? Math.max(1, Math.min(12, Number(toParam))) : 12;
+
+  const rangeStart = new Date(year, fromMonth - 1, 1);
+  const rangeEnd = new Date(year, toMonth, 1);
 
   const yearTransactions = await prisma.transaction.findMany({
-    where: { userId, occurredAt: { gte: yearStart, lt: yearEnd } },
+    where: { userId, occurredAt: { gte: rangeStart, lt: rangeEnd } },
     select: { type: true, amount: true, occurredAt: true },
   });
 
@@ -33,8 +43,15 @@ export default async function ReportsPage({
     if (t.type === "INCOME") monthly[m].income += Number(t.amount);
     else monthly[m].expense += Number(t.amount);
   }
-  const yearIncome = monthly.reduce((sum, m) => sum + m.income, 0);
-  const yearExpense = monthly.reduce((sum, m) => sum + m.expense, 0);
+  const filtered = monthly.filter((m) => m.month >= fromMonth && m.month <= toMonth);
+  const yearIncome = filtered.reduce((sum, m) => sum + m.income, 0);
+  const yearExpense = filtered.reduce((sum, m) => sum + m.expense, 0);
+
+  function quarterHref(q: { from: number; to: number }) {
+    const p = new URLSearchParams({ year: String(year), from: String(q.from), to: String(q.to) });
+    return `/reports?${p}`;
+  }
+  const isFullYear = fromMonth === 1 && toMonth === 12;
 
   return (
     <div className="px-4 sm:px-6 py-6">
@@ -66,6 +83,35 @@ export default async function ReportsPage({
         </a>
       </div>
 
+      <div className="flex gap-2 mb-5 flex-wrap">
+        <Link
+          href={`/reports?year=${year}`}
+          className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+            isFullYear
+              ? "bg-accent text-accent-foreground border-accent"
+              : "border-border text-foreground-muted hover:text-foreground"
+          }`}
+        >
+          全年
+        </Link>
+        {quarters.map((q) => {
+          const active = fromMonth === q.from && toMonth === q.to;
+          return (
+            <Link
+              key={q.label}
+              href={quarterHref(q)}
+              className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                active
+                  ? "bg-accent text-accent-foreground border-accent"
+                  : "border-border text-foreground-muted hover:text-foreground"
+              }`}
+            >
+              {q.label}
+            </Link>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-7">
         <div className="bg-surface rounded-lg p-4">
           <p className="text-sm text-foreground-muted mb-1.5">{year} 年總收入</p>
@@ -85,7 +131,7 @@ export default async function ReportsPage({
 
       {/* 手機：卡片 */}
       <div className="sm:hidden flex flex-col gap-2">
-        {monthly.map((m) => {
+        {filtered.map((m) => {
           const net = m.income - m.expense;
           if (m.income === 0 && m.expense === 0) return null;
           return (
@@ -110,8 +156,8 @@ export default async function ReportsPage({
             </div>
           );
         })}
-        {monthly.every((m) => m.income === 0 && m.expense === 0) && (
-          <p className="text-sm text-foreground-muted">這一年還沒有收支記錄。</p>
+        {filtered.every((m) => m.income === 0 && m.expense === 0) && (
+          <p className="text-sm text-foreground-muted">這個區間還沒有收支記錄。</p>
         )}
       </div>
 
@@ -127,7 +173,7 @@ export default async function ReportsPage({
             </tr>
           </thead>
           <tbody>
-            {monthly.map((m) => (
+            {filtered.map((m) => (
               <tr key={m.month} className="border-t border-border">
                 <td className="px-3 py-2">{m.month} 月</td>
                 <td className="text-right px-3 py-2 font-mono">{currency.format(m.income)}</td>

@@ -2,11 +2,18 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
+import { sendEmail } from "@/lib/email";
 import type { TaxMode } from "@/lib/tax";
 import type { ActionResult } from "@/lib/action-state";
+
+function extractEmail(text: string): string | null {
+  const match = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
+  return match ? match[0] : null;
+}
 
 interface ItemInput {
   name: string;
@@ -156,10 +163,32 @@ export async function updateQuoteItemsAction(
 export async function markQuoteSentAction(quoteId: string) {
   const userId = await requireUserId();
 
-  await prisma.quote.updateMany({
+  const quote = await prisma.quote.findFirst({
     where: { id: quoteId, userId, status: "DRAFT" },
+    include: { client: true, profile: true },
+  });
+
+  if (!quote) return;
+
+  await prisma.quote.update({
+    where: { id: quoteId },
     data: { status: "SENT", sentAt: new Date() },
   });
+
+  const headerList = await headers();
+  const host = headerList.get("host") ?? "";
+  const protocol = host.startsWith("localhost") ? "http" : "https";
+  const shareUrl = `${protocol}://${host}/quote/${quote.shareToken}`;
+  const senderName = quote.profile.name ?? quote.profile.email;
+
+  const clientEmail = extractEmail(quote.client.contact ?? "");
+  if (clientEmail) {
+    await sendEmail({
+      to: clientEmail,
+      subject: `${senderName} 提供了一份報價單給你：${quote.title}`,
+      html: `<p>你好，</p><p>${senderName} 提供了一份報價單給你：<strong>${quote.title}</strong></p><p><a href="${shareUrl}">點此查看報價單並回覆</a></p>`,
+    });
+  }
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");

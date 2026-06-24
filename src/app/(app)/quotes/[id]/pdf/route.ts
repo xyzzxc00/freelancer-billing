@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { renderQuotePdf } from "@/lib/quote-pdf";
-import { contentDisposition } from "@/lib/http";
+import { inlineDisposition } from "@/lib/http";
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -32,7 +32,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
   return new Response(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": contentDisposition(`${quote.title}.pdf`),
+      "Content-Disposition": inlineDisposition(`${quote.title}.pdf`),
     },
   });
 }

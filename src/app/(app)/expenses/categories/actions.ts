@@ -35,3 +35,36 @@ export async function deleteCategoryAction(categoryId: string) {
   revalidatePath("/expenses/categories");
   revalidatePath("/expenses");
 }
+
+export async function mergeExpenseCategoryAction(
+  fromId: string,
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const userId = await requireUserId();
+  const toId = String(formData.get("toId") ?? "").trim();
+
+  if (!toId) return { error: "請選擇要合併到的分類" };
+
+  const [from, to] = await Promise.all([
+    prisma.expenseCategory.findFirst({ where: { id: fromId, userId } }),
+    prisma.expenseCategory.findFirst({ where: { id: toId, userId } }),
+  ]);
+  if (!from || !to) return { error: "找不到分類" };
+
+  await prisma.$transaction([
+    prisma.transaction.updateMany({
+      where: { categoryId: fromId, userId },
+      data: { categoryId: toId },
+    }),
+    prisma.recurringExpense.updateMany({
+      where: { categoryId: fromId, userId },
+      data: { categoryId: toId },
+    }),
+    prisma.expenseCategory.deleteMany({ where: { id: fromId, userId } }),
+  ]);
+
+  revalidatePath("/expenses/categories");
+  revalidatePath("/expenses");
+  return { success: `已將「${from.name}」的記錄合併至「${to.name}」並刪除` };
+}

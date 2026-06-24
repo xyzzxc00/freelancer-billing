@@ -129,6 +129,13 @@ export default async function QuotesPage({
               (sum, item) => sum + Number(item.unitPrice) * Number(item.quantity),
               0
             );
+            const staleDays =
+              quote.status === "SENT" && quote.sentAt
+                ? Math.floor(
+                    (Date.now() - new Date(quote.sentAt).getTime()) /
+                      (1000 * 60 * 60 * 24)
+                  )
+                : null;
             return (
               <Link
                 key={quote.id}
@@ -143,10 +150,15 @@ export default async function QuotesPage({
                     {new Date(quote.createdAt).toLocaleDateString("zh-TW")}
                   </p>
                 </div>
-                <div className="flex items-center gap-2.5 shrink-0">
+                <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                   <span className="text-sm font-medium font-mono">
                     {currency.format(total)}
                   </span>
+                  {staleDays !== null && staleDays >= 7 && (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-warning-bg text-warning-fg">
+                      {staleDays} 天未回覆
+                    </span>
+                  )}
                   <span
                     className={`text-xs px-2.5 py-0.5 rounded-full ${statusTone[quote.status]}`}
                   >

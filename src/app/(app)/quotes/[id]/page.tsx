@@ -75,11 +75,30 @@ export default async function QuoteDetailPage({
             返回
           </Link>
         </div>
-        <div className="flex items-center gap-2 mb-5">
+        <div className="flex items-center gap-2 mb-5 flex-wrap">
           <p className="text-sm text-foreground-muted">{statusLabel[quote.status]}</p>
+          {quote.status === "SENT" && quote.sentAt && (() => {
+            const days = Math.floor((Date.now() - new Date(quote.sentAt).getTime()) / (1000 * 60 * 60 * 24));
+            return days >= 7 ? (
+              <>
+                <span className="text-foreground-muted">·</span>
+                <span className="text-xs px-2 py-0.5 rounded-full bg-warning-bg text-warning-fg">
+                  已送出 {days} 天未回覆
+                </span>
+              </>
+            ) : null;
+          })()}
+          {quote.viewedAt && (
+            <>
+              <span className="text-foreground-muted">·</span>
+              <span className="text-xs text-foreground-muted">
+                客戶已於 {new Date(quote.viewedAt).toLocaleDateString("zh-TW")} 查看
+              </span>
+            </>
+          )}
           <span className="text-foreground-muted">·</span>
-          <a href={`/quotes/${quote.id}/pdf`} className="text-sm text-accent hover:underline">
-            下載 PDF
+          <a href={`/quotes/${quote.id}/pdf`} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:underline">
+            預覽 PDF
           </a>
         </div>
 

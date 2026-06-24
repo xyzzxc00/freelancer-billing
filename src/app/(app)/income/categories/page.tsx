@@ -4,7 +4,8 @@ import { requireUserId } from "@/lib/auth";
 import { TipPanel } from "@/components/TipPanel";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { CategoryForm } from "@/components/CategoryForm";
-import { createIncomeCategoryAction, deleteIncomeCategoryAction } from "./actions";
+import { MergeCategoryForm } from "@/components/MergeCategoryForm";
+import { createIncomeCategoryAction, deleteIncomeCategoryAction, mergeIncomeCategoryAction } from "./actions";
 
 export default async function IncomeCategoriesPage() {
   const userId = await requireUserId();
@@ -34,23 +35,39 @@ export default async function IncomeCategoriesPage() {
             <div className="flex flex-col gap-2">
               {categories.map((category) => {
                 const deleteAction = deleteIncomeCategoryAction.bind(null, category.id);
+                const others = categories.filter((c) => c.id !== category.id);
                 return (
                   <div
                     key={category.id}
-                    className="border border-border rounded-lg px-4 py-3 flex items-center justify-between"
+                    className="border border-border rounded-lg px-4 py-3"
                   >
-                    <div>
-                      <p className="text-sm font-medium">{category.name}</p>
-                      <p className="text-xs text-foreground-muted mt-0.5">
-                        {category._count.transactions} 筆記錄
-                      </p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium">{category.name}</p>
+                        <p className="text-xs text-foreground-muted mt-0.5">
+                          {category._count.transactions} 筆記錄
+                        </p>
+                      </div>
+                      <ConfirmDeleteButton
+                        action={deleteAction}
+                        confirmMessage={
+                          category._count.transactions > 0
+                            ? `確定要刪除「${category.name}」嗎？${category._count.transactions} 筆記錄會變回未分類。`
+                            : `確定要刪除「${category.name}」嗎？`
+                        }
+                        successMessage="已刪除分類"
+                        className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                      />
                     </div>
-                    <ConfirmDeleteButton
-                      action={deleteAction}
-                      confirmMessage="確定要刪除這個分類嗎？相關記錄會變回未分類。"
-                      successMessage="已刪除分類"
-                      className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                    />
+                    {category._count.transactions > 0 && others.length > 0 && (
+                      <div className="mt-2 pt-2 border-t border-border">
+                        <MergeCategoryForm
+                          categoryId={category.id}
+                          otherCategories={others}
+                          mergeAction={mergeIncomeCategoryAction}
+                        />
+                      </div>
+                    )}
                   </div>
                 );
               })}

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { calculateTax } from "@/lib/tax";
 import { SubmitButton } from "@/components/SubmitButton";
+import { QuoteViewTracker } from "@/components/QuoteViewTracker";
 import { respondToQuoteAction } from "../actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -49,6 +50,7 @@ export default async function PublicQuotePage({
   return (
     <div className="flex flex-1 justify-center px-4 sm:px-6 py-8 sm:py-12">
       <div className="w-full max-w-lg">
+        <QuoteViewTracker token={token} />
         <p className="text-sm text-foreground-muted mb-1">
           {quote.profile.name ?? quote.profile.email} 提供的報價單
         </p>
@@ -56,8 +58,8 @@ export default async function PublicQuotePage({
         <div className="flex items-center gap-2 mb-6">
           <p className="text-sm text-foreground-muted">給 {quote.client.name}</p>
           <span className="text-foreground-muted">·</span>
-          <a href={`/quote/${token}/pdf`} className="text-sm text-accent hover:underline">
-            下載 PDF
+          <a href={`/quote/${token}/pdf`} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:underline">
+            預覽 PDF
           </a>
         </div>
 

@@ -4,6 +4,13 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 
+export async function recordQuoteViewedAction(token: string) {
+  await prisma.quote.updateMany({
+    where: { shareToken: token, viewedAt: null },
+    data: { viewedAt: new Date() },
+  });
+}
+
 export async function respondToQuoteAction(token: string, response: "ACCEPTED" | "REJECTED") {
   const quote = await prisma.quote.findUnique({
     where: { shareToken: token },
