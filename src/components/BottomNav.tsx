@@ -73,7 +73,7 @@ export function BottomNav() {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-background border-t border-border flex items-stretch">
       {navItems.map((item) => {
-        const prefixes = "matchPrefixes" in item ? item.matchPrefixes : [item.href];
+        const prefixes = ("matchPrefixes" in item ? item.matchPrefixes : undefined) ?? [item.href];
         const isActive = prefixes.some(
           (p) => pathname === p || pathname.startsWith(`${p}/`)
         );
