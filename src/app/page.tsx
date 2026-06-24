@@ -5,7 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { siteName, siteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
-  title: "讓接案這件事，記帳跟報價都輕鬆一點",
+  title: {
+    absolute: "接案帳本 - 讓接案這件事，記帳跟報價都輕鬆一點",
+  },
   description:
     "接案帳本是給自由接案者跟小型工作室的輕量工具：開報價單、線上簽署、追蹤待收款、記錄收支——不用再用 Excel 東拼西湊。",
   alternates: {
