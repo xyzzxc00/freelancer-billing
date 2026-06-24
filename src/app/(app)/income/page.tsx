@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { LedgerTabs } from "@/components/LedgerTabs";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
@@ -42,6 +43,7 @@ export default async function IncomePage({
 
   return (
     <div className="px-4 sm:px-6 py-6">
+      <LedgerTabs />
       <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-medium">收入</h1>

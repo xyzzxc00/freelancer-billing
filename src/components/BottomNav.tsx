@@ -54,35 +54,16 @@ const navItems = [
   },
   {
     href: "/income",
-    label: "收入",
+    label: "收支",
+    // 收支用雙箭頭上下的圖示
     icon: (
       <>
-        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
-        <path d="M12 9v6M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        <path d="M12 5v14M7 9l5-5 5 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M7 15l5 5 5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       </>
     ),
-  },
-  {
-    href: "/expenses",
-    label: "支出",
-    icon: (
-      <>
-        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="2" />
-        <path d="M9 12h6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-      </>
-    ),
-  },
-  {
-    href: "/reports",
-    label: "報表",
-    icon: (
-      <path
-        d="M5 19V10M11 19V5M17 19v-6"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-    ),
+    // 在 /income、/expenses、/reports 都算 active
+    matchPrefixes: ["/income", "/expenses", "/reports"],
   },
 ];
 
@@ -92,7 +73,10 @@ export function BottomNav() {
   return (
     <nav className="md:hidden fixed bottom-0 left-0 right-0 z-10 bg-background border-t border-border flex items-stretch">
       {navItems.map((item) => {
-        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const prefixes = "matchPrefixes" in item ? item.matchPrefixes : [item.href];
+        const isActive = prefixes.some(
+          (p) => pathname === p || pathname.startsWith(`${p}/`)
+        );
         return (
           <Link
             key={item.href}
