@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/next";
 import { siteName, siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -80,6 +81,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         {children}
+        <Analytics />
         <Toaster
           position="top-center"
           toastOptions={{

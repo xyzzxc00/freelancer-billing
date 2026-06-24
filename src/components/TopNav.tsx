@@ -14,7 +14,13 @@ const navItems = [
   { href: "/reports", label: "報表" },
 ];
 
-export function TopNav({ displayName }: { displayName: string }) {
+export function TopNav({
+  displayName,
+  avatarUrl,
+}: {
+  displayName: string;
+  avatarUrl?: string | null;
+}) {
   const pathname = usePathname();
 
   return (
@@ -41,7 +47,7 @@ export function TopNav({ displayName }: { displayName: string }) {
           })}
         </nav>
       </div>
-      <AccountMenu displayName={displayName} />
+      <AccountMenu displayName={displayName} avatarUrl={avatarUrl} />
     </header>
   );
 }

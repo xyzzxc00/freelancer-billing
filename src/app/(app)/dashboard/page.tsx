@@ -90,6 +90,50 @@ export default async function DashboardPage() {
           </div>
         </div>
 
+        {clients.length === 0 && recentQuotes.length === 0 && (
+          <div className="border border-border rounded-lg p-5 mb-8">
+            <h2 className="text-base font-medium mb-1">歡迎使用接案帳本 👋</h2>
+            <p className="text-sm text-foreground-muted mb-4">
+              三個步驟就能開出第一張報價單，跟著做做看：
+            </p>
+            <div className="flex flex-col gap-3">
+              <Link
+                href="/clients/new"
+                className="flex items-center gap-3 group"
+              >
+                <span className="w-6 h-6 shrink-0 rounded-full bg-accent text-accent-foreground flex items-center justify-center text-xs font-medium">
+                  1
+                </span>
+                <span className="text-sm group-hover:text-accent">
+                  新增你的第一個客戶
+                </span>
+              </Link>
+              <Link
+                href="/quotes/new"
+                className="flex items-center gap-3 group"
+              >
+                <span className="w-6 h-6 shrink-0 rounded-full bg-surface text-foreground-muted flex items-center justify-center text-xs font-medium">
+                  2
+                </span>
+                <span className="text-sm group-hover:text-accent">
+                  建立報價單，產生連結給客戶線上接受
+                </span>
+              </Link>
+              <Link
+                href="/income/new"
+                className="flex items-center gap-3 group"
+              >
+                <span className="w-6 h-6 shrink-0 rounded-full bg-surface text-foreground-muted flex items-center justify-center text-xs font-medium">
+                  3
+                </span>
+                <span className="text-sm group-hover:text-accent">
+                  記一筆收入或支出，年底報表自動彙整
+                </span>
+              </Link>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-baseline justify-between mb-2.5">
           <h2 className="text-lg font-medium">近期報價單</h2>
           <Link href="/quotes/new" className="text-sm text-accent hover:underline">

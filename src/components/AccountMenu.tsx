@@ -11,7 +11,13 @@ function getSystemTheme(): Theme {
   return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-export function AccountMenu({ displayName }: { displayName: string }) {
+export function AccountMenu({
+  displayName,
+  avatarUrl,
+}: {
+  displayName: string;
+  avatarUrl?: string | null;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme | null>(null);
@@ -60,9 +66,19 @@ export function AccountMenu({ displayName }: { displayName: string }) {
         onClick={() => setOpen((v) => !v)}
         aria-label="帳戶選單"
         aria-expanded={open}
-        className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-sm font-medium hover:bg-[color:var(--border)] transition-colors"
+        className="w-8 h-8 rounded-full bg-surface flex items-center justify-center text-sm font-medium hover:bg-[color:var(--border)] transition-colors overflow-hidden"
       >
-        {displayName.slice(0, 1).toUpperCase()}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt={displayName}
+            referrerPolicy="no-referrer"
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          displayName.slice(0, 1).toUpperCase()
+        )}
       </button>
 
       {open && (
@@ -97,6 +113,14 @@ export function AccountMenu({ displayName }: { displayName: string }) {
               />
             </span>
           </button>
+
+          <a
+            href="mailto:xyzzxc00@gmail.com?subject=接案帳本%20意見回饋"
+            onClick={() => setOpen(false)}
+            className="block px-3 py-2 text-sm hover:bg-surface"
+          >
+            意見回饋
+          </a>
 
           <div className="border-t border-border mt-1 pt-1">
             <button

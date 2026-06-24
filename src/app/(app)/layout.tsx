@@ -19,14 +19,18 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     select: { name: true, email: true },
   });
 
-  const displayName = profile?.name || profile?.email || "U";
+  // Google 等 OAuth 登入會把名字/頭像放在 user_metadata，沒設定自訂名稱時就用它
+  const meta = data.user.user_metadata ?? {};
+  const displayName =
+    profile?.name || meta.full_name || meta.name || profile?.email || "U";
+  const avatarUrl: string | null = meta.avatar_url || meta.picture || null;
 
   return (
     <div className="max-w-7xl w-full mx-auto pb-16 md:pb-0">
       <Suspense fallback={null}>
         <ToastListener />
       </Suspense>
-      <TopNav displayName={displayName} />
+      <TopNav displayName={displayName} avatarUrl={avatarUrl} />
       {children}
       <BottomNav />
     </div>
