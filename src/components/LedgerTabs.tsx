@@ -13,7 +13,7 @@ export function LedgerTabs() {
   const pathname = usePathname();
 
   return (
-    <div className="flex gap-1 mb-5 border-b border-border">
+    <div className="md:hidden flex gap-1 mb-5 border-b border-border">
       {tabs.map((tab) => {
         const isActive = pathname === tab.href || pathname.startsWith(`${tab.href}/`);
         return (
