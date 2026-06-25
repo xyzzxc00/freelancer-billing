@@ -2,11 +2,9 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { TipPanel } from "@/components/TipPanel";
-import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { CategoryForm } from "@/components/CategoryForm";
-import { MergeCategoryForm } from "@/components/MergeCategoryForm";
+import { CategoryCard } from "@/components/CategoryCard";
 import { createIncomeCategoryAction, deleteIncomeCategoryAction, mergeIncomeCategoryAction, renameIncomeCategoryAction } from "./actions";
-import { InlineCategoryEdit } from "@/components/InlineCategoryEdit";
 
 export default async function IncomeCategoriesPage() {
   const userId = await requireUserId();
@@ -38,45 +36,19 @@ export default async function IncomeCategoriesPage() {
                 const deleteAction = deleteIncomeCategoryAction.bind(null, category.id);
                 const others = categories.filter((c) => c.id !== category.id);
                 return (
-                  <div
+                  <CategoryCard
                     key={category.id}
-                    className="border border-border rounded-lg px-4 py-3"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium">{category.name}</p>
-                        <p className="text-xs text-foreground-muted mt-0.5">
-                          {category._count.transactions} 筆記錄
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <InlineCategoryEdit
-                          categoryId={category.id}
-                          currentName={category.name}
-                          renameAction={renameIncomeCategoryAction}
-                        />
-                        <ConfirmDeleteButton
-                          action={deleteAction}
-                          confirmMessage={
-                            category._count.transactions > 0
-                              ? `確定要刪除「${category.name}」嗎？${category._count.transactions} 筆記錄會變回未分類。`
-                              : `確定要刪除「${category.name}」嗎？`
-                          }
-                          successMessage="已刪除分類"
-                          className="text-xs text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                        />
-                      </div>
-                    </div>
-                    {category._count.transactions > 0 && others.length > 0 && (
-                      <div className="mt-2 pt-2 border-t border-border">
-                        <MergeCategoryForm
-                          categoryId={category.id}
-                          otherCategories={others}
-                          mergeAction={mergeIncomeCategoryAction}
-                        />
-                      </div>
-                    )}
-                  </div>
+                    category={category}
+                    others={others}
+                    renameAction={renameIncomeCategoryAction}
+                    deleteAction={deleteAction}
+                    mergeAction={mergeIncomeCategoryAction}
+                    deleteConfirmMessage={
+                      category._count.transactions > 0
+                        ? `確定要刪除「${category.name}」嗎？${category._count.transactions} 筆記錄會變回未分類。`
+                        : `確定要刪除「${category.name}」嗎？`
+                    }
+                  />
                 );
               })}
             </div>

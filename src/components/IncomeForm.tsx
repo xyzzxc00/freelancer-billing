@@ -75,7 +75,7 @@ export function IncomeForm({
           type="date"
           required
           defaultValue={defaultOccurredAt ?? new Date().toISOString().slice(0, 10)}
-          className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+          className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full appearance-none"
         />
       </div>
       <div>

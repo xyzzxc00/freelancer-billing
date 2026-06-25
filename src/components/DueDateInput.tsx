@@ -61,7 +61,7 @@ export function DueDateInput({
           e.currentTarget.form?.requestSubmit();
         }}
         onBlur={() => setEditing(false)}
-        className="border border-border rounded-md px-2 py-1 text-xs bg-background"
+        className="border border-border rounded-md px-2 py-1 text-xs bg-background appearance-none"
       />
     </form>
   );
