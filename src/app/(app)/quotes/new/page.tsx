@@ -33,7 +33,7 @@ export default async function NewQuotePage() {
 
   return (
     <div className="px-4 sm:px-6 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 items-start max-w-3xl">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div>
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">新增報價單</h1>
