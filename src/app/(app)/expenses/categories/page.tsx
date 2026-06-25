@@ -44,25 +44,28 @@ export default async function ExpenseCategoriesPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
+                        <p className="text-sm font-medium">{category.name}</p>
+                        <p className="text-xs text-foreground-muted mt-0.5">
+                          {category._count.transactions} 筆記錄
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
                         <InlineCategoryEdit
                           categoryId={category.id}
                           currentName={category.name}
                           renameAction={renameExpenseCategoryAction}
                         />
-                        <p className="text-xs text-foreground-muted mt-0.5">
-                          {category._count.transactions} 筆記錄
-                        </p>
+                        <ConfirmDeleteButton
+                          action={deleteAction}
+                          confirmMessage={
+                            category._count.transactions > 0
+                              ? `確定要刪除「${category.name}」嗎？${category._count.transactions} 筆記錄會變回未分類。`
+                              : `確定要刪除「${category.name}」嗎？`
+                          }
+                          successMessage="已刪除分類"
+                          className="text-xs text-foreground-muted hover:text-[color:var(--danger-fg)]"
+                        />
                       </div>
-                      <ConfirmDeleteButton
-                        action={deleteAction}
-                        confirmMessage={
-                          category._count.transactions > 0
-                            ? `確定要刪除「${category.name}」嗎？${category._count.transactions} 筆記錄會變回未分類。`
-                            : `確定要刪除「${category.name}」嗎？`
-                        }
-                        successMessage="已刪除分類"
-                        className="text-sm text-foreground-muted hover:text-[color:var(--danger-fg)]"
-                      />
                     </div>
                     {category._count.transactions > 0 && others.length > 0 && (
                       <div className="mt-2 pt-2 border-t border-border">
