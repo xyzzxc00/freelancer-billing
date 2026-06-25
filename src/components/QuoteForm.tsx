@@ -50,6 +50,7 @@ export function QuoteForm({
 }) {
   const [items, setItems] = useState<ItemRow[]>(defaultItems);
   const [taxMode, setTaxMode] = useState<TaxMode>(defaultTaxMode);
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [state, formAction] = useActionState(action, undefined);
 
   const subtotal = useMemo(
@@ -118,11 +119,13 @@ export function QuoteForm({
           <label className="text-sm text-foreground-muted">項目</label>
           {templates.length > 0 && (
             <select
-              defaultValue=""
+              value={selectedTemplateId}
               onChange={(e) => {
                 const template = templates.find((t) => t.id === e.target.value);
-                if (template) setItems(template.items);
-                e.target.value = "";
+                if (template) {
+                  setItems(template.items);
+                  setSelectedTemplateId(e.target.value);
+                }
               }}
               className="border border-border rounded-md px-2 py-1 text-xs bg-background"
             >
