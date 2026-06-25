@@ -35,13 +35,13 @@ export default async function DashboardPage() {
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
-  const [paidThisMonth, receivables, recentQuotes, clients] = await Promise.all([
+  const [incomeThisMonth, expenseThisMonth, receivables, recentQuotes, clients] = await Promise.all([
     prisma.transaction.aggregate({
-      where: {
-        userId,
-        type: "INCOME",
-        occurredAt: { gte: monthStart, lt: monthEnd },
-      },
+      where: { userId, type: "INCOME", occurredAt: { gte: monthStart, lt: monthEnd } },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { userId, type: "EXPENSE", occurredAt: { gte: monthStart, lt: monthEnd } },
       _sum: { amount: true },
     }),
     prisma.receivable.findMany({
@@ -62,6 +62,8 @@ export default async function DashboardPage() {
     }),
   ]);
 
+  const monthIncome = Number(incomeThisMonth._sum.amount ?? 0);
+  const monthExpense = Number(expenseThisMonth._sum.amount ?? 0);
   const pendingTotal = receivables.reduce((sum, r) => sum + Number(r.amount), 0);
   const overdueTotal = receivables
     .filter((r) => r.dueDate && r.dueDate < now)
@@ -69,24 +71,31 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-4 sm:px-6 py-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
           <div className="bg-surface rounded-lg p-4">
-            <p className="text-sm text-foreground-muted mb-1.5">本月已收款</p>
-            <p className="text-2xl font-medium">
-              {currency.format(Number(paidThisMonth._sum.amount ?? 0))}
+            <p className="text-xs text-foreground-muted mb-1.5">本月收入</p>
+            <p className="text-xl font-medium">{currency.format(monthIncome)}</p>
+          </div>
+          <div className="bg-surface rounded-lg p-4">
+            <p className="text-xs text-foreground-muted mb-1.5">本月支出</p>
+            <p className="text-xl font-medium">{currency.format(monthExpense)}</p>
+          </div>
+          <div className="bg-surface rounded-lg p-4">
+            <p className="text-xs text-foreground-muted mb-1.5">本月淨收入</p>
+            <p className={`text-xl font-medium ${monthIncome - monthExpense < 0 ? "text-[color:var(--danger-fg)]" : ""}`}>
+              {currency.format(monthIncome - monthExpense)}
             </p>
           </div>
           <div className="bg-surface rounded-lg p-4">
-            <p className="text-sm text-foreground-muted mb-1.5">待收款</p>
-            <p className="text-2xl font-medium text-[color:var(--warning-fg)]">
+            <p className="text-xs text-foreground-muted mb-1.5">待收款</p>
+            <p className="text-xl font-medium text-[color:var(--warning-fg)]">
               {currency.format(pendingTotal)}
             </p>
-          </div>
-          <div className="bg-surface rounded-lg p-4">
-            <p className="text-sm text-foreground-muted mb-1.5">逾期未收</p>
-            <p className="text-2xl font-medium text-[color:var(--danger-fg)]">
-              {currency.format(overdueTotal)}
-            </p>
+            {overdueTotal > 0 && (
+              <p className="text-xs text-[color:var(--danger-fg)] mt-0.5">
+                逾期 {currency.format(overdueTotal)}
+              </p>
+            )}
           </div>
         </div>
 

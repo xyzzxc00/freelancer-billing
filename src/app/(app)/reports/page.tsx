@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { LedgerTabs } from "@/components/LedgerTabs";
+import { ReportsBarChart } from "@/components/ReportsBarChart";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
@@ -126,6 +127,8 @@ export default async function ReportsPage({
           <p className="text-2xl font-medium">{currency.format(yearIncome - yearExpense)}</p>
         </div>
       </div>
+
+      <ReportsBarChart data={filtered} />
 
       <h2 className="text-base font-medium mb-3">月度彙整</h2>
 

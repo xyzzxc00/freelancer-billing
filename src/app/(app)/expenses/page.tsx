@@ -12,15 +12,16 @@ const currency = new Intl.NumberFormat("zh-TW", {
 export default async function ExpensesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string }>;
+  searchParams: Promise<{ year?: string; month?: string }>;
 }) {
   const userId = await requireUserId();
-  const { year: yearParam } = await searchParams;
+  const { year: yearParam, month: monthParam } = await searchParams;
 
   const now = new Date();
   const year = yearParam ? Number(yearParam) : now.getFullYear();
-  const rangeStart = new Date(year, 0, 1);
-  const rangeEnd = new Date(year + 1, 0, 1);
+  const month = monthParam ? Number(monthParam) : null;
+  const rangeStart = month ? new Date(year, month - 1, 1) : new Date(year, 0, 1);
+  const rangeEnd = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);
 
   const expenses = await prisma.transaction.findMany({
     where: {
@@ -82,8 +83,32 @@ export default async function ExpensesPage({
         </div>
       </div>
 
+      <div className="flex gap-1.5 mb-4 flex-wrap">
+        <Link
+          href={`/expenses?year=${year}`}
+          className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+            !month ? "bg-accent text-accent-foreground border-accent" : "border-border text-foreground-muted hover:text-foreground"
+          }`}
+        >
+          全年
+        </Link>
+        {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+          <Link
+            key={m}
+            href={`/expenses?year=${year}&month=${m}`}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+              month === m ? "bg-accent text-accent-foreground border-accent" : "border-border text-foreground-muted hover:text-foreground"
+            }`}
+          >
+            {m} 月
+          </Link>
+        ))}
+      </div>
+
       <div className="bg-surface rounded-lg p-4 mb-7">
-        <p className="text-sm text-foreground-muted mb-1.5">{year} 年總支出</p>
+        <p className="text-sm text-foreground-muted mb-1.5">
+          {month ? `${year} 年 ${month} 月支出` : `${year} 年總支出`}
+        </p>
         <p className="text-2xl font-medium">{currency.format(total)}</p>
       </div>
 

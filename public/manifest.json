@@ -1,0 +1,28 @@
+{
+  "name": "接案帳本",
+  "short_name": "接案帳本",
+  "description": "給自由接案者跟小型工作室的輕量記帳與報價工具",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#181715",
+  "theme_color": "#181715",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

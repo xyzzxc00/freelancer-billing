@@ -33,6 +33,12 @@ const description =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: siteName,
+  },
   title: {
     default: siteName,
     template: `%s｜${siteName}`,
