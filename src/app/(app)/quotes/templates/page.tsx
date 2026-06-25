@@ -48,6 +48,12 @@ export default async function TemplatesPage() {
                       <span className="text-sm font-mono text-foreground-muted">
                         {currency.format(total)}
                       </span>
+                      <Link
+                        href={`/quotes/templates/${template.id}`}
+                        className="text-sm text-foreground-muted hover:text-foreground"
+                      >
+                        編輯
+                      </Link>
                       <ConfirmDeleteButton
                         action={deleteAction}
                         confirmMessage="確定要刪除這個範本嗎？此操作無法復原。"

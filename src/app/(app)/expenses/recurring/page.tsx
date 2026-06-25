@@ -76,6 +76,12 @@ export default async function RecurringExpensesPage() {
                           {r.active ? "已啟用" : "已停用"}
                         </button>
                       </form>
+                      <Link
+                        href={`/expenses/recurring/${r.id}`}
+                        className="text-xs text-foreground-muted hover:text-foreground"
+                      >
+                        編輯
+                      </Link>
                       <ConfirmDeleteButton
                         action={deleteAction}
                         confirmMessage="確定要刪除這個定期支出嗎？此操作無法復原。"

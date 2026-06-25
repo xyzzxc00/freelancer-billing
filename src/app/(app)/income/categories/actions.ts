@@ -27,6 +27,29 @@ export async function createIncomeCategoryAction(
   return { success: "已新增分類" };
 }
 
+export async function renameIncomeCategoryAction(
+  categoryId: string,
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
+  const userId = await requireUserId();
+  const name = String(formData.get("name") ?? "").trim();
+
+  if (!name) return { error: "請輸入分類名稱" };
+
+  try {
+    await prisma.incomeCategory.updateMany({
+      where: { id: categoryId, userId },
+      data: { name },
+    });
+  } catch {
+    return { error: "這個名稱已存在" };
+  }
+
+  revalidatePath("/income/categories");
+  return { success: "已更新" };
+}
+
 export async function deleteIncomeCategoryAction(categoryId: string) {
   const userId = await requireUserId();
 

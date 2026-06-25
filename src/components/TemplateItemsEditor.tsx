@@ -13,10 +13,16 @@ interface ItemRow {
 
 export function TemplateItemsEditor({
   action,
+  defaultName = "",
+  defaultItems = [{ name: "", unitPrice: "", quantity: "1" }],
+  submitLabel = "儲存範本",
 }: {
   action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>;
+  defaultName?: string;
+  defaultItems?: ItemRow[];
+  submitLabel?: string;
 }) {
-  const [items, setItems] = useState<ItemRow[]>([{ name: "", unitPrice: "", quantity: "1" }]);
+  const [items, setItems] = useState<ItemRow[]>(defaultItems);
   const [state, formAction] = useActionState(action, undefined);
 
   function updateItem(index: number, field: keyof ItemRow, value: string) {
@@ -42,6 +48,7 @@ export function TemplateItemsEditor({
         <input
           name="name"
           required
+          defaultValue={defaultName}
           placeholder="例如：標準網站設計報價"
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         />
@@ -100,7 +107,7 @@ export function TemplateItemsEditor({
       <FormError message={state?.error} />
 
       <SubmitButton className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium">
-        儲存範本
+        {submitLabel}
       </SubmitButton>
     </form>
   );

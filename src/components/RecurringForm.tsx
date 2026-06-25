@@ -15,11 +15,21 @@ export function RecurringForm({
   categories,
   namePlaceholder,
   dayLabel,
+  defaultName = "",
+  defaultAmount = "",
+  defaultDayOfMonth = 1,
+  defaultCategoryId = "",
+  submitLabel = "儲存",
 }: {
   action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>;
   categories: CategoryOption[];
   namePlaceholder: string;
   dayLabel: string;
+  defaultName?: string;
+  defaultAmount?: string;
+  defaultDayOfMonth?: number;
+  defaultCategoryId?: string;
+  submitLabel?: string;
 }) {
   const [state, formAction] = useActionState(action, undefined);
 
@@ -30,6 +40,7 @@ export function RecurringForm({
         <input
           name="name"
           required
+          defaultValue={defaultName}
           placeholder={namePlaceholder}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         />
@@ -42,6 +53,7 @@ export function RecurringForm({
           required
           min="0"
           step="1"
+          defaultValue={defaultAmount}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
         />
       </div>
@@ -53,7 +65,7 @@ export function RecurringForm({
           required
           min="1"
           max="28"
-          defaultValue="1"
+          defaultValue={defaultDayOfMonth}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
         />
         <p className="text-xs text-foreground-muted mt-1">限 1-28 號，避免遇到月底沒有的日期。</p>
@@ -62,7 +74,7 @@ export function RecurringForm({
         <label className="text-sm text-foreground-muted block mb-1">分類（選填）</label>
         <select
           name="categoryId"
-          defaultValue=""
+          defaultValue={defaultCategoryId}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         >
           <option value="">不分類</option>
@@ -76,7 +88,7 @@ export function RecurringForm({
 
       <FormError message={state?.error} />
 
-      <SubmitButton>儲存</SubmitButton>
+      <SubmitButton>{submitLabel}</SubmitButton>
     </form>
   );
 }

@@ -5,7 +5,8 @@ import { TipPanel } from "@/components/TipPanel";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { CategoryForm } from "@/components/CategoryForm";
 import { MergeCategoryForm } from "@/components/MergeCategoryForm";
-import { createCategoryAction, deleteCategoryAction, mergeExpenseCategoryAction } from "./actions";
+import { createCategoryAction, deleteCategoryAction, mergeExpenseCategoryAction, renameExpenseCategoryAction } from "./actions";
+import { InlineCategoryEdit } from "@/components/InlineCategoryEdit";
 
 export default async function ExpenseCategoriesPage() {
   const userId = await requireUserId();
@@ -43,7 +44,11 @@ export default async function ExpenseCategoriesPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-medium">{category.name}</p>
+                        <InlineCategoryEdit
+                          categoryId={category.id}
+                          currentName={category.name}
+                          renameAction={renameExpenseCategoryAction}
+                        />
                         <p className="text-xs text-foreground-muted mt-0.5">
                           {category._count.transactions} 筆記錄
                         </p>
