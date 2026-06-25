@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     statusBarStyle: "black-translucent",
     title: siteName,
   },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
   title: {
     default: siteName,
     template: `%s｜${siteName}`,
