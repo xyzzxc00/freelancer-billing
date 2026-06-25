@@ -29,6 +29,69 @@ const currency = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 0,
 });
 
+function TemplatePicker({
+  templates,
+  selectedId,
+  onSelect,
+}: {
+  templates: TemplateOption[];
+  selectedId: string;
+  onSelect: (t: TemplateOption) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const selected = templates.find((t) => t.id === selectedId);
+
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 text-sm text-foreground-muted hover:text-foreground"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        {selected ? `範本：${selected.name}` : "套用範本"}
+        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform ${open ? "rotate-180" : ""}`}>
+          <polyline points="6 9 12 15 18 9"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div className="mt-2 flex flex-col gap-2">
+          {templates.map((t) => {
+            const total = t.items.reduce(
+              (sum, item) => sum + (Number(item.unitPrice) || 0) * (Number(item.quantity) || 0),
+              0
+            );
+            const isSelected = t.id === selectedId;
+            return (
+              <button
+                key={t.id}
+                type="button"
+                onClick={() => {
+                  onSelect(t);
+                  setOpen(false);
+                }}
+                className={`flex items-center justify-between px-3 py-2.5 rounded-lg border text-left transition-colors ${
+                  isSelected
+                    ? "border-accent bg-accent/10 text-foreground"
+                    : "border-border hover:border-accent/50 hover:bg-surface"
+                }`}
+              >
+                <span className="text-sm font-medium">{t.name}</span>
+                <span className="text-sm font-mono text-foreground-muted">
+                  {currency.format(total)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function QuoteForm({
   clients,
   action,
@@ -114,32 +177,19 @@ export function QuoteForm({
         </div>
       )}
 
+      {templates.length > 0 && (
+        <TemplatePicker
+          templates={templates}
+          selectedId={selectedTemplateId}
+          onSelect={(t) => {
+            setItems(t.items);
+            setSelectedTemplateId(t.id);
+          }}
+        />
+      )}
+
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-sm text-foreground-muted">項目</label>
-          {templates.length > 0 && (
-            <select
-              value={selectedTemplateId}
-              onChange={(e) => {
-                const template = templates.find((t) => t.id === e.target.value);
-                if (template) {
-                  setItems(template.items);
-                  setSelectedTemplateId(e.target.value);
-                }
-              }}
-              className="border border-border rounded-md px-2 py-1 text-xs bg-background"
-            >
-              <option value="" disabled>
-                套用範本…
-              </option>
-              {templates.map((t) => (
-                <option key={t.id} value={t.id}>
-                  {t.name}
-                </option>
-              ))}
-            </select>
-          )}
-        </div>
+        <label className="text-sm text-foreground-muted block mb-2">項目</label>
         <div className="flex flex-col gap-2">
           {items.map((item, i) => (
             <div
