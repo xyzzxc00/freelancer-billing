@@ -6,11 +6,11 @@
     },
     {
       "path": "/api/cron/recurring-transactions",
-      "schedule": "0 1 * * *"
+      "schedule": "5 1 * * *"
     },
     {
       "path": "/api/cron/stale-quotes",
-      "schedule": "0 1 * * *"
+      "schedule": "10 1 * * *"
     }
   ]
 }

@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 接案帳本
 
-## Getting Started
+自由工作者專用的報價、收款、收支記帳系統。
 
-First, run the development server:
+## 技術棧
+
+- **Framework:** Next.js (App Router) + React 19
+- **Database:** Supabase (PostgreSQL) + Prisma ORM
+- **Auth:** Supabase Auth (Google OAuth)
+- **Styling:** Tailwind CSS v4
+- **Deployment:** Vercel
+
+## 本地開發
+
+**1. 安裝相依套件**
+
+```bash
+npm install
+```
+
+**2. 設定環境變數**
+
+複製 `.env.example` 為 `.env`，填入 Supabase 連線資訊：
+
+```bash
+cp .env.example .env
+```
+
+| 變數 | 說明 |
+|------|------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase 專案 URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `DATABASE_URL` | Supabase pooler 連線（port 6543） |
+| `DIRECT_URL` | Supabase direct 連線（port 5432，僅 migration 用） |
+| `CRON_SECRET` | Cron job 驗證金鑰（Vercel 環境需設定） |
+
+**3. 執行資料庫 migration**
+
+```bash
+npx prisma migrate dev
+```
+
+**4. 啟動開發伺服器**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+開啟 [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 部署
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+推送到 `main` branch 後 Vercel 會自動部署。
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Vercel 環境變數需額外設定 `CRON_SECRET`，並確認 Supabase 允許該 IP 連線。
