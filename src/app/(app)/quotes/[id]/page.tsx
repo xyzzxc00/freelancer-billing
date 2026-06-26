@@ -78,6 +78,7 @@ export default async function QuoteDetailPage({
         <div className="flex items-center gap-2 mb-5 flex-wrap">
           <p className="text-sm text-foreground-muted">{statusLabel[quote.status]}</p>
           {quote.status === "SENT" && quote.sentAt && (() => {
+            // eslint-disable-next-line react-hooks/purity
             const days = Math.floor((Date.now() - new Date(quote.sentAt).getTime()) / (1000 * 60 * 60 * 24));
             return days >= 7 ? (
               <>

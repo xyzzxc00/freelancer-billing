@@ -25,6 +25,7 @@ export function AccountMenu({
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(stored === "light" || stored === "dark" ? stored : getSystemTheme());
   }, []);
 

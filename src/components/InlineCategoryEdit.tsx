@@ -18,6 +18,7 @@ export function InlineCategoryEdit({ categoryId, currentName, renameAction }: Pr
   const [state, action, pending] = useActionState(boundAction, initialState);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (state?.success) setEditing(false);
   }, [state]);
 

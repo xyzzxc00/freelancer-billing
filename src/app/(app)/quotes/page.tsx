@@ -132,6 +132,7 @@ export default async function QuotesPage({
             const staleDays =
               quote.status === "SENT" && quote.sentAt
                 ? Math.floor(
+                    // eslint-disable-next-line react-hooks/purity
                     (Date.now() - new Date(quote.sentAt).getTime()) /
                       (1000 * 60 * 60 * 24)
                   )

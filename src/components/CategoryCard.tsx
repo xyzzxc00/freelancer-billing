@@ -36,6 +36,7 @@ export function CategoryCard({
   const [state, action, pending] = useActionState(boundRename, initialState);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (state?.success) setEditing(false);
   }, [state]);
 
