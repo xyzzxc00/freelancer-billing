@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
+import { Toaster } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { BottomNav } from "@/components/BottomNav";
 import { ToastListener } from "@/components/ToastListener";
@@ -35,6 +36,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       {children}
       <BottomNav />
       <GlobalKeyboardShortcuts />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          style: {
+            background: "var(--surface)",
+            color: "var(--foreground)",
+            border: "1px solid var(--border)",
+          },
+        }}
+      />
     </div>
   );
 }

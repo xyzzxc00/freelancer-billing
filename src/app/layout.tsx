@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
-import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { siteName, siteUrl } from "@/lib/site";
@@ -95,16 +94,6 @@ export default function RootLayout({
         {children}
         <Analytics />
         <SpeedInsights />
-        <Toaster
-          position="top-center"
-          toastOptions={{
-            style: {
-              background: "var(--surface)",
-              color: "var(--foreground)",
-              border: "1px solid var(--border)",
-            },
-          }}
-        />
       </body>
     </html>
   );
