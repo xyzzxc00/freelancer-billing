@@ -183,15 +183,24 @@ export async function markQuoteSentAction(quoteId: string) {
 
   const clientEmail = extractEmail(quote.client.contact ?? "");
   if (clientEmail) {
-    await sendEmail({
-      to: clientEmail,
-      subject: `${senderName} 提供了一份報價單給你：${quote.title}`,
-      html: `<p>你好，</p><p>${senderName} 提供了一份報價單給你：<strong>${quote.title}</strong></p><p><a href="${shareUrl}">點此查看報價單並回覆</a></p>`,
-    });
+    try {
+      await sendEmail({
+        to: clientEmail,
+        subject: `${senderName} 提供了一份報價單給你：${quote.title}`,
+        html: `<p>你好，</p><p>${senderName} 提供了一份報價單給你：<strong>${quote.title}</strong></p><p><a href="${shareUrl}">點此查看報價單並回覆</a></p>`,
+      });
+    } catch (err) {
+      console.error("報價單通知信寄送失敗:", err);
+    }
   }
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
+
+  const toastMsg = clientEmail
+    ? "已標記為送出，通知信已寄給客戶"
+    : "已標記為送出（客戶聯絡方式未填 email，請手動通知）";
+  redirectWithToast(`/quotes/${quoteId}`, toastMsg);
 }
 
 export async function acceptQuoteAction(quoteId: string) {

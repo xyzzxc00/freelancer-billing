@@ -2,11 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 
-const currency = new Intl.NumberFormat("zh-TW", {
-  style: "currency",
-  currency: "TWD",
-  maximumFractionDigits: 0,
-});
+import { currency, formatDate } from "@/lib/currency";
 
 const statusLabel: Record<string, string> = {
   DRAFT: "草稿",
@@ -148,7 +144,7 @@ export default async function QuotesPage({
                     {quote.client.name} — {quote.title}
                   </p>
                   <p className="text-xs text-foreground-muted mt-0.5">
-                    {new Date(quote.createdAt).toLocaleDateString("zh-TW")}
+                    {formatDate(quote.createdAt)}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">

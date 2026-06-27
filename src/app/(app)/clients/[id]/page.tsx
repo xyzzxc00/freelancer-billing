@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { ClientForm } from "@/components/ClientForm";
+import { currency } from "@/lib/currency";
 import { updateClientAction, deleteClientAction } from "../actions";
 
 const statusLabel: Record<string, string> = {
@@ -26,6 +27,7 @@ export default async function ClientDetailPage({
     include: {
       quotes: {
         orderBy: { createdAt: "desc" },
+        take: 20,
         include: { items: true, receivable: true },
       },
     },
@@ -35,11 +37,6 @@ export default async function ClientDetailPage({
     notFound();
   }
 
-  const currency = new Intl.NumberFormat("zh-TW", {
-    style: "currency",
-    currency: "TWD",
-    maximumFractionDigits: 0,
-  });
 
   const totalRevenue = client.quotes
     .filter((q) => q.status === "ACCEPTED")
@@ -122,11 +119,7 @@ export default async function ClientDetailPage({
                   <p className="text-sm font-medium truncate min-w-0">{quote.title}</p>
                   <div className="flex items-center gap-2.5 shrink-0">
                     <span className="text-sm font-mono">
-                      {new Intl.NumberFormat("zh-TW", {
-                        style: "currency",
-                        currency: "TWD",
-                        maximumFractionDigits: 0,
-                      }).format(total)}
+                      {currency.format(total)}
                     </span>
                     <span className="text-xs px-2.5 py-0.5 rounded-full bg-surface text-foreground-muted">
                       {statusLabel[quote.status]}

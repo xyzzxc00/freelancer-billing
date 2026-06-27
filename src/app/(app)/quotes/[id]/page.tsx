@@ -7,6 +7,7 @@ import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { calculateTax } from "@/lib/tax";
+import { currency, formatDate } from "@/lib/currency";
 import {
   updateQuoteItemsAction,
   markQuoteSentAction,
@@ -14,12 +15,6 @@ import {
   rejectQuoteAction,
   deleteQuoteAction,
 } from "../actions";
-
-const currency = new Intl.NumberFormat("zh-TW", {
-  style: "currency",
-  currency: "TWD",
-  maximumFractionDigits: 0,
-});
 
 const statusLabel: Record<string, string> = {
   DRAFT: "草稿",

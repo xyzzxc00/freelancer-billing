@@ -25,50 +25,62 @@ export async function GET(request: NextRequest) {
   ]);
 
   let created = 0;
+  const errors: string[] = [];
 
   for (const r of dueExpenses) {
-    await prisma.$transaction([
-      prisma.transaction.create({
-        data: {
-          userId: r.userId,
-          type: "EXPENSE",
-          amount: r.amount,
-          categoryId: r.categoryId,
-          note: r.name,
-          occurredAt: now,
-        },
-      }),
-      prisma.recurringExpense.update({
-        where: { id: r.id },
-        data: { lastGeneratedYearMonth: yearMonth },
-      }),
-    ]);
-    created += 1;
+    try {
+      await prisma.$transaction([
+        prisma.transaction.create({
+          data: {
+            userId: r.userId,
+            type: "EXPENSE",
+            amount: r.amount,
+            categoryId: r.categoryId,
+            note: r.name,
+            occurredAt: now,
+          },
+        }),
+        prisma.recurringExpense.update({
+          where: { id: r.id },
+          data: { lastGeneratedYearMonth: yearMonth },
+        }),
+      ]);
+      created += 1;
+    } catch (err) {
+      console.error(`定期支出建立失敗 (id=${r.id}):`, err);
+      errors.push(r.id);
+    }
   }
 
   for (const r of dueIncomes) {
-    await prisma.$transaction([
-      prisma.transaction.create({
-        data: {
-          userId: r.userId,
-          type: "INCOME",
-          amount: r.amount,
-          incomeCategoryId: r.categoryId,
-          note: r.name,
-          occurredAt: now,
-        },
-      }),
-      prisma.recurringIncome.update({
-        where: { id: r.id },
-        data: { lastGeneratedYearMonth: yearMonth },
-      }),
-    ]);
-    created += 1;
+    try {
+      await prisma.$transaction([
+        prisma.transaction.create({
+          data: {
+            userId: r.userId,
+            type: "INCOME",
+            amount: r.amount,
+            incomeCategoryId: r.categoryId,
+            note: r.name,
+            occurredAt: now,
+          },
+        }),
+        prisma.recurringIncome.update({
+          where: { id: r.id },
+          data: { lastGeneratedYearMonth: yearMonth },
+        }),
+      ]);
+      created += 1;
+    } catch (err) {
+      console.error(`定期收入建立失敗 (id=${r.id}):`, err);
+      errors.push(r.id);
+    }
   }
 
   return Response.json({
     checkedExpenses: dueExpenses.length,
     checkedIncomes: dueIncomes.length,
     created,
+    errors: errors.length > 0 ? errors : undefined,
   });
 }

@@ -4,11 +4,7 @@ import { requireUserId } from "@/lib/auth";
 import { LedgerTabs } from "@/components/LedgerTabs";
 import { ReportsBarChart } from "@/components/ReportsBarChart";
 
-const currency = new Intl.NumberFormat("zh-TW", {
-  style: "currency",
-  currency: "TWD",
-  maximumFractionDigits: 0,
-});
+import { currency } from "@/lib/currency";
 
 const quarters = [
   { label: "Q1", from: 1, to: 3 },

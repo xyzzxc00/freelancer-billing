@@ -3,11 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { LedgerTabs } from "@/components/LedgerTabs";
 
-const currency = new Intl.NumberFormat("zh-TW", {
-  style: "currency",
-  currency: "TWD",
-  maximumFractionDigits: 0,
-});
+import { currency, formatDate } from "@/lib/currency";
 
 export default async function IncomePage({
   searchParams,
@@ -150,7 +146,7 @@ export default async function IncomePage({
                   {i.incomeCategory?.name ?? i.category ?? "未分類"}
                 </p>
                 <p className="text-xs text-foreground-muted mt-0.5 truncate">
-                  {i.occurredAt.toLocaleDateString("zh-TW")}
+                  {formatDate(i.occurredAt)}
                   {i.note ? ` · ${i.note}` : ""}
                 </p>
               </div>

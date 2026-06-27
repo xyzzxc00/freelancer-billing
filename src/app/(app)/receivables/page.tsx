@@ -4,16 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { markReceivablePaidAction, setReceivableDueDateAction } from "./actions";
 
-const currency = new Intl.NumberFormat("zh-TW", {
-  style: "currency",
-  currency: "TWD",
-  maximumFractionDigits: 0,
-});
-
-function toDateInputValue(date: Date | null) {
-  if (!date) return "";
-  return date.toISOString().slice(0, 10);
-}
+import { currency, formatDate, toDateInputValue } from "@/lib/currency";
 
 export default async function ReceivablesPage() {
   const userId = await requireUserId();
@@ -116,7 +107,7 @@ export default async function ReceivablesPage() {
                     {r.quote.client.name} — {r.quote.title}
                   </Link>
                   <p className="text-xs text-foreground-muted mt-0.5">
-                    {r.paidAt ? new Date(r.paidAt).toLocaleDateString("zh-TW") : ""} 收款
+                    {r.paidAt ? formatDate(r.paidAt) : ""} 收款
                   </p>
                 </div>
                 <span className="text-sm font-mono">{currency.format(Number(r.amount))}</span>

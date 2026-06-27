@@ -17,31 +17,42 @@ export async function GET(request: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const overdue = await prisma.receivable.findMany({
-    where: { status: "PENDING", dueDate: { lt: new Date() } },
-    include: { profile: true, quote: { include: { client: true } } },
-  });
-
-  const byUser = new Map<string, typeof overdue>();
-  for (const r of overdue) {
-    byUser.set(r.userId, [...(byUser.get(r.userId) ?? []), r]);
-  }
-
-  for (const [, receivables] of byUser) {
-    const profile = receivables[0].profile;
-    const rows = receivables
-      .map(
-        (r) =>
-          `<li>${esc(r.quote.client.name)} — ${esc(r.quote.title)}：${currency.format(Number(r.amount))}</li>`
-      )
-      .join("");
-
-    await sendEmail({
-      to: profile.email,
-      subject: `你有 ${receivables.length} 筆款項已逾期未收`,
-      html: `<p>以下款項已超過到期日尚未收款：</p><ul>${rows}</ul>`,
+  try {
+    const overdue = await prisma.receivable.findMany({
+      where: { status: "PENDING", dueDate: { lt: new Date() } },
+      include: { profile: true, quote: { include: { client: true } } },
     });
-  }
 
-  return Response.json({ notified: byUser.size, overdueCount: overdue.length });
+    const byUser = new Map<string, typeof overdue>();
+    for (const r of overdue) {
+      byUser.set(r.userId, [...(byUser.get(r.userId) ?? []), r]);
+    }
+
+    let notified = 0;
+    for (const [, receivables] of byUser) {
+      const profile = receivables[0].profile;
+      const rows = receivables
+        .map(
+          (r) =>
+            `<li>${esc(r.quote.client.name)} — ${esc(r.quote.title)}：${currency.format(Number(r.amount))}</li>`
+        )
+        .join("");
+
+      try {
+        await sendEmail({
+          to: profile.email,
+          subject: `你有 ${receivables.length} 筆款項已逾期未收`,
+          html: `<p>以下款項已超過到期日尚未收款：</p><ul>${rows}</ul>`,
+        });
+        notified += 1;
+      } catch (emailErr) {
+        console.error(`寄信失敗 (${profile.email}):`, emailErr);
+      }
+    }
+
+    return Response.json({ notified, overdueCount: overdue.length });
+  } catch (err) {
+    console.error("overdue-receivables cron 失敗:", err);
+    return new Response("Internal Server Error", { status: 500 });
+  }
 }
