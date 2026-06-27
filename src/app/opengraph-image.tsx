@@ -93,7 +93,7 @@ export default async function Image() {
         >
           <div style={{ fontSize: "30px", color: "#6b6760" }}>{sub}</div>
           <div style={{ fontSize: "26px", color: "#a8a399" }}>
-            freelancer-billing.vercel.app
+            jieanbook.com
           </div>
         </div>
       </div>
