@@ -5,11 +5,32 @@ import { sendFeedbackAction } from "./actions";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
 
+const faqs = [
+  {
+    q: "資料安全嗎？會不會遺失？",
+    a: "所有資料存在 Supabase 雲端資料庫，每天自動備份，不會因為換裝置或清快取而遺失。",
+  },
+  {
+    q: "有手機版嗎？",
+    a: "有，接案帳本支援手機瀏覽器，也可以安裝到主畫面當 App 使用（PWA）。",
+  },
+  {
+    q: "客戶看到的報價單長什麼樣子？",
+    a: "送出後客戶會收到連結，可以線上查看報價內容並選擇接受或拒絕，不需要下載任何東西。",
+  },
+  {
+    q: "報表功能怎麼用？",
+    a: "記帳時選好分類，到「報表」頁面就能看每月收支走勢和各分類佔比，年底統計特別方便。",
+  },
+];
+
 export default function FeedbackPage() {
   const [state, action] = useActionState(sendFeedbackAction, undefined);
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-sm">
+    <div className="px-4 sm:px-6 py-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+      <div className="max-w-sm">
       <h1 className="text-lg font-medium mb-1">意見回饋</h1>
       <p className="text-sm text-foreground-muted mb-6">
         有任何建議、問題或想法都歡迎告訴我。
@@ -72,6 +93,20 @@ export default function FeedbackPage() {
           </svg>
           @corey.0_
         </a>
+      </div>
+      </div>
+
+      <div className="bg-surface rounded-lg p-6 hidden lg:block">
+        <p className="text-base font-medium mb-4">常見問題</p>
+        <div className="flex flex-col gap-5">
+          {faqs.map((faq) => (
+            <div key={faq.q}>
+              <p className="text-sm font-medium mb-1">{faq.q}</p>
+              <p className="text-sm text-foreground-muted leading-relaxed">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+      </div>
       </div>
     </div>
   );
