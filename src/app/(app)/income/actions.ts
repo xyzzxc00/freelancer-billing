@@ -4,7 +4,16 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
+import { transactionSchema } from "@/lib/schemas";
 import type { ActionResult } from "@/lib/action-state";
+
+function parseIncomeForm(formData: FormData) {
+  return transactionSchema.safeParse({
+    amount: Number(formData.get("amount") ?? 0),
+    occurredAt: String(formData.get("occurredAt") ?? ""),
+    note: String(formData.get("note") ?? "").trim() || undefined,
+  });
+}
 
 export async function createIncomeAction(
   _prevState: ActionResult,
@@ -12,17 +21,10 @@ export async function createIncomeAction(
 ): Promise<ActionResult> {
   const userId = await requireUserId();
 
-  const amount = Number(formData.get("amount") ?? 0);
+  const parsed = parseIncomeForm(formData);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { amount, occurredAt, note } = parsed.data;
   const incomeCategoryId = String(formData.get("incomeCategoryId") ?? "") || null;
-  const note = String(formData.get("note") ?? "").trim();
-  const occurredAtRaw = String(formData.get("occurredAt") ?? "");
-
-  if (!amount || amount <= 0) {
-    return { error: "請填寫大於 0 的金額" };
-  }
-  if (!occurredAtRaw) {
-    return { error: "請選擇日期" };
-  }
 
   await prisma.transaction.create({
     data: {
@@ -30,8 +32,8 @@ export async function createIncomeAction(
       type: "INCOME",
       amount,
       incomeCategoryId,
-      note: note || null,
-      occurredAt: new Date(occurredAtRaw),
+      note: note ?? null,
+      occurredAt: new Date(occurredAt),
     },
   });
 
@@ -47,17 +49,14 @@ export async function updateIncomeAction(
 ): Promise<ActionResult> {
   const userId = await requireUserId();
 
-  const amount = Number(formData.get("amount") ?? 0);
+  const parsed = parseIncomeForm(formData);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { amount, occurredAt, note } = parsed.data;
   const incomeCategoryId = String(formData.get("incomeCategoryId") ?? "") || null;
-  const note = String(formData.get("note") ?? "").trim();
-  const occurredAtRaw = String(formData.get("occurredAt") ?? "");
-
-  if (!amount || amount <= 0) return { error: "請填寫大於 0 的金額" };
-  if (!occurredAtRaw) return { error: "請選擇日期" };
 
   await prisma.transaction.updateMany({
     where: { id: transactionId, userId, type: "INCOME" },
-    data: { amount, incomeCategoryId, note: note || null, occurredAt: new Date(occurredAtRaw) },
+    data: { amount, incomeCategoryId, note: note ?? null, occurredAt: new Date(occurredAt) },
   });
 
   revalidatePath("/income");

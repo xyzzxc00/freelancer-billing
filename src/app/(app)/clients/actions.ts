@@ -5,7 +5,16 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
+import { clientSchema } from "@/lib/schemas";
 import type { ActionResult } from "@/lib/action-state";
+
+function parseClientForm(formData: FormData) {
+  return clientSchema.safeParse({
+    name: String(formData.get("name") ?? "").trim(),
+    contact: String(formData.get("contact") ?? "").trim() || undefined,
+    note: String(formData.get("note") ?? "").trim() || undefined,
+  });
+}
 
 export async function createClientAction(
   _prevState: ActionResult,
@@ -13,21 +22,12 @@ export async function createClientAction(
 ): Promise<ActionResult> {
   const userId = await requireUserId();
 
-  const name = String(formData.get("name") ?? "").trim();
-  const contact = String(formData.get("contact") ?? "").trim();
-  const note = String(formData.get("note") ?? "").trim();
-
-  if (!name) {
-    return { error: "客戶名稱不能為空" };
-  }
+  const parsed = parseClientForm(formData);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { name, contact, note } = parsed.data;
 
   await prisma.client.create({
-    data: {
-      userId,
-      name,
-      contact: contact || null,
-      note: note || null,
-    },
+    data: { userId, name, contact: contact ?? null, note: note ?? null },
   });
 
   revalidatePath("/clients");
@@ -41,21 +41,13 @@ export async function updateClientAction(
 ): Promise<ActionResult> {
   const userId = await requireUserId();
 
-  const name = String(formData.get("name") ?? "").trim();
-  const contact = String(formData.get("contact") ?? "").trim();
-  const note = String(formData.get("note") ?? "").trim();
-
-  if (!name) {
-    return { error: "客戶名稱不能為空" };
-  }
+  const parsed = parseClientForm(formData);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { name, contact, note } = parsed.data;
 
   await prisma.client.updateMany({
     where: { id: clientId, userId },
-    data: {
-      name,
-      contact: contact || null,
-      note: note || null,
-    },
+    data: { name, contact: contact ?? null, note: note ?? null },
   });
 
   revalidatePath("/clients");

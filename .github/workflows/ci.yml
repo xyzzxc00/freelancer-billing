@@ -16,6 +16,8 @@ jobs:
       DIRECT_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
       NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy"
+      RESEND_API_KEY: ""
+      CRON_SECRET: "dummy"
 
     steps:
       - uses: actions/checkout@v4
@@ -36,3 +38,6 @@ jobs:
 
       - name: Type check
         run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build

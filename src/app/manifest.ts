@@ -12,5 +12,20 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#181715",
     theme_color: "#181715",
     lang: "zh-Hant",
+    screenshots: [
+      {
+        src: "/screenshots/desktop.png",
+        sizes: "1280x720",
+        type: "image/png",
+        form_factor: "wide",
+        label: "儀表板總覽",
+      },
+      {
+        src: "/screenshots/mobile.png",
+        sizes: "390x844",
+        type: "image/png",
+        label: "手機版儀表板",
+      },
+    ],
   };
 }

@@ -4,7 +4,16 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
+import { recurringSchema } from "@/lib/schemas";
 import type { ActionResult } from "@/lib/action-state";
+
+function parseRecurringForm(formData: FormData) {
+  return recurringSchema.safeParse({
+    name: String(formData.get("name") ?? "").trim(),
+    amount: Number(formData.get("amount") ?? 0),
+    dayOfMonth: Number(formData.get("dayOfMonth") ?? 1),
+  });
+}
 
 export async function createRecurringIncomeAction(
   _prevState: ActionResult,
@@ -12,20 +21,10 @@ export async function createRecurringIncomeAction(
 ): Promise<ActionResult> {
   const userId = await requireUserId();
 
-  const name = String(formData.get("name") ?? "").trim();
-  const amount = Number(formData.get("amount") ?? 0);
-  const dayOfMonth = Number(formData.get("dayOfMonth") ?? 1);
+  const parsed = parseRecurringForm(formData);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { name, amount, dayOfMonth } = parsed.data;
   const categoryId = String(formData.get("categoryId") ?? "") || null;
-
-  if (!name) {
-    return { error: "請輸入名稱" };
-  }
-  if (!amount || amount <= 0) {
-    return { error: "請填寫大於 0 的金額" };
-  }
-  if (dayOfMonth < 1 || dayOfMonth > 28) {
-    return { error: "每月入帳日請選擇 1-28 之間" };
-  }
 
   await prisma.recurringIncome.create({
     data: { userId, name, amount, dayOfMonth, categoryId },
@@ -42,14 +41,10 @@ export async function updateRecurringIncomeAction(
 ): Promise<ActionResult> {
   const userId = await requireUserId();
 
-  const name = String(formData.get("name") ?? "").trim();
-  const amount = Number(formData.get("amount") ?? 0);
-  const dayOfMonth = Number(formData.get("dayOfMonth") ?? 1);
+  const parsed = parseRecurringForm(formData);
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { name, amount, dayOfMonth } = parsed.data;
   const categoryId = String(formData.get("categoryId") ?? "") || null;
-
-  if (!name) return { error: "請輸入名稱" };
-  if (!amount || amount <= 0) return { error: "請填寫大於 0 的金額" };
-  if (dayOfMonth < 1 || dayOfMonth > 28) return { error: "每月入帳日請選擇 1-28 之間" };
 
   await prisma.recurringIncome.updateMany({
     where: { id: recurringId, userId },

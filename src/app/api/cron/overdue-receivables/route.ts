@@ -8,6 +8,9 @@ const currency = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 0,
 });
 
+const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
     const rows = receivables
       .map(
         (r) =>
-          `<li>${r.quote.client.name} — ${r.quote.title}：${currency.format(Number(r.amount))}</li>`
+          `<li>${esc(r.quote.client.name)} — ${esc(r.quote.title)}：${currency.format(Number(r.amount))}</li>`
       )
       .join("");
 

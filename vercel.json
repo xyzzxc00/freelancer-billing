@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/cron/overdue-receivables",
-      "schedule": "0 1 * * *"
+      "schedule": "0 11 * * *"
     },
     {
       "path": "/api/cron/recurring-transactions",
@@ -10,7 +10,7 @@
     },
     {
       "path": "/api/cron/stale-quotes",
-      "schedule": "10 1 * * *"
+      "schedule": "10 11 * * *"
     }
   ]
 }

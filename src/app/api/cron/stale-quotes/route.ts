@@ -2,7 +2,10 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 
-const STALE_AFTER_DAYS = 3;
+const STALE_AFTER_DAYS = 5;
+
+const esc = (s: string) =>
+  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -26,7 +29,7 @@ export async function GET(request: NextRequest) {
   for (const [, quotes] of byUser) {
     const profile = quotes[0].profile;
     const rows = quotes
-      .map((q) => `<li>${q.client.name} — ${q.title}</li>`)
+      .map((q) => `<li>${esc(q.client.name)} — ${esc(q.title)}</li>`)
       .join("");
 
     await sendEmail({
