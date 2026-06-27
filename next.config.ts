@@ -18,7 +18,7 @@ const securityHeaders = [
       // Google Fonts
       "font-src 'self' https://fonts.gstatic.com",
       // Images: self, data URIs (inline icons), blob (PDF preview)
-      "img-src 'self' data: blob:",
+      "img-src 'self' data: blob: https://lh3.googleusercontent.com",
       // Supabase API + auth
       `connect-src 'self' ${process.env.NEXT_PUBLIC_SUPABASE_URL ?? "https://*.supabase.co"} https://va.vercel-scripts.com`,
       // PDF rendering in iframe
