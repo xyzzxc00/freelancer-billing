@@ -30,7 +30,7 @@ export default function FeedbackPage() {
   return (
     <div className="px-4 sm:px-6 py-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <div className="max-w-sm">
+      <div>
       <h1 className="text-lg font-medium mb-1">意見回饋</h1>
       <p className="text-sm text-foreground-muted mb-6">
         有任何建議、問題或想法都歡迎告訴我。
