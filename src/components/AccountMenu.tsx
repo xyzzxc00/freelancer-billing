@@ -115,13 +115,13 @@ export function AccountMenu({
             </span>
           </button>
 
-          <a
-            href="mailto:xyzzxc00@gmail.com?subject=接案帳本%20意見回饋"
+          <Link
+            href="/feedback"
             onClick={() => setOpen(false)}
             className="block px-3 py-2 text-sm hover:bg-surface"
           >
             意見回饋
-          </a>
+          </Link>
 
           <div className="border-t border-border mt-1 pt-1">
             <button
