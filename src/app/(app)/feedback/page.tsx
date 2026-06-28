@@ -43,6 +43,8 @@ export default function FeedbackPage() {
         </div>
       ) : (
         <form action={action} className="flex flex-col gap-4">
+          {/* 蜜罐欄位：對使用者隱藏，機器人會填 */}
+          <input name="website" type="text" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ display: "none" }} />
           <div>
             <label className="text-sm text-foreground-muted block mb-1">名稱</label>
             <input

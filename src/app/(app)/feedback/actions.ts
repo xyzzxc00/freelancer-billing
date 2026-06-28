@@ -20,6 +20,11 @@ export async function sendFeedbackAction(
 ): Promise<ActionResult> {
   await requireUserId();
 
+  // 蜜罐：真人不會填這個欄位，機器人會
+  if (String(formData.get("website") ?? "").trim() !== "") {
+    return { success: "已送出，謝謝你的回饋！" };
+  }
+
   const parsed = feedbackSchema.safeParse({
     name: String(formData.get("name") ?? "").trim(),
     email: String(formData.get("email") ?? "").trim(),
