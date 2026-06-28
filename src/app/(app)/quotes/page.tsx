@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
-
+import { Pagination } from "@/components/Pagination";
 import { currency, formatDate } from "@/lib/currency";
+
+const PAGE_SIZE = 20;
 
 const statusLabel: Record<string, string> = {
   DRAFT: "草稿",
@@ -32,37 +35,54 @@ const filterTabs: { label: string; value: string }[] = [
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
   const userId = await requireUserId();
-  const { q, status } = await searchParams;
+  const { q, status, page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
 
   const statusFilter =
     status && (validStatuses as readonly string[]).includes(status)
       ? (status as QuoteStatus)
       : undefined;
 
-  const quotes = await prisma.quote.findMany({
-    where: {
-      userId,
-      ...(statusFilter ? { status: statusFilter } : {}),
-      ...(q
-        ? {
-            OR: [
-              { title: { contains: q, mode: "insensitive" } },
-              { client: { name: { contains: q, mode: "insensitive" } } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    include: { client: true, items: true },
-  });
+  const where: Prisma.QuoteWhereInput = {
+    userId,
+    ...(statusFilter ? { status: statusFilter } : {}),
+    ...(q
+      ? {
+          OR: [
+            { title: { contains: q, mode: "insensitive" } },
+            { client: { name: { contains: q, mode: "insensitive" } } },
+          ],
+        }
+      : {}),
+  };
+
+  const [quotes, totalCount] = await Promise.all([
+    prisma.quote.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      include: { client: true, items: true },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+    }),
+    prisma.quote.count({ where }),
+  ]);
 
   function tabHref(value: string) {
     const params = new URLSearchParams();
     if (q) params.set("q", q);
     if (value) params.set("status", value);
+    const qs = params.toString();
+    return `/quotes${qs ? `?${qs}` : ""}`;
+  }
+
+  function pageHref(p: number) {
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (status) params.set("status", status);
+    if (p > 1) params.set("page", String(p));
     const qs = params.toString();
     return `/quotes${qs ? `?${qs}` : ""}`;
   }
@@ -114,11 +134,12 @@ export default async function QuotesPage({
         })}
       </div>
 
-      {quotes.length === 0 ? (
+      {totalCount === 0 ? (
         <p className="text-sm text-foreground-muted py-12 text-center">
           {q || statusFilter ? "沒有符合條件的報價單。" : "還沒有報價單，先新增一個吧。"}
         </p>
       ) : (
+        <>
         <div className="flex flex-col gap-2">
           {quotes.map((quote) => {
             const total = quote.items.reduce(
@@ -166,6 +187,8 @@ export default async function QuotesPage({
             );
           })}
         </div>
+        <Pagination currentPage={page} totalCount={totalCount} pageSize={PAGE_SIZE} buildHref={pageHref} />
+        </>
       )}
     </div>
   );

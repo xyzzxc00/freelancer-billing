@@ -9,15 +9,21 @@ import { currency, formatDate, toDateInputValue } from "@/lib/currency";
 export default async function ReceivablesPage() {
   const userId = await requireUserId();
 
-  const receivables = await prisma.receivable.findMany({
-    where: { userId },
-    orderBy: [{ status: "asc" }, { dueDate: "asc" }],
-    include: { quote: { include: { client: true } } },
-  });
+  const [pending, paid] = await Promise.all([
+    prisma.receivable.findMany({
+      where: { userId, status: "PENDING" },
+      orderBy: { dueDate: "asc" },
+      include: { quote: { include: { client: true } } },
+    }),
+    prisma.receivable.findMany({
+      where: { userId, status: "PAID" },
+      orderBy: { paidAt: "desc" },
+      take: 50,
+      include: { quote: { include: { client: true } } },
+    }),
+  ]);
 
   const now = new Date();
-  const pending = receivables.filter((r) => r.status === "PENDING");
-  const paid = receivables.filter((r) => r.status === "PAID");
   const overdueTotal = pending
     .filter((r) => r.dueDate && r.dueDate < now)
     .reduce((sum, r) => sum + Number(r.amount), 0);
