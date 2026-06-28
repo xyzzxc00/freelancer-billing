@@ -140,6 +140,7 @@ export default async function Home() {
         </div>
       </header>
 
+      <main>
       <section className="flex flex-col items-center text-center px-4 sm:px-6 py-20">
         <h1 className="text-3xl sm:text-4xl font-medium leading-tight max-w-2xl">
           讓接案這件事，記帳跟報價都輕鬆一點
@@ -163,7 +164,8 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="px-4 sm:px-6 py-16 max-w-5xl w-full mx-auto">
+      <section className="px-4 sm:px-6 py-16 max-w-5xl w-full mx-auto" aria-labelledby="features-heading">
+        <h2 id="features-heading" className="sr-only">核心功能</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {features.map((f) => (
             <div key={f.title} className="border border-border rounded-lg p-5">
@@ -189,6 +191,7 @@ export default async function Home() {
         </div>
       </section>
 
+      </main>
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted">
         <span>接案帳本</span>
         <Link href="/privacy?from=home" className="hover:text-foreground">
