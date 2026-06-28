@@ -39,7 +39,7 @@ export default async function OgImage() {
               justifyContent: "center",
             }}
           >
-            <div style={{ display: "flex", color: "#fff", fontSize: "18px", fontWeight: 700 }}>帳</div>
+            <span style={{ color: "#fff", fontSize: "18px", fontWeight: 700 }}>帳</span>
           </div>
           <span style={{ color: "#fdfcfa", fontSize: "20px", fontWeight: 400 }}>
             接案帳本
@@ -49,6 +49,7 @@ export default async function OgImage() {
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div
             style={{
+              display: "flex",
               color: "#fdfcfa",
               fontSize: "52px",
               fontWeight: 700,
@@ -57,12 +58,12 @@ export default async function OgImage() {
           >
             自由接案者知識庫
           </div>
-          <div style={{ color: "#9c9589", fontSize: "24px", lineHeight: 1.5 }}>
+          <div style={{ display: "flex", color: "#9c9589", fontSize: "24px", lineHeight: 1.5 }}>
             報價、記帳、稅務、收款——接案必知的實用知識
           </div>
         </div>
 
-        <div>
+        <div style={{ display: "flex" }}>
           <span style={{ color: "#6b6760", fontSize: "18px" }}>jieanbook.com/guides</span>
         </div>
       </div>

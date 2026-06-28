@@ -34,7 +34,6 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
           fontFamily: "NotoSansTC",
         }}
       >
-        {/* 頂部品牌 */}
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div
             style={{
@@ -47,17 +46,17 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
               justifyContent: "center",
             }}
           >
-            <div style={{ display: "flex", color: "#fff", fontSize: "18px", fontWeight: 700 }}>帳</div>
+            <span style={{ color: "#fff", fontSize: "18px", fontWeight: 700 }}>帳</span>
           </div>
           <span style={{ color: "#fdfcfa", fontSize: "20px", fontWeight: 400 }}>
             接案帳本
           </span>
         </div>
 
-        {/* 主要內容 */}
         <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
           <div
             style={{
+              display: "flex",
               color: "#fdfcfa",
               fontSize: title.length > 20 ? "44px" : "52px",
               fontWeight: 700,
@@ -67,26 +66,22 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
           >
             {title}
           </div>
-          {description && (
+          {description ? (
             <div
               style={{
+                display: "flex",
                 color: "#9c9589",
                 fontSize: "22px",
                 lineHeight: 1.5,
                 maxWidth: "900px",
-                display: "-webkit-box",
-                WebkitLineClamp: 2,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
               }}
             >
               {description}
             </div>
-          )}
+          ) : null}
         </div>
 
-        {/* 底部 */}
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex" }}>
           <span style={{ color: "#6b6760", fontSize: "18px" }}>jieanbook.com/guides</span>
         </div>
       </div>
