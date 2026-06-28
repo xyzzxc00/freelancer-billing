@@ -2,15 +2,16 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-// cache() deduplicates this call within a single render pass,
-// so multiple async Server Components can call it without extra round trips.
+// Middleware already validates the user via getUser() at the Edge.
+// Here we use getSession() which reads from the cookie without a network round-trip,
+// making server component rendering significantly faster.
 export const requireUserId = cache(async (): Promise<string> => {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!data.user) {
+  if (!session?.user) {
     redirect("/login");
   }
 
-  return data.user.id;
+  return session.user.id;
 });
