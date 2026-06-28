@@ -47,7 +47,7 @@ export default async function OgImage({ params }: { params: Promise<{ slug: stri
               justifyContent: "center",
             }}
           >
-            <div style={{ color: "#fff", fontSize: "18px", fontWeight: 700 }}>帳</div>
+            <div style={{ display: "flex", color: "#fff", fontSize: "18px", fontWeight: 700 }}>帳</div>
           </div>
           <span style={{ color: "#fdfcfa", fontSize: "20px", fontWeight: 400 }}>
             接案帳本
