@@ -1,6 +1,18 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const protectedPrefixes = [
+  "/dashboard",
+  "/clients",
+  "/quotes",
+  "/income",
+  "/expenses",
+  "/receivables",
+  "/reports",
+  "/settings",
+  "/feedback",
+];
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
@@ -25,8 +37,18 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Refreshes the session token if expired — do not remove
-  await supabase.auth.getUser();
+  // Validates + refreshes the session token — do not remove
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const isProtected = protectedPrefixes.some((p) =>
+    request.nextUrl.pathname.startsWith(p)
+  );
+
+  if (isProtected && !user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }
