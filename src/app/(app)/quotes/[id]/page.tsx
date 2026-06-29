@@ -94,8 +94,12 @@ export default async function QuoteDetailPage({
             </>
           )}
           <span className="text-foreground-muted">·</span>
+          <Link href={`/quotes/${quote.id}/preview`} className="text-sm text-accent hover:underline">
+            預覽
+          </Link>
+          <span className="text-foreground-muted">·</span>
           <a href={`/quotes/${quote.id}/pdf`} target="_blank" rel="noopener noreferrer" className="text-sm text-accent hover:underline">
-            預覽 PDF
+            PDF
           </a>
         </div>
 
