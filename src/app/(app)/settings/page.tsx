@@ -4,7 +4,6 @@ import { requireUserId } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
 import { LogoutButton } from "@/components/LogoutButton";
-import { TipPanel } from "@/components/TipPanel";
 import { updateProfileAction } from "./actions";
 
 export default async function SettingsPage() {
@@ -22,9 +21,7 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-6xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-      <div>
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
       <h1 className="text-lg font-medium mb-6">帳戶設定</h1>
 
       <section className="mb-8">
@@ -82,19 +79,6 @@ export default async function SettingsPage() {
       <section>
         <LogoutButton className="text-sm text-[color:var(--danger-fg)] hover:underline" />
       </section>
-      </div>
-
-      <TipPanel
-        title="接案帳本能幫你做什麼"
-        description="幾個常用功能的入口，剛開始用可以從這裡探索。"
-        steps={[
-          "報價單 — 開報價單給客戶，客戶可線上接受或拒絕",
-          "待收款 — 追蹤哪些案子還沒收到款，設定到期提醒",
-          "收入／支出 — 記帳並分類，年底報表自動統計",
-          "報表 — 查看每月收支走勢與各分類佔比",
-        ]}
-      />
-      </div>
     </div>
   );
 }
