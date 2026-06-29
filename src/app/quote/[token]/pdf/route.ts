@@ -23,6 +23,7 @@ export async function GET(
     clientName: quote.client.name,
     freelancerName: quote.profile.name ?? quote.profile.email,
     quoteDate: quote.sentAt ?? quote.createdAt,
+    notes: quote.notes,
     items: quote.items.map((item) => ({
       name: item.name,
       unitPrice: Number(item.unitPrice),

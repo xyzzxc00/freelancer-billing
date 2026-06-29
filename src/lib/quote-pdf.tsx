@@ -39,6 +39,11 @@ const styles = StyleSheet.create({
   cellText: { fontSize: 10, color: "#1f2937" },
   cellMuted: { fontSize: 10, color: "#6b7280" },
 
+  // Notes
+  notesSection: { marginTop: 24, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#e5e7eb" },
+  notesLabel: { fontSize: 8, color: "#9ca3af", marginBottom: 4 },
+  notesText: { fontSize: 10, color: "#374151" },
+
   // Totals
   totalsWrapper: { flexDirection: "row", justifyContent: "flex-end", marginTop: 16 },
   totalsBox: { width: 220 },
@@ -65,11 +70,12 @@ interface QuotePdfProps {
   clientName: string;
   freelancerName: string;
   quoteDate: Date;
+  notes?: string | null;
   items: { name: string; unitPrice: number; quantity: number }[];
   taxMode: TaxMode;
 }
 
-function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, items, taxMode }: QuotePdfProps) {
+function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, notes, items, taxMode }: QuotePdfProps) {
   const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const breakdown = calculateTax(subtotal, taxMode);
 
@@ -118,6 +124,14 @@ function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, items,
             <Text style={[styles.cellText, styles.colSubtotal]}>{currency.format(item.unitPrice * item.quantity)}</Text>
           </View>
         ))}
+
+        {/* Notes */}
+        {notes && (
+          <View style={styles.notesSection}>
+            <Text style={styles.notesLabel}>備註</Text>
+            <Text style={styles.notesText}>{notes}</Text>
+          </View>
+        )}
 
         {/* Totals */}
         <View style={styles.totalsWrapper}>

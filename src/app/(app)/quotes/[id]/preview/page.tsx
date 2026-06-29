@@ -135,6 +135,14 @@ export default async function QuotePreviewPage({
             </table>
           </div>
 
+          {/* Notes */}
+          {quote.notes && (
+            <div className="px-8 pb-6 border-t border-gray-100 pt-6">
+              <p className="text-xs text-gray-400 mb-2">備註</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{quote.notes}</p>
+            </div>
+          )}
+
           {/* Totals */}
           <div className="px-8 pb-8">
             <div className="ml-auto w-full sm:w-72 border-t border-gray-200 pt-4 flex flex-col gap-2">

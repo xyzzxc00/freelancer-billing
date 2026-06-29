@@ -79,6 +79,7 @@ export async function createQuoteAction(
   const clientId = String(formData.get("clientId") ?? "");
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
 
   if (!clientId) {
     return { error: "請選擇客戶" };
@@ -98,6 +99,7 @@ export async function createQuoteAction(
       clientId,
       title,
       taxMode,
+      notes,
       items: {
         create: items.map((item, i) => ({
           name: item.name,
@@ -122,6 +124,7 @@ export async function updateQuoteItemsAction(
 
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
+  const notes = String(formData.get("notes") ?? "").trim() || null;
 
   if (!title) {
     return { error: "請填寫標題" };
@@ -144,6 +147,7 @@ export async function updateQuoteItemsAction(
       data: {
         title,
         taxMode,
+        notes,
         items: {
           create: items.map((item, i) => ({
             name: item.name,

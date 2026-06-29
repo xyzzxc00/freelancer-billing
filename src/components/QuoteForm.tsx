@@ -99,6 +99,7 @@ export function QuoteForm({
   defaultTitle = "",
   defaultTaxMode = "NONE",
   defaultItems = [{ name: "", unitPrice: "", quantity: "1" }],
+  defaultNotes = "",
   showClientField = true,
   templates = [],
 }: {
@@ -108,6 +109,7 @@ export function QuoteForm({
   defaultTitle?: string;
   defaultTaxMode?: TaxMode;
   defaultItems?: ItemRow[];
+  defaultNotes?: string;
   showClientField?: boolean;
   templates?: TemplateOption[];
 }) {
@@ -238,6 +240,17 @@ export function QuoteForm({
         >
           + 新增項目
         </button>
+      </div>
+
+      <div>
+        <label className="text-sm text-foreground-muted block mb-1">備註</label>
+        <textarea
+          name="notes"
+          defaultValue={defaultNotes}
+          placeholder="付款方式、有效期限、其他說明…（選填）"
+          rows={3}
+          className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
+        />
       </div>
 
       <div>

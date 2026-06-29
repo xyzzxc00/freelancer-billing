@@ -156,6 +156,7 @@ export default async function QuoteDetailPage({
             defaultClientId={quote.clientId}
             defaultTitle={quote.title}
             defaultTaxMode={quote.taxMode}
+            defaultNotes={quote.notes ?? ""}
             defaultItems={quote.items.map((item) => ({
               name: item.name,
               unitPrice: String(item.unitPrice),
