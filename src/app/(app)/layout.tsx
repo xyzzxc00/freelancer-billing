@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { Toaster } from "sonner";
 import { Sidebar } from "@/components/Sidebar";
+import { ContentHeader } from "@/components/ContentHeader";
 import { ToastListener } from "@/components/ToastListener";
 import { GlobalKeyboardShortcuts } from "@/components/GlobalKeyboardShortcuts";
 
@@ -32,6 +33,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </Suspense>
       <Sidebar displayName={displayName} avatarUrl={avatarUrl} />
       <div className="flex-1 min-w-0 flex flex-col">
+        <ContentHeader />
         <main className="flex-1">
           {children}
         </main>
