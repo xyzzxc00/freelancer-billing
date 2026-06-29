@@ -1,11 +1,13 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Mode = "signin" | "signup";
+
+const REMEMBER_KEY = "remembered_email";
 
 function LoginForm() {
   const router = useRouter();
@@ -15,6 +17,8 @@ function LoginForm() {
   );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "oauth"
@@ -22,6 +26,16 @@ function LoginForm() {
       : null
   );
   const [notice, setNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    const saved = localStorage.getItem(REMEMBER_KEY);
+    if (saved) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setEmail(saved);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setRememberMe(true);
+    }
+  }, []);
 
   async function handleGoogle() {
     setError(null);
@@ -45,6 +59,12 @@ function LoginForm() {
     setError(null);
     setNotice(null);
 
+    if (mode === "signup" && password !== confirmPassword) {
+      setError("兩次輸入的密碼不一致。");
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
 
     if (mode === "signin") {
@@ -53,6 +73,11 @@ function LoginForm() {
         setError(error.message);
         setLoading(false);
         return;
+      }
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_KEY, email);
+      } else {
+        localStorage.removeItem(REMEMBER_KEY);
       }
       router.push("/dashboard");
       router.refresh();
@@ -132,6 +157,30 @@ function LoginForm() {
           className="border border-border rounded-md px-3 py-2 text-sm bg-background"
         />
 
+        {mode === "signup" && (
+          <input
+            type="password"
+            required
+            minLength={8}
+            placeholder="確認密碼"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="border border-border rounded-md px-3 py-2 text-sm bg-background"
+          />
+        )}
+
+        {mode === "signin" && (
+          <label className="flex items-center gap-2 text-sm text-foreground-muted cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+              className="w-4 h-4 accent-accent"
+            />
+            記住帳號
+          </label>
+        )}
+
         {error && <p className="text-sm text-[color:var(--danger-fg)]">{error}</p>}
         {notice && <p className="text-sm text-[color:var(--success-fg)]">{notice}</p>}
 
@@ -149,6 +198,7 @@ function LoginForm() {
           setMode(mode === "signin" ? "signup" : "signin");
           setError(null);
           setNotice(null);
+          setConfirmPassword("");
         }}
         className="text-sm text-foreground-muted hover:text-foreground mt-4"
       >
