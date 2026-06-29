@@ -23,7 +23,7 @@ export default async function EditRecurringIncomePage({
   const updateAction = updateRecurringIncomeAction.bind(null, recurring.id);
 
   return (
-    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-sm">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-md">
       <div className="flex items-baseline justify-between mb-4">
         <h1 className="text-lg font-medium">編輯定期收入</h1>
         <Link

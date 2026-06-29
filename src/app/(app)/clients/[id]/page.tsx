@@ -57,7 +57,7 @@ export default async function ClientDetailPage({
   const deleteAction = deleteClientAction.bind(null, client.id);
 
   return (
-    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-2xl">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-3xl">
       <div className="border border-border rounded-xl p-6">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">客戶資料</h1>
