@@ -104,6 +104,12 @@ export default async function QuotePreviewPage({
                 <p className="text-xs text-gray-400 mb-1">給</p>
                 <p className="text-sm font-medium text-gray-800">{quote.client.name}</p>
               </div>
+              {quote.expiresAt && (
+                <div>
+                  <p className="text-xs text-gray-400 mb-1">有效期限</p>
+                  <p className="text-sm font-medium text-gray-800">{formatDate(quote.expiresAt)}</p>
+                </div>
+              )}
             </div>
           </div>
 

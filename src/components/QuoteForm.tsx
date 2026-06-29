@@ -100,6 +100,7 @@ export function QuoteForm({
   defaultTaxMode = "NONE",
   defaultItems = [{ name: "", unitPrice: "", quantity: "1" }],
   defaultNotes = "",
+  defaultExpiresAt = "",
   showClientField = true,
   templates = [],
 }: {
@@ -110,6 +111,7 @@ export function QuoteForm({
   defaultTaxMode?: TaxMode;
   defaultItems?: ItemRow[];
   defaultNotes?: string;
+  defaultExpiresAt?: string;
   showClientField?: boolean;
   templates?: TemplateOption[];
 }) {
@@ -240,6 +242,16 @@ export function QuoteForm({
         >
           + 新增項目
         </button>
+      </div>
+
+      <div>
+        <label className="text-sm text-foreground-muted block mb-1">報價有效期限</label>
+        <input
+          type="date"
+          name="expiresAt"
+          defaultValue={defaultExpiresAt}
+          className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+        />
       </div>
 
       <div>

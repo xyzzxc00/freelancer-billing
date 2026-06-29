@@ -67,6 +67,7 @@ model Quote {
   status      QuoteStatus @default(DRAFT)
   taxMode     TaxMode     @default(NONE)
   notes       String?     // 備註，會顯示在報價單底部
+  expiresAt   DateTime?   // 報價有效期限
   shareToken  String      @unique @default(uuid()) // 給客戶看的公開分享連結用
   sentAt      DateTime?
   respondedAt DateTime?

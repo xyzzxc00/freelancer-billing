@@ -80,6 +80,8 @@ export async function createQuoteAction(
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
+  const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
 
   if (!clientId) {
     return { error: "請選擇客戶" };
@@ -100,6 +102,7 @@ export async function createQuoteAction(
       title,
       taxMode,
       notes,
+      expiresAt,
       items: {
         create: items.map((item, i) => ({
           name: item.name,
@@ -125,6 +128,8 @@ export async function updateQuoteItemsAction(
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
+  const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
 
   if (!title) {
     return { error: "請填寫標題" };
@@ -148,6 +153,7 @@ export async function updateQuoteItemsAction(
         title,
         taxMode,
         notes,
+        expiresAt,
         items: {
           create: items.map((item, i) => ({
             name: item.name,
@@ -221,6 +227,9 @@ export async function acceptQuoteAction(quoteId: string) {
     0
   );
 
+  const dueDate = new Date();
+  dueDate.setDate(dueDate.getDate() + 30);
+
   await prisma.$transaction([
     prisma.quote.update({
       where: { id: quoteId },
@@ -228,7 +237,7 @@ export async function acceptQuoteAction(quoteId: string) {
     }),
     prisma.receivable.upsert({
       where: { quoteId },
-      create: { userId, quoteId, amount: subtotal },
+      create: { userId, quoteId, amount: subtotal, dueDate },
       update: { amount: subtotal },
     }),
   ]);

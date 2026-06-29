@@ -5,6 +5,12 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { createQuoteAction } from "../actions";
 
+function defaultExpiresAt() {
+  const d = new Date();
+  d.setDate(d.getDate() + 14);
+  return d.toISOString().slice(0, 10);
+}
+
 export default async function NewQuotePage() {
   const userId = await requireUserId();
 
@@ -51,7 +57,7 @@ export default async function NewQuotePage() {
               ，才能建立報價單。
             </p>
           ) : (
-            <QuoteForm clients={clients} action={createQuoteAction} templates={templateOptions} />
+            <QuoteForm clients={clients} action={createQuoteAction} templates={templateOptions} defaultExpiresAt={defaultExpiresAt()} />
           )}
         </div>
 
