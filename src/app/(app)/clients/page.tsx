@@ -34,7 +34,7 @@ export default async function ClientsPage({
   ]);
 
   return (
-    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-6xl">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
         <div className="flex items-baseline justify-between mb-4">
           <h1 className="text-lg font-medium">客戶</h1>
           <Link href="/clients/new" className="text-sm text-accent hover:underline">

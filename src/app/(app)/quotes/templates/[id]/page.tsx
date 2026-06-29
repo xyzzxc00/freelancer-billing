@@ -23,7 +23,7 @@ export default async function EditTemplatePage({
   const updateAction = updateTemplateAction.bind(null, template.id);
 
   return (
-    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-xl">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-2xl">
       <div className="flex items-baseline justify-between mb-4">
         <h1 className="text-lg font-medium">編輯範本</h1>
         <Link
