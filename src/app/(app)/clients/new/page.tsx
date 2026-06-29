@@ -23,7 +23,7 @@ export default async function NewClientPage() {
   });
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-5xl">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-5xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         <div>
           <div className="flex items-baseline justify-between mb-4">

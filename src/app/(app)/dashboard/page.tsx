@@ -297,7 +297,7 @@ async function Onboarding() {
 
 export default function DashboardPage() {
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-5xl">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-5xl">
       <Suspense fallback={<StatsSkeleton />}>
         <Stats />
       </Suspense>

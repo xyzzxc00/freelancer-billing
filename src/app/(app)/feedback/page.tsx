@@ -28,7 +28,7 @@ export default function FeedbackPage() {
   const [state, action] = useActionState(sendFeedbackAction, undefined);
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-5xl">
+    <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-5xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <div>
       <h1 className="text-lg font-medium mb-1">意見回饋</h1>
