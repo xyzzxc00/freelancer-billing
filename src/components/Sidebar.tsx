@@ -172,15 +172,14 @@ export function Sidebar({
     );
   };
 
-  // Shared user menu popup
-  const UserMenu = ({ onClose }: { onClose: () => void }) => (
+  const userMenuJsx = (
     <div className="absolute bottom-full left-0 right-0 mb-1 bg-background border border-border rounded-lg py-1.5 z-30 shadow-lg">
       <p className="px-3 py-2 text-sm font-medium truncate border-b border-border mb-1">
         {displayName}
       </p>
       <Link
         href="/settings"
-        onClick={onClose}
+        onClick={() => setUserMenuOpen(false)}
         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-surface transition-colors"
       >
         <Icon>
@@ -191,7 +190,7 @@ export function Sidebar({
       </Link>
       <Link
         href="/feedback"
-        onClick={onClose}
+        onClick={() => setUserMenuOpen(false)}
         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-surface transition-colors"
       >
         <Icon>
@@ -228,16 +227,6 @@ export function Sidebar({
         </button>
       </div>
     </div>
-  );
-
-  // Nav items for mobile drawer (always expanded)
-  const MobileNav = () => (
-    <nav className="flex flex-col gap-0.5 flex-1">
-      <p className="text-xs text-foreground-muted px-3 mb-1 mt-2">主選單</p>
-      {navItems.map((item) => (
-        <NavLink key={item.href} {...item} collapsed={false} onClick={() => setMobileOpen(false)} />
-      ))}
-    </nav>
   );
 
   return (
@@ -282,7 +271,7 @@ export function Sidebar({
 
         {/* User button */}
         <div className="mt-3 pt-3 border-t border-border relative" ref={userMenuRef}>
-          {userMenuOpen && <UserMenu onClose={() => setUserMenuOpen(false)} />}
+          {userMenuOpen && userMenuJsx}
           <button
             type="button"
             onClick={() => setUserMenuOpen((v) => !v)}
@@ -333,7 +322,12 @@ export function Sidebar({
               </button>
             </div>
 
-            <MobileNav />
+            <nav className="flex flex-col gap-0.5 flex-1">
+              <p className="text-xs text-foreground-muted px-3 mb-1 mt-2">主選單</p>
+              {navItems.map((item) => (
+                <NavLink key={item.href} {...item} collapsed={false} onClick={() => setMobileOpen(false)} />
+              ))}
+            </nav>
 
             {/* Mobile user section */}
             <div className="border-t border-border pt-3 mt-3">
