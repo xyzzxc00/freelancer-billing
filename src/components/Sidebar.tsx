@@ -173,7 +173,7 @@ export function Sidebar({
   };
 
   const userMenuJsx = (
-    <div className="absolute bottom-full left-0 right-0 mb-1 bg-background border border-border rounded-lg py-1.5 z-30 shadow-lg">
+    <div className="absolute bottom-full left-0 mb-1 w-56 bg-background border border-border rounded-lg py-1.5 z-30 shadow-lg">
       <p className="px-3 py-2 text-sm font-medium truncate border-b border-border mb-1">
         {displayName}
       </p>
@@ -184,7 +184,7 @@ export function Sidebar({
       >
         <Icon>
           <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.8" />
-          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" strokeWidth="1.8" />
         </Icon>
         帳戶設定
       </Link>
@@ -205,8 +205,7 @@ export function Sidebar({
       >
         <div className="flex items-center gap-2.5">
           <Icon>
-            <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
-            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
           </Icon>
           深色模式
         </div>
