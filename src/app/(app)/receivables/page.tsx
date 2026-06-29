@@ -101,23 +101,19 @@ export default async function ReceivablesPage() {
         ) : (
           <div className="flex flex-col gap-2">
             {paid.map((r) => (
-              <div
+              <Link
                 key={r.id}
-                className="border border-border rounded-lg px-4 py-3 flex items-center justify-between"
+                href={`/quotes/${r.quote.id}`}
+                className="border border-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-surface transition-colors"
               >
                 <div>
-                  <Link
-                    href={`/quotes/${r.quote.id}`}
-                    className="text-sm font-medium hover:text-accent"
-                  >
-                    {r.quote.client.name} — {r.quote.title}
-                  </Link>
+                  <p className="text-sm font-medium">{r.quote.client.name} — {r.quote.title}</p>
                   <p className="text-xs text-foreground-muted mt-0.5">
                     {r.paidAt ? formatDate(r.paidAt) : ""} 收款
                   </p>
                 </div>
                 <span className="text-sm font-mono">{currency.format(Number(r.amount))}</span>
-              </div>
+              </Link>
             ))}
           </div>
         )}
