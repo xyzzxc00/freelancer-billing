@@ -87,19 +87,6 @@ async function Stats() {
   );
 }
 
-function StatsSkeleton() {
-  return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 animate-pulse">
-      {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="bg-surface rounded-lg p-4">
-          <div className="h-3 w-16 bg-border rounded mb-3" />
-          <div className="h-7 w-24 bg-border rounded" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
 // ── Recent Quotes ─────────────────────────────────────────────────────────────
 
 async function RecentQuotes() {
@@ -161,28 +148,6 @@ async function RecentQuotes() {
   );
 }
 
-function RecentQuotesSkeleton() {
-  return (
-    <div className="mb-7 animate-pulse">
-      <div className="flex items-baseline justify-between mb-2.5">
-        <div className="h-5 w-20 bg-border rounded" />
-        <div className="h-4 w-16 bg-border rounded" />
-      </div>
-      <div className="flex flex-col gap-2">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="border border-border rounded-lg px-4 py-3.5 flex items-center justify-between">
-            <div className="space-y-1.5">
-              <div className="h-3.5 w-40 bg-surface rounded" />
-              <div className="h-3 w-24 bg-surface rounded" />
-            </div>
-            <div className="h-4 w-20 bg-surface rounded" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // ── Clients ───────────────────────────────────────────────────────────────────
 
 async function Clients() {
@@ -228,26 +193,6 @@ async function Clients() {
         </div>
       )}
     </>
-  );
-}
-
-function ClientsSkeleton() {
-  return (
-    <div className="animate-pulse">
-      <div className="flex items-baseline justify-between mb-2.5">
-        <div className="h-5 w-12 bg-border rounded" />
-        <div className="h-4 w-16 bg-border rounded" />
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="border border-border rounded-lg p-3.5 flex flex-col items-center">
-            <div className="w-9 h-9 rounded-full bg-surface mb-2" />
-            <div className="h-3.5 w-16 bg-surface rounded mb-1.5" />
-            <div className="h-3 w-12 bg-surface rounded" />
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -298,7 +243,7 @@ async function Onboarding() {
 export default function DashboardPage() {
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
-      <Suspense fallback={<StatsSkeleton />}>
+      <Suspense fallback={null}>
         <Stats />
       </Suspense>
 
@@ -306,11 +251,11 @@ export default function DashboardPage() {
         <Onboarding />
       </Suspense>
 
-      <Suspense fallback={<RecentQuotesSkeleton />}>
+      <Suspense fallback={null}>
         <RecentQuotes />
       </Suspense>
 
-      <Suspense fallback={<ClientsSkeleton />}>
+      <Suspense fallback={null}>
         <Clients />
       </Suspense>
     </div>
