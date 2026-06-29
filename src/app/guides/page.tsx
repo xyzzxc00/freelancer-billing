@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllGuides } from "@/lib/guides";
 import { siteUrl } from "@/lib/site";
+import { createClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "接案知識庫 — 報價、記帳、接案實用指南",
@@ -13,7 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default async function GuidesPage() {
-  const guides = await getAllGuides();
+  const [guides, supabase] = await Promise.all([getAllGuides(), createClient()]);
+  const { data: { session } } = await supabase.auth.getSession();
+  const isLoggedIn = !!session;
 
   return (
     <div className="flex flex-col flex-1">
@@ -21,12 +24,21 @@ export default async function GuidesPage() {
         <Link href="/" className="text-base font-medium">
           接案帳本
         </Link>
-        <Link
-          href="/login"
-          className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
-        >
-          登入
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/dashboard"
+            className="border border-border rounded-md px-4 py-2 text-sm font-medium hover:bg-surface"
+          >
+            返回總覽
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
+          >
+            登入
+          </Link>
+        )}
       </header>
 
       <section className="px-4 sm:px-6 py-12 max-w-3xl w-full mx-auto">

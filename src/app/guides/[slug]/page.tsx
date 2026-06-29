@@ -5,6 +5,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getAllGuides, getGuide } from "@/lib/guides";
 import { siteName, siteUrl } from "@/lib/site";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateStaticParams() {
   const guides = await getAllGuides();
@@ -39,8 +40,10 @@ export default async function GuidePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const guide = await getGuide(slug);
+  const [guide, supabase] = await Promise.all([getGuide(slug), createClient()]);
   if (!guide) notFound();
+  const { data: { session } } = await supabase.auth.getSession();
+  const isLoggedIn = !!session;
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -64,12 +67,21 @@ export default async function GuidePage({
         <Link href="/" className="text-base font-medium">
           接案帳本
         </Link>
-        <Link
-          href="/login"
-          className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
-        >
-          登入
-        </Link>
+        {isLoggedIn ? (
+          <Link
+            href="/dashboard"
+            className="border border-border rounded-md px-4 py-2 text-sm font-medium hover:bg-surface"
+          >
+            返回總覽
+          </Link>
+        ) : (
+          <Link
+            href="/login"
+            className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
+          >
+            登入
+          </Link>
+        )}
       </header>
 
       <article className="px-4 sm:px-6 py-10 max-w-2xl w-full mx-auto">
