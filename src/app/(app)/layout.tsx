@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const avatarUrl: string | null = meta.avatar_url || meta.picture || null;
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col md:flex-row min-h-screen">
       <Suspense fallback={null}>
         <ToastListener />
       </Suspense>
