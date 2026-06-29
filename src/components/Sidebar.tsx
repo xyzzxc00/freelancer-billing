@@ -150,11 +150,13 @@ export function Sidebar({
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(stored === "light" || stored === "dark" ? stored : getSystemTheme());
   }, []);
 
   // close drawer on route change
   const pathname = usePathname();
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
   function toggleTheme() {
