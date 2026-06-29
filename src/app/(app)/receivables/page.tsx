@@ -58,7 +58,7 @@ export default async function ReceivablesPage() {
               return (
                 <div
                   key={r.id}
-                  className="border border-border rounded-lg px-4 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                  className="border border-border rounded-lg px-4 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 hover:bg-surface transition-colors"
                 >
                   <div className="min-w-0">
                     <Link

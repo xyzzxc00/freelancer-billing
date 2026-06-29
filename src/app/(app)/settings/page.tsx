@@ -49,7 +49,7 @@ export default async function SettingsPage() {
           </div>
           <button
             type="submit"
-            className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium self-start px-4"
+            className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium self-start px-4 hover:opacity-80 active:scale-95 transition-all cursor-pointer"
           >
             儲存
           </button>
