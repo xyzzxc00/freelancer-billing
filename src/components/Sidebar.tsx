@@ -106,6 +106,8 @@ export function Sidebar({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState<Theme | null>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const userBtnRef = useRef<HTMLButtonElement>(null);
+  const [menuPos, setMenuPos] = useState({ bottom: 0, left: 0, width: 224 });
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
@@ -119,9 +121,22 @@ export function Sidebar({
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); }, [pathname]);
 
+  function openUserMenu() {
+    if (userBtnRef.current) {
+      const rect = userBtnRef.current.getBoundingClientRect();
+      setMenuPos({
+        bottom: window.innerHeight - rect.top + 8,
+        left: rect.left,
+        width: Math.max(rect.width, 224),
+      });
+    }
+    setUserMenuOpen((v) => !v);
+  }
+
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node) &&
+          userBtnRef.current && !userBtnRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
     }
@@ -173,7 +188,7 @@ export function Sidebar({
   };
 
   const userMenuJsx = (
-    <div className="absolute bottom-full left-0 mb-1 w-56 bg-background border border-border rounded-lg py-1.5 z-30 shadow-lg">
+    <div ref={userMenuRef} style={{ position: "fixed", bottom: menuPos.bottom, left: menuPos.left, width: menuPos.width }} className="bg-background border border-border rounded-lg py-1.5 z-50 shadow-lg">
       <p className="px-3 py-2 text-sm font-medium truncate border-b border-border mb-1">
         {displayName}
       </p>
@@ -230,10 +245,11 @@ export function Sidebar({
 
   return (
     <>
+      {userMenuOpen && userMenuJsx}
       {/* ── Desktop sidebar ── */}
       <aside
         className={`hidden md:flex flex-col shrink-0 border-r border-border sticky top-0 h-screen overflow-y-auto py-4 transition-all duration-200 ${
-          collapsed ? "w-14 px-2 overflow-x-hidden" : "w-52 px-3"
+          collapsed ? "w-14 px-2" : "w-52 px-3"
         }`}
       >
         {/* Top: brand + collapse toggle */}
@@ -269,11 +285,11 @@ export function Sidebar({
         </nav>
 
         {/* User button */}
-        <div className="mt-3 pt-3 border-t border-border relative" ref={userMenuRef}>
-          {userMenuOpen && userMenuJsx}
+        <div className="mt-3 pt-3 border-t border-border">
           <button
+            ref={userBtnRef}
             type="button"
-            onClick={() => setUserMenuOpen((v) => !v)}
+            onClick={openUserMenu}
             className={`w-full flex items-center rounded-lg hover:bg-surface transition-colors text-sm text-foreground-muted ${
               collapsed ? "justify-center py-2" : "gap-2.5 px-3 py-2"
             }`}
