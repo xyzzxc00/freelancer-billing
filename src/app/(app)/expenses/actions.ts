@@ -73,4 +73,5 @@ export async function deleteExpenseAction(transactionId: string) {
   revalidatePath("/expenses");
   revalidatePath("/income");
   revalidatePath("/dashboard");
+  redirectWithToast("/expenses", "已刪除支出");
 }
