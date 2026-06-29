@@ -2,6 +2,7 @@
 
 import { useTransition } from "react";
 import { toast } from "sonner";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 
 export function ConfirmDeleteButton({
   action,
@@ -29,7 +30,8 @@ export function ConfirmDeleteButton({
           try {
             await action();
             toast.success(successMessage);
-          } catch {
+          } catch (e) {
+            if (isRedirectError(e)) throw e;
             toast.error("刪除失敗，請稍後再試");
           }
         });
