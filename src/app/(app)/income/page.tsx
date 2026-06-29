@@ -37,7 +37,7 @@ export default async function IncomePage({
   const sourceRows = Array.from(bySource.entries()).sort((a, b) => b[1] - a[1]);
 
   return (
-    <div className="px-4 sm:px-6 py-6">
+    <div className="px-4 sm:px-6 py-6 max-w-3xl">
       <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-medium">收入</h1>

@@ -31,7 +31,8 @@ export default async function EditExpensePage({
   const deleteAction = deleteExpenseAction.bind(null, id);
 
   return (
-    <div className="px-4 sm:px-6 py-6 max-w-sm">
+    <div className="px-4 sm:px-6 py-6 max-w-xl">
+      <div className="border border-border rounded-xl p-6">
       <div className="flex items-baseline justify-between mb-4">
         <h1 className="text-lg font-medium">編輯支出</h1>
         <Link href="/expenses" className="text-sm text-foreground-muted hover:text-foreground">
@@ -57,6 +58,7 @@ export default async function EditExpensePage({
           className="text-sm text-[color:var(--danger-fg)] hover:underline"
           label="刪除這筆支出"
         />
+      </div>
       </div>
     </div>
   );

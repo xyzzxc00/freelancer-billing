@@ -50,7 +50,7 @@ export default async function ReportsPage({
   const isFullYear = fromMonth === 1 && toMonth === 12;
 
   return (
-    <div className="px-4 sm:px-6 py-6">
+    <div className="px-4 sm:px-6 py-6 max-w-4xl">
       <div className="flex items-baseline justify-between mb-4 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-medium">收支報表</h1>

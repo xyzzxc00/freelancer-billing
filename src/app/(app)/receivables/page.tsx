@@ -30,7 +30,7 @@ export default async function ReceivablesPage() {
   const pendingTotal = pending.reduce((sum, r) => sum + Number(r.amount), 0);
 
   return (
-    <div className="px-4 sm:px-6 py-6">
+    <div className="px-4 sm:px-6 py-6 max-w-3xl">
         <h1 className="text-lg font-medium mb-4">待收款</h1>
 
         <div className="grid grid-cols-2 gap-3 mb-7">

@@ -22,7 +22,7 @@ export default async function SettingsPage() {
   });
 
   return (
-    <div className="px-4 sm:px-6 py-6">
+    <div className="px-4 sm:px-6 py-6 max-w-4xl">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
       <div>
       <h1 className="text-lg font-medium mb-6">帳戶設定</h1>
