@@ -3,8 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { prisma } from "@/lib/prisma";
 import { Toaster } from "sonner";
-import { TopNav } from "@/components/TopNav";
-import { BottomNav } from "@/components/BottomNav";
+import { Sidebar } from "@/components/Sidebar";
 import { ToastListener } from "@/components/ToastListener";
 import { GlobalKeyboardShortcuts } from "@/components/GlobalKeyboardShortcuts";
 
@@ -21,20 +20,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     select: { name: true, email: true },
   });
 
-  // Google 等 OAuth 登入會把名字/頭像放在 user_metadata，沒設定自訂名稱時就用它
   const meta = data.user.user_metadata ?? {};
   const displayName =
     profile?.name || meta.full_name || meta.name || profile?.email || "U";
   const avatarUrl: string | null = meta.avatar_url || meta.picture || null;
 
   return (
-    <div className="max-w-7xl w-full mx-auto pb-16 md:pb-0">
+    <div className="flex min-h-screen">
       <Suspense fallback={null}>
         <ToastListener />
       </Suspense>
-      <TopNav displayName={displayName} avatarUrl={avatarUrl} />
-      {children}
-      <BottomNav />
+      <Sidebar displayName={displayName} avatarUrl={avatarUrl} />
+      <div className="flex-1 min-w-0 flex flex-col">
+        <main className="flex-1">
+          {children}
+        </main>
+      </div>
       <GlobalKeyboardShortcuts />
       <Toaster
         position="top-center"
