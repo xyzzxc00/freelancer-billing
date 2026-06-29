@@ -26,9 +26,13 @@ export default async function TemplatesPage() {
         <div>
           <div className="flex items-baseline justify-between mb-4">
             <h1 className="text-lg font-medium">報價單範本</h1>
+            <div className="flex items-center gap-4">
+            <Link href="/quotes" className="text-sm text-foreground-muted hover:text-foreground">
+              返回</Link>
             <Link href="/quotes/templates/new" className="text-sm text-accent hover:underline">
               + 新增範本
             </Link>
+            </div>
           </div>
 
           {templates.length === 0 ? (
