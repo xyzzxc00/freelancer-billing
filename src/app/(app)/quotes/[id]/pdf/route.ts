@@ -21,6 +21,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
     title: quote.title,
     clientName: quote.client.name,
     freelancerName: quote.profile.name ?? quote.profile.email,
+    quoteDate: quote.sentAt ?? quote.createdAt,
     items: quote.items.map((item) => ({
       name: item.name,
       unitPrice: Number(item.unitPrice),
