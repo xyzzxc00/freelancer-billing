@@ -234,7 +234,7 @@ export function Sidebar({
       {/* ── Desktop sidebar ── */}
       <aside
         className={`hidden md:flex flex-col shrink-0 border-r border-border sticky top-0 h-screen overflow-y-auto py-4 transition-all duration-200 ${
-          collapsed ? "w-14 px-2" : "w-52 px-3"
+          collapsed ? "w-14 px-2 overflow-x-hidden" : "w-52 px-3"
         }`}
       >
         {/* Top: brand + collapse toggle */}
