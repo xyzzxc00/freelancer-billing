@@ -143,12 +143,21 @@ export default async function GuidePage({
           <p className="text-sm text-foreground-muted mb-3">
             想把報價、記帳、追款都管在一個地方？
           </p>
-          <Link
-            href="/login?mode=signup"
-            className="inline-block bg-accent text-accent-foreground rounded-md px-5 py-2.5 text-sm font-medium"
-          >
-            免費開始使用接案帳本
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/dashboard"
+              className="inline-block bg-accent text-accent-foreground rounded-md px-5 py-2.5 text-sm font-medium"
+            >
+              返回總覽
+            </Link>
+          ) : (
+            <Link
+              href="/login?mode=signup"
+              className="inline-block bg-accent text-accent-foreground rounded-md px-5 py-2.5 text-sm font-medium"
+            >
+              免費開始使用接案帳本
+            </Link>
+          )}
         </div>
       </article>
 
