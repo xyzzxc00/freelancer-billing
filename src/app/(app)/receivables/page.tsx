@@ -83,7 +83,7 @@ export default async function ReceivablesPage() {
                     <form action={markPaid}>
                       <button
                         type="submit"
-                        className="bg-accent text-accent-foreground rounded-md px-3 py-1.5 text-sm font-medium"
+                        className="bg-accent text-accent-foreground rounded-md px-3 py-1.5 text-sm font-medium hover:opacity-80 active:scale-95 transition-all cursor-pointer"
                       >
                         標記已收款
                       </button>
