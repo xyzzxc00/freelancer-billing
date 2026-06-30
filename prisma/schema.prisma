@@ -243,3 +243,12 @@ model RecurringIncome {
   @@index([userId])
   @@map("recurring_incomes")
 }
+
+// 內部系統日誌，用來監控當日 Resend 寄送量（避免超過方案限制）
+model EmailLog {
+  id     String   @id @default(uuid())
+  sentAt DateTime @default(now())
+
+  @@index([sentAt])
+  @@map("email_logs")
+}

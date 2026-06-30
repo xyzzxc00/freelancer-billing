@@ -1,0 +1,23 @@
+{
+  "skill_name": "health-check",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "幫我健檢一下這個專案,有什麼地方需要優化,supabase、resend、SEO、UI都幫我看一下",
+      "expected_output": "回報涵蓋 Supabase/Auth/API/Resend/SEO/UI-UX/效能/CI-CD 多面向、有具體檔案路徑與行號、依高中低優先分類、且不直接修改程式碼的健檢報告",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我們準備上線前想最後做一次全面 review,看 codebase 有沒有什麼風險或沒處理好的地方",
+      "expected_output": "同樣輸出全面健檢報告,涵蓋安全性(RLS、env變數)、穩定性(Resend重試、API驗證)、以及UI/效能面向,並標示優先順序供上線前判斷",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Resend 跟 Supabase 那邊最近有點擔心,可以順便幫我看一下整個系統還有沒有其他要注意的地方嗎",
+      "expected_output": "雖然使用者只點名 Resend/Supabase,仍應觸發全面健檢 skill,涵蓋其餘面向(Auth/API/SEO/UI/效能/CI-CD),而不是只看使用者點名的兩項",
+      "files": []
+    }
+  ]
+}

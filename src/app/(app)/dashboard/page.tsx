@@ -238,12 +238,38 @@ async function Onboarding() {
   );
 }
 
+function StatsSkeleton() {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-surface rounded-lg p-4 animate-pulse">
+          <div className="h-3 w-16 bg-foreground-muted/20 rounded mb-3" />
+          <div className="h-6 w-24 bg-foreground-muted/20 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CardsSkeleton({ count = 3 }: { count?: number }) {
+  return (
+    <div className="flex flex-col gap-2 mb-8">
+      {[...Array(count)].map((_, i) => (
+        <div key={i} className="border border-border rounded-lg px-4 py-3 animate-pulse">
+          <div className="h-4 w-48 bg-foreground-muted/20 rounded mb-2" />
+          <div className="h-3 w-32 bg-foreground-muted/20 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ── Page shell ────────────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
-      <Suspense fallback={null}>
+      <Suspense fallback={<StatsSkeleton />}>
         <Stats />
       </Suspense>
 
@@ -251,11 +277,11 @@ export default function DashboardPage() {
         <Onboarding />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<CardsSkeleton count={3} />}>
         <RecentQuotes />
       </Suspense>
 
-      <Suspense fallback={null}>
+      <Suspense fallback={<CardsSkeleton count={4} />}>
         <Clients />
       </Suspense>
     </div>

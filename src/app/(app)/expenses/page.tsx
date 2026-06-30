@@ -2,39 +2,62 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { currency, formatDate } from "@/lib/currency";
+import { Pagination } from "@/components/Pagination";
+
+const PAGE_SIZE = 50;
 
 export default async function ExpensesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string; month?: string }>;
+  searchParams: Promise<{ year?: string; month?: string; page?: string }>;
 }) {
   const userId = await requireUserId();
-  const { year: yearParam, month: monthParam } = await searchParams;
+  const { year: yearParam, month: monthParam, page: pageParam } = await searchParams;
 
   const now = new Date();
   const year = yearParam ? Number(yearParam) : now.getFullYear();
   const month = monthParam ? Number(monthParam) : null;
+  const page = Math.max(1, Number(pageParam) || 1);
   const rangeStart = month ? new Date(year, month - 1, 1) : new Date(year, 0, 1);
   const rangeEnd = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);
 
-  const expenses = await prisma.transaction.findMany({
-    where: {
-      userId,
-      type: "EXPENSE",
-      occurredAt: { gte: rangeStart, lt: rangeEnd },
-    },
-    orderBy: { occurredAt: "desc" },
-    include: { expenseCategory: true },
-  });
+  const where = {
+    userId,
+    type: "EXPENSE" as const,
+    occurredAt: { gte: rangeStart, lt: rangeEnd },
+  };
 
-  const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  // 統計用的全年/全月資料只取必要欄位，避免一次撈整批完整紀錄
+  const [allForStats, totalCount, expenses] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      select: { amount: true, category: true, expenseCategory: { select: { name: true } } },
+    }),
+    prisma.transaction.count({ where }),
+    prisma.transaction.findMany({
+      where,
+      orderBy: { occurredAt: "desc" },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+      include: { expenseCategory: true },
+    }),
+  ]);
+
+  const total = allForStats.reduce((sum, e) => sum + Number(e.amount), 0);
 
   const byCategory = new Map<string, number>();
-  for (const e of expenses) {
+  for (const e of allForStats) {
     const label = e.expenseCategory?.name ?? e.category ?? "未分類";
     byCategory.set(label, (byCategory.get(label) ?? 0) + Number(e.amount));
   }
   const categoryRows = Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]);
+
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams({ year: String(year) });
+    if (month) params.set("month", String(month));
+    if (p > 1) params.set("page", String(p));
+    return `/expenses?${params}`;
+  };
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
@@ -131,28 +154,36 @@ export default async function ExpensesPage({
       {expenses.length === 0 ? (
         <p className="text-sm text-foreground-muted">這一年還沒有支出記錄。</p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {expenses.map((e) => (
-            <Link
-              key={e.id}
-              href={`/expenses/${e.id}`}
-              className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {e.expenseCategory?.name ?? e.category ?? "未分類"}
-                </p>
-                <p className="text-xs text-foreground-muted mt-0.5 truncate">
-                  {formatDate(e.occurredAt)}
-                  {e.note ? ` · ${e.note}` : ""}
-                </p>
-              </div>
-              <span className="text-sm font-mono shrink-0 text-[color:var(--danger-fg)]">
-                -{currency.format(Number(e.amount))}
-              </span>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-2">
+            {expenses.map((e) => (
+              <Link
+                key={e.id}
+                href={`/expenses/${e.id}`}
+                className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {e.expenseCategory?.name ?? e.category ?? "未分類"}
+                  </p>
+                  <p className="text-xs text-foreground-muted mt-0.5 truncate">
+                    {formatDate(e.occurredAt)}
+                    {e.note ? ` · ${e.note}` : ""}
+                  </p>
+                </div>
+                <span className="text-sm font-mono shrink-0 text-[color:var(--danger-fg)]">
+                  -{currency.format(Number(e.amount))}
+                </span>
+              </Link>
+            ))}
+          </div>
+          <Pagination
+            currentPage={page}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+            buildHref={pageHref}
+          />
+        </>
       )}
     </div>
   );

@@ -28,25 +28,27 @@ export async function GET(request: NextRequest) {
     }
 
     let notified = 0;
+    let failed = 0;
     for (const [, quotes] of byUser) {
       const profile = quotes[0].profile;
       const rows = quotes
         .map((q) => `<li>${esc(q.client.name)} — ${esc(q.title)}</li>`)
         .join("");
 
-      try {
-        await sendEmail({
-          to: profile.email,
-          subject: `你有 ${quotes.length} 張報價單客戶還沒回應`,
-          html: `<p>以下報價單發出已超過 ${STALE_AFTER_DAYS} 天，客戶尚未接受或拒絕，要不要跟催一下：</p><ul>${rows}</ul>`,
-        });
+      const ok = await sendEmail({
+        to: profile.email,
+        subject: `你有 ${quotes.length} 張報價單客戶還沒回應`,
+        html: `<p>以下報價單發出已超過 ${STALE_AFTER_DAYS} 天，客戶尚未接受或拒絕，要不要跟催一下：</p><ul>${rows}</ul>`,
+      });
+      if (ok) {
         notified += 1;
-      } catch (emailErr) {
-        console.error(`寄信失敗 (${profile.email}):`, emailErr);
+      } else {
+        failed += 1;
+        console.error(`寄信失敗 (${profile.email})`);
       }
     }
 
-    return Response.json({ notified, staleCount: staleQuotes.length });
+    return Response.json({ notified, failed, staleCount: staleQuotes.length });
   } catch (err) {
     console.error("stale-quotes cron 失敗:", err);
     return new Response("Internal Server Error", { status: 500 });

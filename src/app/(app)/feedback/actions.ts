@@ -35,7 +35,7 @@ export async function sendFeedbackAction(
   const { name, email, message } = parsed.data;
 
   await sendEmail({
-    to: "xyzzxc00@gmail.com",
+    to: process.env.ADMIN_EMAIL ?? "xyzzxc00@gmail.com",
     subject: `[意見回饋] ${name}`,
     html: `
       <p><strong>姓名：</strong>${esc(name)}</p>

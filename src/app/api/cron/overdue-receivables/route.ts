@@ -29,6 +29,7 @@ export async function GET(request: NextRequest) {
     }
 
     let notified = 0;
+    let failed = 0;
     for (const [, receivables] of byUser) {
       const profile = receivables[0].profile;
       const rows = receivables
@@ -38,19 +39,20 @@ export async function GET(request: NextRequest) {
         )
         .join("");
 
-      try {
-        await sendEmail({
-          to: profile.email,
-          subject: `你有 ${receivables.length} 筆款項已逾期未收`,
-          html: `<p>以下款項已超過到期日尚未收款：</p><ul>${rows}</ul>`,
-        });
+      const ok = await sendEmail({
+        to: profile.email,
+        subject: `你有 ${receivables.length} 筆款項已逾期未收`,
+        html: `<p>以下款項已超過到期日尚未收款：</p><ul>${rows}</ul>`,
+      });
+      if (ok) {
         notified += 1;
-      } catch (emailErr) {
-        console.error(`寄信失敗 (${profile.email}):`, emailErr);
+      } else {
+        failed += 1;
+        console.error(`寄信失敗 (${profile.email})`);
       }
     }
 
-    return Response.json({ notified, overdueCount: overdue.length });
+    return Response.json({ notified, failed, overdueCount: overdue.length });
   } catch (err) {
     console.error("overdue-receivables cron 失敗:", err);
     return new Response("Internal Server Error", { status: 500 });

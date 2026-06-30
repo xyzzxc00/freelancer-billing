@@ -2,39 +2,61 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { currency, formatDate } from "@/lib/currency";
+import { Pagination } from "@/components/Pagination";
+
+const PAGE_SIZE = 50;
 
 export default async function IncomePage({
   searchParams,
 }: {
-  searchParams: Promise<{ year?: string; month?: string }>;
+  searchParams: Promise<{ year?: string; month?: string; page?: string }>;
 }) {
   const userId = await requireUserId();
-  const { year: yearParam, month: monthParam } = await searchParams;
+  const { year: yearParam, month: monthParam, page: pageParam } = await searchParams;
 
   const now = new Date();
   const year = yearParam ? Number(yearParam) : now.getFullYear();
   const month = monthParam ? Number(monthParam) : null;
+  const page = Math.max(1, Number(pageParam) || 1);
   const rangeStart = month ? new Date(year, month - 1, 1) : new Date(year, 0, 1);
   const rangeEnd = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);
 
-  const income = await prisma.transaction.findMany({
-    where: {
-      userId,
-      type: "INCOME",
-      occurredAt: { gte: rangeStart, lt: rangeEnd },
-    },
-    orderBy: { occurredAt: "desc" },
-    include: { incomeCategory: true },
-  });
+  const where = {
+    userId,
+    type: "INCOME" as const,
+    occurredAt: { gte: rangeStart, lt: rangeEnd },
+  };
 
-  const total = income.reduce((sum, i) => sum + Number(i.amount), 0);
+  const [allForStats, totalCount, income] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      select: { amount: true, category: true, incomeCategory: { select: { name: true } } },
+    }),
+    prisma.transaction.count({ where }),
+    prisma.transaction.findMany({
+      where,
+      orderBy: { occurredAt: "desc" },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
+      include: { incomeCategory: true },
+    }),
+  ]);
+
+  const total = allForStats.reduce((sum, i) => sum + Number(i.amount), 0);
 
   const bySource = new Map<string, number>();
-  for (const i of income) {
+  for (const i of allForStats) {
     const label = i.incomeCategory?.name ?? i.category ?? "未分類";
     bySource.set(label, (bySource.get(label) ?? 0) + Number(i.amount));
   }
   const sourceRows = Array.from(bySource.entries()).sort((a, b) => b[1] - a[1]);
+
+  const pageHref = (p: number) => {
+    const params = new URLSearchParams({ year: String(year) });
+    if (month) params.set("month", String(month));
+    if (p > 1) params.set("page", String(p));
+    return `/income?${params}`;
+  };
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
@@ -131,26 +153,34 @@ export default async function IncomePage({
       {income.length === 0 ? (
         <p className="text-sm text-foreground-muted">這一年還沒有收入記錄。</p>
       ) : (
-        <div className="flex flex-col gap-2">
-          {income.map((i) => (
-            <Link
-              key={i.id}
-              href={`/income/${i.id}`}
-              className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
-            >
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">
-                  {i.incomeCategory?.name ?? i.category ?? "未分類"}
-                </p>
-                <p className="text-xs text-foreground-muted mt-0.5 truncate">
-                  {formatDate(i.occurredAt)}
-                  {i.note ? ` · ${i.note}` : ""}
-                </p>
-              </div>
-              <span className="text-sm font-mono shrink-0">+{currency.format(Number(i.amount))}</span>
-            </Link>
-          ))}
-        </div>
+        <>
+          <div className="flex flex-col gap-2">
+            {income.map((i) => (
+              <Link
+                key={i.id}
+                href={`/income/${i.id}`}
+                className="border border-border rounded-lg px-4 py-3 flex items-center justify-between gap-3 hover:bg-surface transition-colors"
+              >
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {i.incomeCategory?.name ?? i.category ?? "未分類"}
+                  </p>
+                  <p className="text-xs text-foreground-muted mt-0.5 truncate">
+                    {formatDate(i.occurredAt)}
+                    {i.note ? ` · ${i.note}` : ""}
+                  </p>
+                </div>
+                <span className="text-sm font-mono shrink-0">+{currency.format(Number(i.amount))}</span>
+              </Link>
+            ))}
+          </div>
+          <Pagination
+            currentPage={page}
+            totalCount={totalCount}
+            pageSize={PAGE_SIZE}
+            buildHref={pageHref}
+          />
+        </>
       )}
     </div>
   );

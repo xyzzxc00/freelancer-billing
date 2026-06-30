@@ -42,10 +42,12 @@ export async function setReceivableDueDateAction(receivableId: string, formData:
   const dueDateRaw = String(formData.get("dueDate") ?? "");
   const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
 
-  await prisma.receivable.updateMany({
+  const result = await prisma.receivable.updateMany({
     where: { id: receivableId, userId },
     data: { dueDate },
   });
+
+  if (result.count === 0) return;
 
   revalidatePath("/receivables");
 }
