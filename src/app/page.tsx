@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { siteName, siteUrl } from "@/lib/site";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: {
@@ -131,6 +132,7 @@ export default async function Home() {
           <Link href="/guides" className="text-sm text-foreground-muted hover:text-foreground">
             接案知識庫
           </Link>
+          <ThemeToggle />
           <Link
             href="/login"
             className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
