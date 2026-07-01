@@ -12,6 +12,17 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      # 以下套件的「大版號升級」需要手動照官方 migration guide 處理，
+      # 不讓 Dependabot 自動開註定失敗的 PR（安全性修補仍會照開）：
+      # - prisma / @prisma/client 7：schema 設定需搬到 prisma.config.ts
+      # - eslint 10：eslint-config-next 尚未相容
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
 
   # GitHub Actions 本身的版本更新
   - package-ecosystem: github-actions
