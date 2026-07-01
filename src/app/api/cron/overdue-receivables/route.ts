@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { serverEnv } from "@/lib/env";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
@@ -49,6 +50,19 @@ export async function GET(request: NextRequest) {
       } else {
         failed += 1;
         console.error(`寄信失敗 (${profile.email})`);
+      }
+    }
+
+    // 有寄信失敗時主動通知管理員，避免客戶收不到逾期通知卻無人察覺
+    if (failed > 0) {
+      try {
+        await sendEmail({
+          to: serverEnv.adminEmail,
+          subject: `[系統告警] 逾期通知寄送有 ${failed} 筆失敗`,
+          html: `<p>overdue-receivables 排程本次寄送：成功 ${notified} 筆、失敗 ${failed} 筆（共 ${overdue.length} 筆逾期）。請檢查 Resend 寄信狀態與後台 log。</p>`,
+        });
+      } catch (alertErr) {
+        console.error("寄送管理員告警信失敗:", alertErr);
       }
     }
 

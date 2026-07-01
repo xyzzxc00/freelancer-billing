@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { sendEmail } from "@/lib/email";
+import { serverEnv } from "@/lib/env";
 import { requireUserId } from "@/lib/auth";
 import type { ActionResult } from "@/lib/action-state";
 
@@ -35,7 +36,7 @@ export async function sendFeedbackAction(
   const { name, email, message } = parsed.data;
 
   await sendEmail({
-    to: process.env.ADMIN_EMAIL ?? "xyzzxc00@gmail.com",
+    to: serverEnv.adminEmail,
     subject: `[意見回饋] ${name}`,
     html: `
       <p><strong>姓名：</strong>${esc(name)}</p>
