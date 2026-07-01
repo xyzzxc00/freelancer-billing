@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
-import type { ActionResult } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 interface ItemInput {
   name: string;
@@ -13,7 +13,12 @@ interface ItemInput {
 }
 
 function parseItems(raw: string): ItemInput[] {
-  const parsed = JSON.parse(raw) as ItemInput[];
+  let parsed: ItemInput[];
+  try {
+    parsed = JSON.parse(raw) as ItemInput[];
+  } catch {
+    return [];
+  }
   return parsed
     .filter((item) => item.name?.trim())
     .map((item) => ({
@@ -39,20 +44,25 @@ export async function createTemplateAction(
     return { error: "請至少新增一個項目" };
   }
 
-  await prisma.quoteTemplate.create({
-    data: {
-      userId,
-      name,
-      items: {
-        create: items.map((item, i) => ({
-          name: item.name,
-          unitPrice: item.unitPrice,
-          quantity: item.quantity,
-          sortOrder: i,
-        })),
+  try {
+    await prisma.quoteTemplate.create({
+      data: {
+        userId,
+        name,
+        items: {
+          create: items.map((item, i) => ({
+            name: item.name,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            sortOrder: i,
+          })),
+        },
       },
-    },
-  });
+    });
+  } catch (err) {
+    console.error("新增報價範本失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/quotes/templates");
   redirectWithToast("/quotes/templates", "已建立範本");
@@ -74,23 +84,28 @@ export async function updateTemplateAction(
   const template = await prisma.quoteTemplate.findFirst({ where: { id: templateId, userId } });
   if (!template) return { error: "找不到範本" };
 
-  await prisma.$transaction([
-    prisma.quoteTemplateItem.deleteMany({ where: { templateId } }),
-    prisma.quoteTemplate.update({
-      where: { id: templateId },
-      data: {
-        name,
-        items: {
-          create: items.map((item, i) => ({
-            name: item.name,
-            unitPrice: item.unitPrice,
-            quantity: item.quantity,
-            sortOrder: i,
-          })),
+  try {
+    await prisma.$transaction([
+      prisma.quoteTemplateItem.deleteMany({ where: { templateId } }),
+      prisma.quoteTemplate.update({
+        where: { id: templateId },
+        data: {
+          name,
+          items: {
+            create: items.map((item, i) => ({
+              name: item.name,
+              unitPrice: item.unitPrice,
+              quantity: item.quantity,
+              sortOrder: i,
+            })),
+          },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (err) {
+    console.error("更新報價範本失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/quotes/templates");
   redirectWithToast("/quotes/templates", "已更新範本");
@@ -99,7 +114,12 @@ export async function updateTemplateAction(
 export async function deleteTemplateAction(templateId: string) {
   const userId = await requireUserId();
 
-  await prisma.quoteTemplate.deleteMany({ where: { id: templateId, userId } });
+  try {
+    await prisma.quoteTemplate.deleteMany({ where: { id: templateId, userId } });
+  } catch (err) {
+    console.error("刪除報價範本失敗:", err);
+    return;
+  }
 
   revalidatePath("/quotes/templates");
 }

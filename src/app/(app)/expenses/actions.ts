@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { transactionSchema } from "@/lib/schemas";
-import type { ActionResult } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 function parseExpenseForm(formData: FormData) {
   return transactionSchema.safeParse({
@@ -26,16 +26,21 @@ export async function createExpenseAction(
   const { amount, occurredAt, note } = parsed.data;
   const categoryId = String(formData.get("categoryId") ?? "") || null;
 
-  await prisma.transaction.create({
-    data: {
-      userId,
-      type: "EXPENSE",
-      amount,
-      categoryId,
-      note: note ?? null,
-      occurredAt: new Date(occurredAt),
-    },
-  });
+  try {
+    await prisma.transaction.create({
+      data: {
+        userId,
+        type: "EXPENSE",
+        amount,
+        categoryId,
+        note: note ?? null,
+        occurredAt: new Date(occurredAt),
+      },
+    });
+  } catch (err) {
+    console.error("新增支出失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/expenses");
   revalidatePath("/income");
@@ -55,10 +60,15 @@ export async function updateExpenseAction(
   const { amount, occurredAt, note } = parsed.data;
   const categoryId = String(formData.get("categoryId") ?? "") || null;
 
-  await prisma.transaction.updateMany({
-    where: { id: transactionId, userId, type: "EXPENSE" },
-    data: { amount, categoryId, note: note ?? null, occurredAt: new Date(occurredAt) },
-  });
+  try {
+    await prisma.transaction.updateMany({
+      where: { id: transactionId, userId, type: "EXPENSE" },
+      data: { amount, categoryId, note: note ?? null, occurredAt: new Date(occurredAt) },
+    });
+  } catch (err) {
+    console.error("更新支出失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/expenses");
   revalidatePath("/dashboard");
@@ -68,7 +78,12 @@ export async function updateExpenseAction(
 export async function deleteExpenseAction(transactionId: string) {
   const userId = await requireUserId();
 
-  await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "EXPENSE" } });
+  try {
+    await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "EXPENSE" } });
+  } catch (err) {
+    console.error("刪除支出失敗:", err);
+    redirectWithToast("/expenses", GENERIC_ACTION_ERROR, "error");
+  }
 
   revalidatePath("/expenses");
   revalidatePath("/income");

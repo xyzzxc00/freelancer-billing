@@ -1,19 +1,40 @@
 import Link from "next/link";
 import { DueDateInput } from "@/components/DueDateInput";
+import { Pagination } from "@/components/Pagination";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { markReceivablePaidAction, setReceivableDueDateAction } from "./actions";
 
 import { currency, formatDate, toDateInputValue } from "@/lib/currency";
 
-export default async function ReceivablesPage() {
-  const userId = await requireUserId();
+const PAGE_SIZE = 50;
 
-  const [pending, paid] = await Promise.all([
+export default async function ReceivablesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  const userId = await requireUserId();
+  const { page: pageParam } = await searchParams;
+  const page = Math.max(1, Number(pageParam) || 1);
+  const now = new Date();
+
+  const [pending, pendingCount, pendingSum, overdueSum, paid] = await Promise.all([
     prisma.receivable.findMany({
       where: { userId, status: "PENDING" },
       orderBy: { dueDate: "asc" },
+      take: PAGE_SIZE,
+      skip: (page - 1) * PAGE_SIZE,
       include: { quote: { include: { client: true } } },
+    }),
+    prisma.receivable.count({ where: { userId, status: "PENDING" } }),
+    prisma.receivable.aggregate({
+      where: { userId, status: "PENDING" },
+      _sum: { amount: true },
+    }),
+    prisma.receivable.aggregate({
+      where: { userId, status: "PENDING", dueDate: { lt: now } },
+      _sum: { amount: true },
     }),
     prisma.receivable.findMany({
       where: { userId, status: "PAID" },
@@ -23,11 +44,9 @@ export default async function ReceivablesPage() {
     }),
   ]);
 
-  const now = new Date();
-  const overdueTotal = pending
-    .filter((r) => r.dueDate && r.dueDate < now)
-    .reduce((sum, r) => sum + Number(r.amount), 0);
-  const pendingTotal = pending.reduce((sum, r) => sum + Number(r.amount), 0);
+  const overdueTotal = Number(overdueSum._sum.amount ?? 0);
+  const pendingTotal = Number(pendingSum._sum.amount ?? 0);
+  const pageHref = (p: number) => (p > 1 ? `/receivables?page=${p}` : "/receivables");
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
@@ -94,6 +113,14 @@ export default async function ReceivablesPage() {
             })}
           </div>
         )}
+        <div className="mb-7">
+          <Pagination
+            currentPage={page}
+            totalCount={pendingCount}
+            pageSize={PAGE_SIZE}
+            buildHref={pageHref}
+          />
+        </div>
 
         <h2 className="text-base font-medium mb-3">已收款</h2>
         {paid.length === 0 ? (

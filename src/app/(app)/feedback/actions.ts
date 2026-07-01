@@ -35,7 +35,7 @@ export async function sendFeedbackAction(
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { name, email, message } = parsed.data;
 
-  await sendEmail({
+  const sent = await sendEmail({
     to: serverEnv.adminEmail,
     subject: `[意見回饋] ${name}`,
     html: `
@@ -45,6 +45,10 @@ export async function sendFeedbackAction(
       <p style="white-space:pre-wrap">${esc(message)}</p>
     `,
   });
+
+  if (!sent) {
+    return { error: "寄送失敗，請稍後再試" };
+  }
 
   return { success: "已送出，謝謝你的回饋！" };
 }

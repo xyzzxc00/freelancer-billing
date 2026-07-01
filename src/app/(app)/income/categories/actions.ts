@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
-import type { ActionResult } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 export async function createIncomeCategoryAction(
   _prevState: ActionResult,
@@ -16,11 +16,16 @@ export async function createIncomeCategoryAction(
     return { error: "請輸入分類名稱" };
   }
 
-  await prisma.incomeCategory.upsert({
-    where: { userId_name: { userId, name } },
-    create: { userId, name },
-    update: {},
-  });
+  try {
+    await prisma.incomeCategory.upsert({
+      where: { userId_name: { userId, name } },
+      create: { userId, name },
+      update: {},
+    });
+  } catch (err) {
+    console.error("新增收入分類失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/income/categories");
   revalidatePath("/income");
@@ -53,7 +58,12 @@ export async function renameIncomeCategoryAction(
 export async function deleteIncomeCategoryAction(categoryId: string) {
   const userId = await requireUserId();
 
-  await prisma.incomeCategory.deleteMany({ where: { id: categoryId, userId } });
+  try {
+    await prisma.incomeCategory.deleteMany({ where: { id: categoryId, userId } });
+  } catch (err) {
+    console.error("刪除收入分類失敗:", err);
+    return;
+  }
 
   revalidatePath("/income/categories");
   revalidatePath("/income");
@@ -75,17 +85,22 @@ export async function mergeIncomeCategoryAction(
   ]);
   if (!from || !to) return { error: "找不到分類" };
 
-  await prisma.$transaction([
-    prisma.transaction.updateMany({
-      where: { incomeCategoryId: fromId, userId },
-      data: { incomeCategoryId: toId },
-    }),
-    prisma.recurringIncome.updateMany({
-      where: { categoryId: fromId, userId },
-      data: { categoryId: toId },
-    }),
-    prisma.incomeCategory.deleteMany({ where: { id: fromId, userId } }),
-  ]);
+  try {
+    await prisma.$transaction([
+      prisma.transaction.updateMany({
+        where: { incomeCategoryId: fromId, userId },
+        data: { incomeCategoryId: toId },
+      }),
+      prisma.recurringIncome.updateMany({
+        where: { categoryId: fromId, userId },
+        data: { categoryId: toId },
+      }),
+      prisma.incomeCategory.deleteMany({ where: { id: fromId, userId } }),
+    ]);
+  } catch (err) {
+    console.error("合併收入分類失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/income/categories");
   revalidatePath("/income");

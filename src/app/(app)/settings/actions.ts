@@ -9,10 +9,15 @@ export async function updateProfileAction(formData: FormData) {
 
   const name = String(formData.get("name") ?? "").trim();
 
-  await prisma.profile.update({
-    where: { id: userId },
-    data: { name: name || null },
-  });
+  try {
+    await prisma.profile.update({
+      where: { id: userId },
+      data: { name: name || null },
+    });
+  } catch (err) {
+    console.error("更新個人資料失敗:", err);
+    return;
+  }
 
   revalidatePath("/settings");
   revalidatePath("/", "layout");

@@ -8,7 +8,7 @@ import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { sendEmail } from "@/lib/email";
 import type { TaxMode } from "@/lib/tax";
-import type { ActionResult } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 function extractEmail(text: string): string | null {
   const match = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
@@ -95,24 +95,30 @@ export async function createQuoteAction(
   }
   const items = parsed.items;
 
-  const quote = await prisma.quote.create({
-    data: {
-      userId,
-      clientId,
-      title,
-      taxMode,
-      notes,
-      expiresAt,
-      items: {
-        create: items.map((item, i) => ({
-          name: item.name,
-          unitPrice: item.unitPrice,
-          quantity: item.quantity,
-          sortOrder: i,
-        })),
+  let quote;
+  try {
+    quote = await prisma.quote.create({
+      data: {
+        userId,
+        clientId,
+        title,
+        taxMode,
+        notes,
+        expiresAt,
+        items: {
+          create: items.map((item, i) => ({
+            name: item.name,
+            unitPrice: item.unitPrice,
+            quantity: item.quantity,
+            sortOrder: i,
+          })),
+        },
       },
-    },
-  });
+    });
+  } catch (err) {
+    console.error("建立報價單失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/quotes");
   redirectWithToast(`/quotes/${quote.id}`, "已建立報價單");
@@ -145,26 +151,31 @@ export async function updateQuoteItemsAction(
     return { error: "找不到報價單" };
   }
 
-  await prisma.$transaction([
-    prisma.quoteItem.deleteMany({ where: { quoteId } }),
-    prisma.quote.update({
-      where: { id: quoteId },
-      data: {
-        title,
-        taxMode,
-        notes,
-        expiresAt,
-        items: {
-          create: items.map((item, i) => ({
-            name: item.name,
-            unitPrice: item.unitPrice,
-            quantity: item.quantity,
-            sortOrder: i,
-          })),
+  try {
+    await prisma.$transaction([
+      prisma.quoteItem.deleteMany({ where: { quoteId } }),
+      prisma.quote.update({
+        where: { id: quoteId },
+        data: {
+          title,
+          taxMode,
+          notes,
+          expiresAt,
+          items: {
+            create: items.map((item, i) => ({
+              name: item.name,
+              unitPrice: item.unitPrice,
+              quantity: item.quantity,
+              sortOrder: i,
+            })),
+          },
         },
-      },
-    }),
-  ]);
+      }),
+    ]);
+  } catch (err) {
+    console.error("更新報價單失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath(`/quotes/${quoteId}`);
   redirectWithToast(`/quotes/${quoteId}`, "已更新報價單");
@@ -180,10 +191,15 @@ export async function markQuoteSentAction(quoteId: string) {
 
   if (!quote) return;
 
-  await prisma.quote.update({
-    where: { id: quoteId },
-    data: { status: "SENT", sentAt: new Date() },
-  });
+  try {
+    await prisma.quote.update({
+      where: { id: quoteId },
+      data: { status: "SENT", sentAt: new Date() },
+    });
+  } catch (err) {
+    console.error("標記報價單為送出失敗:", err);
+    redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
+  }
 
   const headerList = await headers();
   const host = headerList.get("host") ?? "";
@@ -220,7 +236,7 @@ export async function acceptQuoteAction(quoteId: string) {
     where: { id: quoteId, userId },
     include: { items: true },
   });
-  if (!quote) throw new Error("找不到報價單");
+  if (!quote) return;
 
   const subtotal = quote.items.reduce(
     (sum, item) => sum + Number(item.unitPrice) * Number(item.quantity),
@@ -230,17 +246,22 @@ export async function acceptQuoteAction(quoteId: string) {
   const dueDate = new Date();
   dueDate.setDate(dueDate.getDate() + 30);
 
-  await prisma.$transaction([
-    prisma.quote.update({
-      where: { id: quoteId },
-      data: { status: "ACCEPTED", respondedAt: new Date() },
-    }),
-    prisma.receivable.upsert({
-      where: { quoteId },
-      create: { userId, quoteId, amount: subtotal, dueDate },
-      update: { amount: subtotal },
-    }),
-  ]);
+  try {
+    await prisma.$transaction([
+      prisma.quote.update({
+        where: { id: quoteId },
+        data: { status: "ACCEPTED", respondedAt: new Date() },
+      }),
+      prisma.receivable.upsert({
+        where: { quoteId },
+        create: { userId, quoteId, amount: subtotal, dueDate },
+        update: { amount: subtotal },
+      }),
+    ]);
+  } catch (err) {
+    console.error("接受報價單失敗:", err);
+    return;
+  }
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
@@ -250,10 +271,15 @@ export async function acceptQuoteAction(quoteId: string) {
 export async function rejectQuoteAction(quoteId: string) {
   const userId = await requireUserId();
 
-  await prisma.quote.updateMany({
-    where: { id: quoteId, userId },
-    data: { status: "REJECTED", respondedAt: new Date() },
-  });
+  try {
+    await prisma.quote.updateMany({
+      where: { id: quoteId, userId },
+      data: { status: "REJECTED", respondedAt: new Date() },
+    });
+  } catch (err) {
+    console.error("拒絕報價單失敗:", err);
+    return;
+  }
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
@@ -262,7 +288,12 @@ export async function rejectQuoteAction(quoteId: string) {
 export async function deleteQuoteAction(quoteId: string) {
   const userId = await requireUserId();
 
-  await prisma.quote.deleteMany({ where: { id: quoteId, userId } });
+  try {
+    await prisma.quote.deleteMany({ where: { id: quoteId, userId } });
+  } catch (err) {
+    console.error("刪除報價單失敗:", err);
+    redirectWithToast("/quotes", GENERIC_ACTION_ERROR, "error");
+  }
 
   revalidatePath("/quotes");
   redirect("/quotes");

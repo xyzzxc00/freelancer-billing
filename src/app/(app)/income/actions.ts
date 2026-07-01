@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { transactionSchema } from "@/lib/schemas";
-import type { ActionResult } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 function parseIncomeForm(formData: FormData) {
   return transactionSchema.safeParse({
@@ -26,16 +26,21 @@ export async function createIncomeAction(
   const { amount, occurredAt, note } = parsed.data;
   const incomeCategoryId = String(formData.get("incomeCategoryId") ?? "") || null;
 
-  await prisma.transaction.create({
-    data: {
-      userId,
-      type: "INCOME",
-      amount,
-      incomeCategoryId,
-      note: note ?? null,
-      occurredAt: new Date(occurredAt),
-    },
-  });
+  try {
+    await prisma.transaction.create({
+      data: {
+        userId,
+        type: "INCOME",
+        amount,
+        incomeCategoryId,
+        note: note ?? null,
+        occurredAt: new Date(occurredAt),
+      },
+    });
+  } catch (err) {
+    console.error("新增收入失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/income");
   revalidatePath("/dashboard");
@@ -54,10 +59,15 @@ export async function updateIncomeAction(
   const { amount, occurredAt, note } = parsed.data;
   const incomeCategoryId = String(formData.get("incomeCategoryId") ?? "") || null;
 
-  await prisma.transaction.updateMany({
-    where: { id: transactionId, userId, type: "INCOME" },
-    data: { amount, incomeCategoryId, note: note ?? null, occurredAt: new Date(occurredAt) },
-  });
+  try {
+    await prisma.transaction.updateMany({
+      where: { id: transactionId, userId, type: "INCOME" },
+      data: { amount, incomeCategoryId, note: note ?? null, occurredAt: new Date(occurredAt) },
+    });
+  } catch (err) {
+    console.error("更新收入失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/income");
   revalidatePath("/dashboard");
@@ -67,7 +77,12 @@ export async function updateIncomeAction(
 export async function deleteIncomeAction(transactionId: string) {
   const userId = await requireUserId();
 
-  await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "INCOME" } });
+  try {
+    await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "INCOME" } });
+  } catch (err) {
+    console.error("刪除收入失敗:", err);
+    redirectWithToast("/income", GENERIC_ACTION_ERROR, "error");
+  }
 
   revalidatePath("/income");
   revalidatePath("/dashboard");

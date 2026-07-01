@@ -113,9 +113,27 @@ export default async function QuotePreviewPage({
             </div>
           </div>
 
-          {/* Items table */}
-          <div className="px-8 py-6">
-            <table className="w-full text-sm" style={{ tableLayout: "fixed" }}>
+          {/* Items */}
+          <div className="px-4 sm:px-8 py-6">
+            {/* 手機：卡片 */}
+            <div className="sm:hidden flex flex-col divide-y divide-gray-50">
+              {quote.items.map((item) => (
+                <div key={item.id} className="py-3 first:pt-0">
+                  <div className="flex justify-between gap-3">
+                    <span className="text-sm text-gray-800 break-words">{item.name}</span>
+                    <span className="text-sm font-mono text-gray-800 shrink-0">
+                      {currency.format(Number(item.unitPrice) * Number(item.quantity))}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {Number(item.quantity)} × {currency.format(Number(item.unitPrice))}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* 桌機：表格 */}
+            <table className="hidden sm:table w-full text-sm" style={{ tableLayout: "fixed" }}>
               <thead>
                 <tr className="text-xs text-gray-400 border-b border-gray-100">
                   <th className="text-left pb-2 font-medium w-1/2">項目</th>

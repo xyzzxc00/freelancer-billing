@@ -16,7 +16,11 @@ jobs:
       DIRECT_URL: "postgresql://dummy:dummy@localhost:5432/dummy"
       NEXT_PUBLIC_SUPABASE_URL: "https://dummy.supabase.co"
       NEXT_PUBLIC_SUPABASE_ANON_KEY: "dummy"
+      NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
       RESEND_API_KEY: ""
+      RESEND_FROM_EMAIL: "測試 <noreply@example.com>"
+      RESEND_DAILY_LIMIT: "90"
+      ADMIN_EMAIL: "admin@example.com"
       CRON_SECRET: "dummy"
 
     steps:

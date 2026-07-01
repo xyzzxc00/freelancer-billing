@@ -84,6 +84,7 @@ export default function RootLayout({
     <html
       lang="zh-Hant"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
       <head>
         <Script id="theme-init" strategy="beforeInteractive">

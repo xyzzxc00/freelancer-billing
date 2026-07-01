@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
-import type { ActionResult } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 export async function createCategoryAction(
   _prevState: ActionResult,
@@ -16,11 +16,16 @@ export async function createCategoryAction(
     return { error: "請輸入分類名稱" };
   }
 
-  await prisma.expenseCategory.upsert({
-    where: { userId_name: { userId, name } },
-    create: { userId, name },
-    update: {},
-  });
+  try {
+    await prisma.expenseCategory.upsert({
+      where: { userId_name: { userId, name } },
+      create: { userId, name },
+      update: {},
+    });
+  } catch (err) {
+    console.error("新增支出分類失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/expenses/categories");
   revalidatePath("/expenses");
@@ -53,7 +58,12 @@ export async function renameExpenseCategoryAction(
 export async function deleteCategoryAction(categoryId: string) {
   const userId = await requireUserId();
 
-  await prisma.expenseCategory.deleteMany({ where: { id: categoryId, userId } });
+  try {
+    await prisma.expenseCategory.deleteMany({ where: { id: categoryId, userId } });
+  } catch (err) {
+    console.error("刪除支出分類失敗:", err);
+    return;
+  }
 
   revalidatePath("/expenses/categories");
   revalidatePath("/expenses");
@@ -75,17 +85,22 @@ export async function mergeExpenseCategoryAction(
   ]);
   if (!from || !to) return { error: "找不到分類" };
 
-  await prisma.$transaction([
-    prisma.transaction.updateMany({
-      where: { categoryId: fromId, userId },
-      data: { categoryId: toId },
-    }),
-    prisma.recurringExpense.updateMany({
-      where: { categoryId: fromId, userId },
-      data: { categoryId: toId },
-    }),
-    prisma.expenseCategory.deleteMany({ where: { id: fromId, userId } }),
-  ]);
+  try {
+    await prisma.$transaction([
+      prisma.transaction.updateMany({
+        where: { categoryId: fromId, userId },
+        data: { categoryId: toId },
+      }),
+      prisma.recurringExpense.updateMany({
+        where: { categoryId: fromId, userId },
+        data: { categoryId: toId },
+      }),
+      prisma.expenseCategory.deleteMany({ where: { id: fromId, userId } }),
+    ]);
+  } catch (err) {
+    console.error("合併支出分類失敗:", err);
+    return { error: GENERIC_ACTION_ERROR };
+  }
 
   revalidatePath("/expenses/categories");
   revalidatePath("/expenses");
