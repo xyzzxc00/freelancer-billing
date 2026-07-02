@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { startOfTodayTaipei, taipeiMonthRange } from "@/lib/taipei";
 
 import { currency, formatDate } from "@/lib/currency";
 
@@ -30,9 +31,9 @@ const avatarTones = [
 
 async function Stats() {
   const userId = await requireUserId();
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  // 「本月」「逾期」都以台灣日曆日為準（伺服器時區是 UTC）
+  const today = startOfTodayTaipei();
+  const { start: monthStart, end: monthEnd } = taipeiMonthRange();
 
   const [incomeThisMonth, expenseThisMonth, receivables] = await Promise.all([
     prisma.transaction.aggregate({
@@ -53,7 +54,7 @@ async function Stats() {
   const monthExpense = Number(expenseThisMonth._sum.amount ?? 0);
   const pendingTotal = receivables.reduce((sum, r) => sum + Number(r.amount), 0);
   const overdueTotal = receivables
-    .filter((r) => r.dueDate && r.dueDate < now)
+    .filter((r) => r.dueDate && r.dueDate < today)
     .reduce((sum, r) => sum + Number(r.amount), 0);
 
   return (

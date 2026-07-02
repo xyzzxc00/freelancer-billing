@@ -1,9 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-
-function currentYearMonth(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-}
+import { taipeiYearMonth, taipeiDayOfMonth, startOfTodayTaipei } from "@/lib/taipei";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -11,9 +8,11 @@ export async function GET(request: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const now = new Date();
-  const yearMonth = currentYearMonth(now);
-  const today = now.getDate();
+  // 以台灣日曆日判斷「今天幾號、這是哪個月」，避免伺服器 UTC 在月底/月初的邊界差一天
+  const yearMonth = taipeiYearMonth();
+  const today = taipeiDayOfMonth();
+  // 交易日期記台灣「今天」的日期（UTC 午夜），與手動記帳的日期欄位存法一致
+  const occurredAt = startOfTodayTaipei();
 
   const [dueExpenses, dueIncomes] = await Promise.all([
     prisma.recurringExpense.findMany({
@@ -37,7 +36,7 @@ export async function GET(request: NextRequest) {
             amount: r.amount,
             categoryId: r.categoryId,
             note: r.name,
-            occurredAt: now,
+            occurredAt,
           },
         }),
         prisma.recurringExpense.update({
@@ -62,7 +61,7 @@ export async function GET(request: NextRequest) {
             amount: r.amount,
             incomeCategoryId: r.categoryId,
             note: r.name,
-            occurredAt: now,
+            occurredAt,
           },
         }),
         prisma.recurringIncome.update({

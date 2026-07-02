@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { serverEnv } from "@/lib/env";
+import { startOfTodayTaipei } from "@/lib/taipei";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
@@ -19,8 +20,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    // 到期日「當天」還不算逾期，過了台灣時間的那一天才算
     const overdue = await prisma.receivable.findMany({
-      where: { status: "PENDING", dueDate: { lt: new Date() } },
+      where: { status: "PENDING", dueDate: { lt: startOfTodayTaipei() } },
       include: { profile: true, quote: { include: { client: true } } },
     });
 

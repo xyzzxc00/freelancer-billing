@@ -3,6 +3,7 @@ import { DueDateInput } from "@/components/DueDateInput";
 import { Pagination } from "@/components/Pagination";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { startOfTodayTaipei } from "@/lib/taipei";
 import { markReceivablePaidAction, setReceivableDueDateAction } from "./actions";
 
 import { currency, formatDate, toDateInputValue } from "@/lib/currency";
@@ -17,7 +18,8 @@ export default async function ReceivablesPage({
   const userId = await requireUserId();
   const { page: pageParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
-  const now = new Date();
+  // 逾期以台灣日曆日為準：到期日當天還不算逾期
+  const today = startOfTodayTaipei();
 
   const [pending, pendingCount, pendingSum, overdueSum, paid] = await Promise.all([
     prisma.receivable.findMany({
@@ -33,7 +35,7 @@ export default async function ReceivablesPage({
       _sum: { amount: true },
     }),
     prisma.receivable.aggregate({
-      where: { userId, status: "PENDING", dueDate: { lt: now } },
+      where: { userId, status: "PENDING", dueDate: { lt: today } },
       _sum: { amount: true },
     }),
     prisma.receivable.findMany({
@@ -71,7 +73,7 @@ export default async function ReceivablesPage({
         ) : (
           <div className="flex flex-col gap-2 mb-7">
             {pending.map((r) => {
-              const isOverdue = r.dueDate && r.dueDate < now;
+              const isOverdue = r.dueDate && r.dueDate < today;
               const markPaid = markReceivablePaidAction.bind(null, r.id);
               const setDueDate = setReceivableDueDateAction.bind(null, r.id);
               return (
