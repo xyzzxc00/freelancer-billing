@@ -14,8 +14,10 @@ const WITHHOLDING_RATE = 0.1;
 const BUSINESS_TAX_RATE = 0.05;
 
 export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
+  // 稅額一律四捨五入到整數元（台灣實務），總額由取整後的各行加總而得，
+  // 確保明細相加永遠等於總額，不會因浮點運算出現一元落差
   if (mode === "BUSINESS_5PCT") {
-    const tax = subtotal * BUSINESS_TAX_RATE;
+    const tax = Math.round(subtotal * BUSINESS_TAX_RATE);
     return {
       subtotal,
       clientTotal: subtotal + tax,
@@ -29,9 +31,11 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
   }
 
   if (mode === "LABOR_INCOME_10PCT") {
-    const withholding = subtotal * WITHHOLDING_RATE;
+    const withholding = Math.round(subtotal * WITHHOLDING_RATE);
     const healthSupplement =
-      subtotal > HEALTH_SUPPLEMENT_THRESHOLD ? subtotal * HEALTH_SUPPLEMENT_RATE : 0;
+      subtotal > HEALTH_SUPPLEMENT_THRESHOLD
+        ? Math.round(subtotal * HEALTH_SUPPLEMENT_RATE)
+        : 0;
     return {
       subtotal,
       clientTotal: subtotal,
