@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
+import { GENERIC_ACTION_ERROR } from "@/lib/action-state";
 
 export async function markReceivablePaidAction(receivableId: string) {
   const userId = await requireUserId();
@@ -33,7 +35,7 @@ export async function markReceivablePaidAction(receivableId: string) {
     });
   } catch (err) {
     console.error("標記已收款失敗:", err);
-    return;
+    redirectWithToast("/receivables", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/receivables");
@@ -55,7 +57,7 @@ export async function setReceivableDueDateAction(receivableId: string, formData:
     });
   } catch (err) {
     console.error("更新到期日失敗:", err);
-    return;
+    redirectWithToast("/receivables", GENERIC_ACTION_ERROR, "error");
   }
 
   if (result.count === 0) return;

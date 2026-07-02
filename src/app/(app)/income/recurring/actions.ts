@@ -75,7 +75,7 @@ export async function toggleRecurringIncomeAction(recurringId: string, active: b
     });
   } catch (err) {
     console.error("切換定期收入狀態失敗:", err);
-    return;
+    redirectWithToast("/income/recurring", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/income/recurring");
@@ -88,7 +88,7 @@ export async function deleteRecurringIncomeAction(recurringId: string) {
     await prisma.recurringIncome.deleteMany({ where: { id: recurringId, userId } });
   } catch (err) {
     console.error("刪除定期收入失敗:", err);
-    return;
+    redirectWithToast("/income/recurring", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/income/recurring");

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 export async function createIncomeCategoryAction(
@@ -62,7 +63,7 @@ export async function deleteIncomeCategoryAction(categoryId: string) {
     await prisma.incomeCategory.deleteMany({ where: { id: categoryId, userId } });
   } catch (err) {
     console.error("刪除收入分類失敗:", err);
-    return;
+    redirectWithToast("/income/categories", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/income/categories");

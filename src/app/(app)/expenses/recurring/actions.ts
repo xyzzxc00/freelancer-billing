@@ -75,7 +75,7 @@ export async function toggleRecurringExpenseAction(recurringId: string, active: 
     });
   } catch (err) {
     console.error("切換定期支出狀態失敗:", err);
-    return;
+    redirectWithToast("/expenses/recurring", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/expenses/recurring");
@@ -88,7 +88,7 @@ export async function deleteRecurringExpenseAction(recurringId: string) {
     await prisma.recurringExpense.deleteMany({ where: { id: recurringId, userId } });
   } catch (err) {
     console.error("刪除定期支出失敗:", err);
-    return;
+    redirectWithToast("/expenses/recurring", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/expenses/recurring");
