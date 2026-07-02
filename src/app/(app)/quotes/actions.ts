@@ -260,7 +260,7 @@ export async function acceptQuoteAction(quoteId: string) {
     ]);
   } catch (err) {
     console.error("接受報價單失敗:", err);
-    return;
+    redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath(`/quotes/${quoteId}`);
@@ -278,7 +278,7 @@ export async function rejectQuoteAction(quoteId: string) {
     });
   } catch (err) {
     console.error("拒絕報價單失敗:", err);
-    return;
+    redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath(`/quotes/${quoteId}`);
@@ -287,6 +287,15 @@ export async function rejectQuoteAction(quoteId: string) {
 
 export async function deleteQuoteAction(quoteId: string) {
   const userId = await requireUserId();
+
+  // 已收款的報價刪除會連帶刪掉應收款，但入帳交易仍在，導致帳目對不上——直接擋下
+  const paidReceivable = await prisma.receivable.findFirst({
+    where: { quoteId, userId, status: "PAID" },
+    select: { id: true },
+  });
+  if (paidReceivable) {
+    redirectWithToast(`/quotes/${quoteId}`, "這張報價單已有入帳紀錄，無法刪除", "error");
+  }
 
   try {
     await prisma.quote.deleteMany({ where: { id: quoteId, userId } });

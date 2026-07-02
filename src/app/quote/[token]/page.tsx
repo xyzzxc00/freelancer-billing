@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { calculateTax } from "@/lib/tax";
-import { SubmitButton } from "@/components/SubmitButton";
 import { QuoteViewTracker } from "@/components/QuoteViewTracker";
+import { QuoteResponseActions } from "@/components/QuoteResponseActions";
 import { respondToQuoteAction } from "../actions";
 
 const currency = new Intl.NumberFormat("zh-TW", {
@@ -188,24 +188,7 @@ export default async function PublicQuotePage({
           {quote.status === "SENT" && (
             <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-sm text-gray-500">請確認報價內容後選擇接受或拒絕</p>
-              <div className="flex gap-2">
-                <form action={rejectAction}>
-                  <SubmitButton
-                    pendingLabel="處理中…"
-                    className="border border-gray-300 rounded-lg px-5 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                  >
-                    拒絕
-                  </SubmitButton>
-                </form>
-                <form action={acceptAction}>
-                  <SubmitButton
-                    pendingLabel="處理中…"
-                    className="bg-green-600 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-green-700 transition-colors"
-                  >
-                    接受報價
-                  </SubmitButton>
-                </form>
-              </div>
+              <QuoteResponseActions acceptAction={acceptAction} rejectAction={rejectAction} />
             </div>
           )}
 
