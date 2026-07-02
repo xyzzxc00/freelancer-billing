@@ -35,7 +35,7 @@ describe("sendEmail", () => {
     process.env.RESEND_API_KEY = originalKey;
   });
 
-  it("寄信成功時回傳 true 並記錄一筆 log", async () => {
+  it("寄信成功時回傳 true 並記錄收件人、主旨與 sent 狀態", async () => {
     process.env.RESEND_API_KEY = "re_test_key";
     mockSend.mockResolvedValue({ id: "msg_123" });
 
@@ -45,9 +45,12 @@ describe("sendEmail", () => {
     expect(result).toBe(true);
     expect(mockSend).toHaveBeenCalledOnce();
     expect(mockCreate).toHaveBeenCalledOnce();
+    expect(mockCreate).toHaveBeenCalledWith({
+      data: { to: "test@example.com", subject: "測試", status: "sent" },
+    });
   });
 
-  it("寄信失敗時重試並最終回傳 false", async () => {
+  it("寄信失敗時重試、回傳 false 並記錄 failed 狀態與錯誤訊息", async () => {
     process.env.RESEND_API_KEY = "re_test_key";
     mockSend.mockRejectedValue(new Error("Network error"));
 
@@ -56,6 +59,22 @@ describe("sendEmail", () => {
 
     expect(result).toBe(false);
     expect(mockSend).toHaveBeenCalledTimes(2); // 原本 + 1 次重試
+    expect(mockCreate).toHaveBeenCalledOnce();
+    expect(mockCreate).toHaveBeenCalledWith({
+      data: { to: "test@example.com", subject: "測試", status: "failed", error: "Network error" },
+    });
+  });
+
+  it("emailLog 寫入失敗時不影響寄信結果，也不會重寄", async () => {
+    process.env.RESEND_API_KEY = "re_test_key";
+    mockSend.mockResolvedValue({ id: "msg_123" });
+    mockCreate.mockRejectedValue(new Error("DB down"));
+
+    const { sendEmail } = await import("../email");
+    const result = await sendEmail({ to: "test@example.com", subject: "測試", html: "<p>內容</p>" });
+
+    expect(result).toBe(true);
+    expect(mockSend).toHaveBeenCalledOnce(); // log 失敗不觸發重寄
   });
 
   it("今日寄信量已達上限時跳過寄送", async () => {
@@ -69,5 +88,17 @@ describe("sendEmail", () => {
     expect(result).toBe(false);
     expect(mockSend).not.toHaveBeenCalled();
     delete process.env.RESEND_DAILY_LIMIT;
+  });
+
+  it("每日額度只計算 sent 狀態的紀錄", async () => {
+    process.env.RESEND_API_KEY = "re_test_key";
+    mockSend.mockResolvedValue({ id: "msg_123" });
+
+    const { sendEmail } = await import("../email");
+    await sendEmail({ to: "test@example.com", subject: "測試", html: "<p>內容</p>" });
+
+    expect(mockCount).toHaveBeenCalledWith({
+      where: { sentAt: { gte: expect.any(Date) }, status: "sent" },
+    });
   });
 });

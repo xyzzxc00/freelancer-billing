@@ -11,7 +11,24 @@ const DAILY_LIMIT = Number(process.env.RESEND_DAILY_LIMIT ?? 90);
 async function todaySentCount(): Promise<number> {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
-  return prisma.emailLog.count({ where: { sentAt: { gte: startOfDay } } });
+  // 只計成功寄出的，失敗紀錄不占 Resend 額度
+  return prisma.emailLog.count({
+    where: { sentAt: { gte: startOfDay }, status: "sent" },
+  });
+}
+
+// log 寫入失敗不能影響寄信結果（尤其不能讓成功寄出的信被誤判失敗而重寄）
+async function logEmail(data: {
+  to: string;
+  subject: string;
+  status: "sent" | "failed";
+  error?: string;
+}): Promise<void> {
+  try {
+    await prisma.emailLog.create({ data });
+  } catch (error) {
+    console.error("寫入 email log 失敗：", error);
+  }
 }
 
 export async function sendEmail({
@@ -37,18 +54,28 @@ export async function sendEmail({
   }
 
   const MAX_RETRIES = 2;
+  let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       await resend.emails.send({ from: FROM, to, subject, html });
-      await prisma.emailLog.create({ data: {} });
-      return true;
     } catch (error) {
+      lastError = error;
+      console.warn(`寄送 email 第 ${attempt}/${MAX_RETRIES} 次嘗試失敗：${subject}`, error);
       if (attempt < MAX_RETRIES) {
         await new Promise((r) => setTimeout(r, 1000 * attempt));
-      } else {
-        console.error(`寄送 email 失敗（已重試 ${MAX_RETRIES - 1} 次）：`, error);
       }
+      continue;
     }
+    await logEmail({ to, subject, status: "sent" });
+    return true;
   }
+
+  console.error(`寄送 email 失敗（已重試 ${MAX_RETRIES - 1} 次）：${subject}`, lastError);
+  await logEmail({
+    to,
+    subject,
+    status: "failed",
+    error: lastError instanceof Error ? lastError.message : String(lastError),
+  });
   return false;
 }
