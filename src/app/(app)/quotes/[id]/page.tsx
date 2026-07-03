@@ -93,6 +93,14 @@ export default async function QuoteDetailPage({
               </span>
             </>
           )}
+          {quote.signerName && quote.respondedAt && (
+            <>
+              <span className="text-foreground-muted">·</span>
+              <span className="text-xs text-foreground-muted">
+                由 {quote.signerName} 於 {new Date(quote.respondedAt).toLocaleDateString("zh-TW")} 簽署接受
+              </span>
+            </>
+          )}
           <span className="text-foreground-muted">·</span>
           <Link href={`/quotes/${quote.id}/preview`} className="text-sm text-accent hover:underline">
             預覽
@@ -158,6 +166,7 @@ export default async function QuoteDetailPage({
             defaultTaxMode={quote.taxMode}
             defaultNotes={quote.notes ?? ""}
             defaultExpiresAt={quote.expiresAt ? quote.expiresAt.toISOString().slice(0, 10) : ""}
+            defaultDepositPercent={quote.depositPercent ? String(quote.depositPercent) : ""}
             defaultItems={quote.items.map((item) => ({
               name: item.name,
               unitPrice: String(item.unitPrice),

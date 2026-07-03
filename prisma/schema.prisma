@@ -13,10 +13,14 @@ datasource db {
 
 // 對應 Supabase Auth 的 auth.users，這裡只存應用層需要的個人資料
 model Profile {
-  id        String   @id @default(uuid()) // 等於 supabase auth.users.id
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
+  id                String   @id @default(uuid()) // 等於 supabase auth.users.id
+  email             String   @unique
+  name              String?
+  bankName          String? // 收款銀行名稱，顯示在請款單 PDF
+  bankBranch        String? // 分行
+  bankAccount       String? // 帳號
+  bankAccountHolder String? // 戶名
+  createdAt         DateTime @default(now())
 
   clients           Client[]
   quotes            Quote[]
@@ -60,25 +64,27 @@ enum TaxMode {
 }
 
 model Quote {
-  id          String      @id @default(uuid())
-  userId      String
-  clientId    String
-  title       String
-  status      QuoteStatus @default(DRAFT)
-  taxMode     TaxMode     @default(NONE)
-  notes       String?     // 備註，會顯示在報價單底部
-  expiresAt   DateTime?   // 報價有效期限
-  shareToken  String      @unique @default(uuid()) // 給客戶看的公開分享連結用
-  sentAt      DateTime?
-  respondedAt DateTime?
-  viewedAt    DateTime?   // 客戶第一次開啟公開連結的時間
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  userId         String
+  clientId       String
+  title          String
+  status         QuoteStatus @default(DRAFT)
+  taxMode        TaxMode     @default(NONE)
+  notes          String?     // 備註，會顯示在報價單底部
+  expiresAt      DateTime?   // 報價有效期限
+  shareToken     String      @unique @default(uuid()) // 給客戶看的公開分享連結用
+  depositPercent Int?        // 訂金比例 1-99，NULL 代表不分期，接受後整筆入應收款
+  signerName     String?     // 客戶接受報價時填寫的姓名
+  sentAt         DateTime?
+  respondedAt    DateTime?
+  viewedAt       DateTime?   // 客戶第一次開啟公開連結的時間
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
-  profile    Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  client     Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
-  items      QuoteItem[]
-  receivable Receivable?
+  profile     Profile      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client      Client       @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  items       QuoteItem[]
+  receivables Receivable[]
 
   @@index([userId])
   @@index([clientId])
@@ -106,10 +112,17 @@ enum ReceivableStatus {
   PAID
 }
 
+enum ReceivableKind {
+  FULL // 未分期，整筆報價金額
+  DEPOSIT // 訂金
+  FINAL // 尾款
+}
+
 model Receivable {
   id        String           @id @default(uuid())
   userId    String
-  quoteId   String           @unique
+  quoteId   String
+  kind      ReceivableKind   @default(FULL)
   amount    Decimal          @db.Decimal(12, 2)
   status    ReceivableStatus @default(PENDING)
   dueDate   DateTime?
@@ -120,6 +133,7 @@ model Receivable {
   quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([quoteId])
   @@map("receivables")
 }
 
@@ -164,6 +178,7 @@ model Transaction {
   categoryId      String? // 支出分類
   incomeCategoryId String? // 收入分類
   note            String?
+  receiptUrl      String? // 支出憑證照片，Supabase Storage 的 object path（非完整 URL）
   occurredAt      DateTime
   createdAt       DateTime        @default(now())
 

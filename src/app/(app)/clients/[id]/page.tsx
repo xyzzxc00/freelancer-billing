@@ -28,7 +28,7 @@ export default async function ClientDetailPage({
       quotes: {
         orderBy: { createdAt: "desc" },
         take: 20,
-        include: { items: true, receivable: true },
+        include: { items: true, receivables: true },
       },
     },
   });
@@ -44,14 +44,13 @@ export default async function ClientDetailPage({
       (sum, q) => sum + q.items.reduce((s, i) => s + Number(i.unitPrice) * Number(i.quantity), 0),
       0
     );
-  const pendingAmount = client.quotes
-    .map((q) => q.receivable)
-    .filter((r) => r?.status === "PENDING")
-    .reduce((sum, r) => sum + Number(r!.amount), 0);
-  const paidAmount = client.quotes
-    .map((q) => q.receivable)
-    .filter((r) => r?.status === "PAID")
-    .reduce((sum, r) => sum + Number(r!.amount), 0);
+  const receivables = client.quotes.flatMap((q) => q.receivables);
+  const pendingAmount = receivables
+    .filter((r) => r.status === "PENDING")
+    .reduce((sum, r) => sum + Number(r.amount), 0);
+  const paidAmount = receivables
+    .filter((r) => r.status === "PAID")
+    .reduce((sum, r) => sum + Number(r.amount), 0);
 
   const updateAction = updateClientAction.bind(null, client.id);
   const deleteAction = deleteClientAction.bind(null, client.id);

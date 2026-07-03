@@ -3,23 +3,41 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { calculateDepositSplit } from "@/lib/deposit";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 export async function recordQuoteViewedAction(token: string) {
   try {
-    await prisma.quote.updateMany({
+    const result = await prisma.quote.updateMany({
       where: { shareToken: token, viewedAt: null },
       data: { viewedAt: new Date() },
     });
+
+    // count > 0 代表這次真的是「第一次」開啟，才通知報價擁有者
+    if (result.count > 0) {
+      const quote = await prisma.quote.findUnique({
+        where: { shareToken: token },
+        include: { client: true, profile: true },
+      });
+      if (quote) {
+        await sendEmail({
+          to: quote.profile.email,
+          subject: `${quote.client.name} 已開啟你的報價單「${quote.title}」`,
+          html: `<p>${quote.client.name} 剛剛開啟了報價單「${quote.title}」的連結。</p>`,
+        });
+      }
+    }
   } catch (err) {
     console.error("記錄報價單瀏覽失敗:", err);
   }
 }
 
-// 綁定 token/response 後交給 useActionState 呼叫（呼叫時會多帶 state 與 formData，這裡用不到）
+// 綁定 token/response 後交給 useActionState 呼叫
 export async function respondToQuoteAction(
   token: string,
-  response: "ACCEPTED" | "REJECTED"
+  response: "ACCEPTED" | "REJECTED",
+  _prevState: ActionResult,
+  formData: FormData
 ): Promise<ActionResult> {
   let quote;
   try {
@@ -39,6 +57,11 @@ export async function respondToQuoteAction(
     return { error: "這份報價單已經回覆過了，請重新整理頁面查看最新狀態" };
   }
 
+  const signerName = String(formData.get("signerName") ?? "").trim();
+  if (response === "ACCEPTED" && !signerName) {
+    return { error: "請填寫姓名以確認接受這份報價單" };
+  }
+
   try {
     if (response === "ACCEPTED") {
       const subtotal = quote.items.reduce(
@@ -46,19 +69,33 @@ export async function respondToQuoteAction(
         0
       );
       // 與內部 acceptQuoteAction 一致：預設 30 天後到期，讓逾期提醒接手追蹤
-      const dueDate = new Date();
-      dueDate.setDate(dueDate.getDate() + 30);
-      await prisma.$transaction([
-        prisma.quote.update({
-          where: { id: quote.id },
-          data: { status: "ACCEPTED", respondedAt: new Date() },
-        }),
-        prisma.receivable.upsert({
-          where: { quoteId: quote.id },
-          create: { userId: quote.userId, quoteId: quote.id, amount: subtotal, dueDate },
-          update: { amount: subtotal },
-        }),
-      ]);
+      const finalDueDate = new Date();
+      finalDueDate.setDate(finalDueDate.getDate() + 30);
+
+      const quoteUpdate = prisma.quote.update({
+        where: { id: quote.id },
+        data: { status: "ACCEPTED", respondedAt: new Date(), signerName },
+      });
+
+      if (quote.depositPercent) {
+        const { depositAmount, finalAmount } = calculateDepositSplit(subtotal, quote.depositPercent);
+        await prisma.$transaction([
+          quoteUpdate,
+          prisma.receivable.create({
+            data: { userId: quote.userId, quoteId: quote.id, kind: "DEPOSIT", amount: depositAmount, dueDate: new Date() },
+          }),
+          prisma.receivable.create({
+            data: { userId: quote.userId, quoteId: quote.id, kind: "FINAL", amount: finalAmount, dueDate: finalDueDate },
+          }),
+        ]);
+      } else {
+        await prisma.$transaction([
+          quoteUpdate,
+          prisma.receivable.create({
+            data: { userId: quote.userId, quoteId: quote.id, kind: "FULL", amount: subtotal, dueDate: finalDueDate },
+          }),
+        ]);
+      }
     } else {
       await prisma.quote.update({
         where: { id: quote.id },

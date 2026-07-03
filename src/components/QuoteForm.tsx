@@ -101,6 +101,7 @@ export function QuoteForm({
   defaultItems = [{ name: "", unitPrice: "", quantity: "1" }],
   defaultNotes = "",
   defaultExpiresAt = "",
+  defaultDepositPercent = "",
   showClientField = true,
   templates = [],
 }: {
@@ -112,6 +113,7 @@ export function QuoteForm({
   defaultItems?: ItemRow[];
   defaultNotes?: string;
   defaultExpiresAt?: string;
+  defaultDepositPercent?: string;
   showClientField?: boolean;
   templates?: TemplateOption[];
 }) {
@@ -252,6 +254,22 @@ export function QuoteForm({
           defaultValue={defaultExpiresAt}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         />
+      </div>
+
+      <div>
+        <label className="text-sm text-foreground-muted block mb-1">訂金比例（選填）</label>
+        <input
+          type="number"
+          name="depositPercent"
+          min="1"
+          max="99"
+          placeholder="例如：30"
+          defaultValue={defaultDepositPercent}
+          className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
+        />
+        <p className="text-xs text-foreground-muted mt-1">
+          填寫後，客戶接受報價會自動拆成訂金與尾款兩筆待收款；留空則整筆計入待收款。
+        </p>
       </div>
 
       <div>

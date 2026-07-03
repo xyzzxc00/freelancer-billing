@@ -8,11 +8,18 @@ import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { sendEmail } from "@/lib/email";
 import type { TaxMode } from "@/lib/tax";
+import { calculateDepositSplit } from "@/lib/deposit";
+import { extractEmail } from "@/lib/extract-email";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
-function extractEmail(text: string): string | null {
-  const match = text.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/);
-  return match ? match[0] : null;
+function parseDepositPercent(formData: FormData): { ok: true; value: number | null } | { ok: false; error: string } {
+  const raw = String(formData.get("depositPercent") ?? "").trim();
+  if (!raw) return { ok: true, value: null };
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value < 1 || value > 99) {
+    return { ok: false, error: "訂金比例請填 1-99 之間的數字" };
+  }
+  return { ok: true, value: Math.round(value) };
 }
 
 interface ItemInput {
@@ -94,6 +101,11 @@ export async function createQuoteAction(
     return { error: parsed.error };
   }
   const items = parsed.items;
+  const depositResult = parseDepositPercent(formData);
+  if (!depositResult.ok) {
+    return { error: depositResult.error };
+  }
+  const depositPercent = depositResult.value;
 
   let quote;
   try {
@@ -105,6 +117,7 @@ export async function createQuoteAction(
         taxMode,
         notes,
         expiresAt,
+        depositPercent,
         items: {
           create: items.map((item, i) => ({
             name: item.name,
@@ -145,6 +158,11 @@ export async function updateQuoteItemsAction(
     return { error: parsed.error };
   }
   const items = parsed.items;
+  const depositResult = parseDepositPercent(formData);
+  if (!depositResult.ok) {
+    return { error: depositResult.error };
+  }
+  const depositPercent = depositResult.value;
 
   const quote = await prisma.quote.findFirst({ where: { id: quoteId, userId } });
   if (!quote) {
@@ -161,6 +179,7 @@ export async function updateQuoteItemsAction(
           taxMode,
           notes,
           expiresAt,
+          depositPercent,
           items: {
             create: items.map((item, i) => ({
               name: item.name,
@@ -243,21 +262,35 @@ export async function acceptQuoteAction(quoteId: string) {
     0
   );
 
-  const dueDate = new Date();
-  dueDate.setDate(dueDate.getDate() + 30);
+  const finalDueDate = new Date();
+  finalDueDate.setDate(finalDueDate.getDate() + 30);
 
   try {
-    await prisma.$transaction([
-      prisma.quote.update({
-        where: { id: quoteId },
-        data: { status: "ACCEPTED", respondedAt: new Date() },
-      }),
-      prisma.receivable.upsert({
-        where: { quoteId },
-        create: { userId, quoteId, amount: subtotal, dueDate },
-        update: { amount: subtotal },
-      }),
-    ]);
+    if (quote.depositPercent) {
+      const { depositAmount, finalAmount } = calculateDepositSplit(subtotal, quote.depositPercent);
+      await prisma.$transaction([
+        prisma.quote.update({
+          where: { id: quoteId },
+          data: { status: "ACCEPTED", respondedAt: new Date() },
+        }),
+        prisma.receivable.create({
+          data: { userId, quoteId, kind: "DEPOSIT", amount: depositAmount, dueDate: new Date() },
+        }),
+        prisma.receivable.create({
+          data: { userId, quoteId, kind: "FINAL", amount: finalAmount, dueDate: finalDueDate },
+        }),
+      ]);
+    } else {
+      await prisma.$transaction([
+        prisma.quote.update({
+          where: { id: quoteId },
+          data: { status: "ACCEPTED", respondedAt: new Date() },
+        }),
+        prisma.receivable.create({
+          data: { userId, quoteId, kind: "FULL", amount: subtotal, dueDate: finalDueDate },
+        }),
+      ]);
+    }
   } catch (err) {
     console.error("接受報價單失敗:", err);
     redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
