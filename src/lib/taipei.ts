@@ -31,3 +31,11 @@ export function taipeiMonthRange(): { start: Date; end: Date } {
     end: new Date(Date.UTC(t.getUTCFullYear(), t.getUTCMonth() + 1, 1)),
   };
 }
+
+/** 台灣「過去 7 天」的起訖（UTC 午夜表示），供每週摘要信使用 */
+export function taipeiPreviousWeekRange(): { start: Date; end: Date } {
+  const end = startOfTodayTaipei();
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 7);
+  return { start, end };
+}

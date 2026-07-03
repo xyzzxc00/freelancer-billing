@@ -70,12 +70,20 @@ export default async function ReportsPage({
             </Link>
           </div>
         </div>
-        <a
-          href={`/reports/export?year=${year}`}
-          className="text-sm text-foreground-muted hover:text-foreground"
-        >
-          匯出 CSV
-        </a>
+        <div className="flex items-center gap-3">
+          <Link
+            href={`/reports/tax-summary?year=${year}`}
+            className="text-sm text-foreground-muted hover:text-foreground"
+          >
+            報稅彙總
+          </Link>
+          <a
+            href={`/reports/export?year=${year}`}
+            className="text-sm text-foreground-muted hover:text-foreground"
+          >
+            匯出 CSV
+          </a>
+        </div>
       </div>
 
       <div className="flex gap-2 mb-5 flex-wrap">
