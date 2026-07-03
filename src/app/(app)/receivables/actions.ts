@@ -46,6 +46,7 @@ export async function markReceivablePaidAction(receivableId: string) {
   revalidatePath("/receivables");
   revalidatePath("/income");
   revalidatePath("/dashboard");
+  redirectWithToast("/receivables", "已標記為已收款");
 }
 
 export async function sendDunningEmailAction(receivableId: string) {

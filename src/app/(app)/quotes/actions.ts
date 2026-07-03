@@ -299,6 +299,7 @@ export async function acceptQuoteAction(quoteId: string) {
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
   revalidatePath("/income");
+  redirectWithToast(`/quotes/${quoteId}`, "已標記為已接受，轉入待收款");
 }
 
 export async function rejectQuoteAction(quoteId: string) {
@@ -316,6 +317,7 @@ export async function rejectQuoteAction(quoteId: string) {
 
   revalidatePath(`/quotes/${quoteId}`);
   revalidatePath("/quotes");
+  redirectWithToast(`/quotes/${quoteId}`, "已標記為已拒絕");
 }
 
 export async function deleteQuoteAction(quoteId: string) {

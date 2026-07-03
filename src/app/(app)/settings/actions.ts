@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { redirectWithToast } from "@/lib/toast";
+import { GENERIC_ACTION_ERROR } from "@/lib/action-state";
 
 export async function updateProfileAction(formData: FormData) {
   const userId = await requireUserId();
@@ -16,11 +18,11 @@ export async function updateProfileAction(formData: FormData) {
     });
   } catch (err) {
     console.error("更新個人資料失敗:", err);
-    return;
+    redirectWithToast("/settings", GENERIC_ACTION_ERROR, "error");
   }
 
-  revalidatePath("/settings");
   revalidatePath("/", "layout");
+  redirectWithToast("/settings", "已更新個人資料");
 }
 
 export async function updateBankInfoAction(formData: FormData) {
@@ -38,8 +40,9 @@ export async function updateBankInfoAction(formData: FormData) {
     });
   } catch (err) {
     console.error("更新收款帳戶失敗:", err);
-    return;
+    redirectWithToast("/settings", GENERIC_ACTION_ERROR, "error");
   }
 
   revalidatePath("/settings");
+  redirectWithToast("/settings", "已更新收款帳戶");
 }
