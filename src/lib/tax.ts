@@ -31,7 +31,10 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
   }
 
   if (mode === "LABOR_INCOME_10PCT") {
-    const withholding = Math.round(subtotal * WITHHOLDING_RATE);
+    // 依法單筆給付 ≤ 2 萬元時應扣繳稅額不到 2,000 元，免予扣繳；
+    // 二代健保補充保費的起扣點剛好也是 2 萬元，兩者同一門檻
+    const withholding =
+      subtotal > HEALTH_SUPPLEMENT_THRESHOLD ? Math.round(subtotal * WITHHOLDING_RATE) : 0;
     const healthSupplement =
       subtotal > HEALTH_SUPPLEMENT_THRESHOLD
         ? Math.round(subtotal * HEALTH_SUPPLEMENT_RATE)
@@ -43,7 +46,9 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
       clientLines: [{ label: "委託報酬總額", amount: subtotal }],
       freelancerLines: [
         { label: "委託報酬總額", amount: subtotal },
-        { label: "代扣勞務報酬所得稅 10%", amount: -withholding },
+        ...(withholding > 0
+          ? [{ label: "代扣勞務報酬所得稅 10%", amount: -withholding }]
+          : []),
         ...(healthSupplement > 0
           ? [{ label: "二代健保補充保費 2.11%（單筆逾 2 萬）", amount: -healthSupplement }]
           : []),
