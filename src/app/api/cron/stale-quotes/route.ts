@@ -1,11 +1,9 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { escapeHtml as esc } from "@/lib/html";
 
 const STALE_AFTER_DAYS = 5;
-
-const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");

@@ -3,15 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { serverEnv } from "@/lib/env";
 import { startOfTodayTaipei } from "@/lib/taipei";
+import { escapeHtml as esc } from "@/lib/html";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
   currency: "TWD",
   maximumFractionDigits: 0,
 });
-
-const esc = (s: string) =>
-  s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");

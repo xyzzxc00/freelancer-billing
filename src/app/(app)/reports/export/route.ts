@@ -1,13 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
-
-function csvEscape(value: string) {
-  if (/[",\n]/.test(value)) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
+import { toCsvResponse } from "@/lib/csv";
 
 export async function GET(request: NextRequest) {
   const userId = await requireUserId();
@@ -33,13 +27,5 @@ export async function GET(request: NextRequest) {
     t.note ?? "",
   ]);
 
-  const csv = [header, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
-  const csvWithBom = "﻿" + csv;
-
-  return new Response(csvWithBom, {
-    headers: {
-      "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="收支報表-${year}.csv"`,
-    },
-  });
+  return toCsvResponse([header, ...rows], `收支報表-${year}.csv`);
 }
