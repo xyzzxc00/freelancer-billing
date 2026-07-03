@@ -1,6 +1,7 @@
 import path from "path";
 import { Document, Page, Text, View, StyleSheet, Font, renderToBuffer } from "@react-pdf/renderer";
 import { calculateTax, type TaxMode } from "./tax";
+import { BankInfoSection, type BankInfo } from "./pdf-bank-section";
 
 Font.register({
   family: "NotoSansTC",
@@ -74,9 +75,10 @@ interface QuotePdfProps {
   notes?: string | null;
   items: { name: string; unitPrice: number; quantity: number }[];
   taxMode: TaxMode;
+  bankInfo?: BankInfo | null;
 }
 
-function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, expiresAt, notes, items, taxMode }: QuotePdfProps) {
+function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, expiresAt, notes, items, taxMode, bankInfo }: QuotePdfProps) {
   const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const breakdown = calculateTax(subtotal, taxMode);
 
@@ -156,6 +158,8 @@ function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, expire
             </View>
           </View>
         </View>
+
+        <BankInfoSection bankInfo={bankInfo} />
 
       </Page>
     </Document>

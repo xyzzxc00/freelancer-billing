@@ -93,7 +93,7 @@ export function ReceiptField({
           accept={ACCEPT}
           disabled={uploading}
           onChange={handleFileChange}
-          className="text-sm w-full disabled:opacity-50"
+          className="text-sm w-full text-foreground-muted disabled:opacity-50 cursor-pointer file:cursor-pointer file:mr-3 file:px-4 file:py-2 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-accent file:text-accent-foreground hover:file:opacity-80"
         />
       )}
       {uploading && <p className="text-xs text-foreground-muted mt-1">上傳中…</p>}

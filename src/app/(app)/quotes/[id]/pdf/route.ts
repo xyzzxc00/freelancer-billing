@@ -30,6 +30,12 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
       quantity: Number(item.quantity),
     })),
     taxMode: quote.taxMode,
+    bankInfo: {
+      bankName: quote.profile.bankName,
+      bankBranch: quote.profile.bankBranch,
+      bankAccount: quote.profile.bankAccount,
+      bankAccountHolder: quote.profile.bankAccountHolder,
+    },
   });
 
   return new Response(new Uint8Array(pdf), {

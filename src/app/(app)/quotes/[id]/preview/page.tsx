@@ -183,6 +183,23 @@ export default async function QuotePreviewPage({
             </div>
           </div>
 
+          {/* Bank info */}
+          {(quote.profile.bankName || quote.profile.bankAccount) && (
+            <div className="px-8 pb-8 border-t border-gray-100 pt-6">
+              <p className="text-xs text-gray-400 mb-2">收款帳戶</p>
+              <div className="text-sm text-gray-700 flex flex-col gap-1">
+                {quote.profile.bankName && (
+                  <p>
+                    銀行：{quote.profile.bankName}
+                    {quote.profile.bankBranch ? ` ${quote.profile.bankBranch}` : ""}
+                  </p>
+                )}
+                {quote.profile.bankAccount && <p>帳號：{quote.profile.bankAccount}</p>}
+                {quote.profile.bankAccountHolder && <p>戶名：{quote.profile.bankAccountHolder}</p>}
+              </div>
+            </div>
+          )}
+
           <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 text-center">
             <p className="text-sm text-gray-400">這是你的預覽畫面，客戶不會看到此列</p>
           </div>

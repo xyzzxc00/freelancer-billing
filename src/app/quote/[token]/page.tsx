@@ -184,6 +184,23 @@ export default async function PublicQuotePage({
             </div>
           </div>
 
+          {/* Bank info */}
+          {(quote.profile.bankName || quote.profile.bankAccount) && (
+            <div className="px-8 pb-8 border-t border-gray-100 pt-6">
+              <p className="text-xs text-gray-400 mb-2">收款帳戶</p>
+              <div className="text-sm text-gray-700 flex flex-col gap-1">
+                {quote.profile.bankName && (
+                  <p>
+                    銀行：{quote.profile.bankName}
+                    {quote.profile.bankBranch ? ` ${quote.profile.bankBranch}` : ""}
+                  </p>
+                )}
+                {quote.profile.bankAccount && <p>帳號：{quote.profile.bankAccount}</p>}
+                {quote.profile.bankAccountHolder && <p>戶名：{quote.profile.bankAccountHolder}</p>}
+              </div>
+            </div>
+          )}
+
           {/* Action */}
           {quote.status === "SENT" && (
             <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
