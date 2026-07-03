@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
 import { LogoutButton } from "@/components/LogoutButton";
 import { TipPanel } from "@/components/TipPanel";
-import { updateProfileAction } from "./actions";
+import { updateProfileAction, updateBankInfoAction } from "./actions";
 
 export default async function SettingsPage() {
   const userId = await requireUserId();
@@ -48,6 +48,57 @@ export default async function SettingsPage() {
                   disabled
                   value={profile?.email ?? ""}
                   className="border border-border rounded-md px-3 py-2 text-sm bg-surface w-full text-foreground-muted"
+                />
+              </div>
+              <button
+                type="submit"
+                className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium self-start px-4 hover:opacity-80 active:scale-95 transition-all cursor-pointer"
+              >
+                儲存
+              </button>
+            </form>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-sm font-medium mb-3">收款帳戶</h2>
+            <p className="text-xs text-foreground-muted mb-3">
+              填寫後會自動帶入請款單 PDF，客戶收到就知道要匯到哪。全部選填。
+            </p>
+            <form action={updateBankInfoAction} className="flex flex-col gap-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-foreground-muted block mb-1">銀行名稱</label>
+                  <input
+                    name="bankName"
+                    defaultValue={profile?.bankName ?? ""}
+                    placeholder="例如：台灣銀行"
+                    className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-foreground-muted block mb-1">分行</label>
+                  <input
+                    name="bankBranch"
+                    defaultValue={profile?.bankBranch ?? ""}
+                    placeholder="例如：忠孝分行"
+                    className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-foreground-muted block mb-1">帳號</label>
+                <input
+                  name="bankAccount"
+                  defaultValue={profile?.bankAccount ?? ""}
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-foreground-muted block mb-1">戶名</label>
+                <input
+                  name="bankAccountHolder"
+                  defaultValue={profile?.bankAccountHolder ?? ""}
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
                 />
               </div>
               <button

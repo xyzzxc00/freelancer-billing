@@ -4,11 +4,16 @@ import { Pagination } from "@/components/Pagination";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { startOfTodayTaipei } from "@/lib/taipei";
-import { markReceivablePaidAction, setReceivableDueDateAction } from "./actions";
+import { markReceivablePaidAction, setReceivableDueDateAction, sendDunningEmailAction } from "./actions";
 
 import { currency, formatDate, toDateInputValue } from "@/lib/currency";
 
 const PAGE_SIZE = 50;
+
+const kindLabel: Record<string, string> = {
+  DEPOSIT: "訂金",
+  FINAL: "尾款",
+};
 
 export default async function ReceivablesPage({
   searchParams,
@@ -76,6 +81,7 @@ export default async function ReceivablesPage({
               const isOverdue = r.dueDate && r.dueDate < today;
               const markPaid = markReceivablePaidAction.bind(null, r.id);
               const setDueDate = setReceivableDueDateAction.bind(null, r.id);
+              const sendDunning = sendDunningEmailAction.bind(null, r.id);
               return (
                 <div
                   key={r.id}
@@ -87,6 +93,11 @@ export default async function ReceivablesPage({
                       className="text-sm font-medium truncate block hover:text-accent"
                     >
                       {r.quote.client.name} — {r.quote.title}
+                      {kindLabel[r.kind] && (
+                        <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded bg-surface text-foreground-muted align-middle">
+                          {kindLabel[r.kind]}
+                        </span>
+                      )}
                     </Link>
                     <div className="flex items-center gap-2 mt-1 flex-wrap">
                       <DueDateInput action={setDueDate} defaultValue={toDateInputValue(r.dueDate)} />
@@ -101,6 +112,22 @@ export default async function ReceivablesPage({
                     <span className="text-sm font-medium font-mono">
                       {currency.format(Number(r.amount))}
                     </span>
+                    <a
+                      href={`/receivables/${r.id}/pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-foreground-muted hover:text-foreground"
+                    >
+                      請款單
+                    </a>
+                    <form action={sendDunning}>
+                      <button
+                        type="submit"
+                        className="text-sm text-foreground-muted hover:text-foreground cursor-pointer"
+                      >
+                        寄催款信
+                      </button>
+                    </form>
                     <form action={markPaid}>
                       <button
                         type="submit"
@@ -136,7 +163,14 @@ export default async function ReceivablesPage({
                 className="border border-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-surface transition-colors"
               >
                 <div>
-                  <p className="text-sm font-medium">{r.quote.client.name} — {r.quote.title}</p>
+                  <p className="text-sm font-medium">
+                    {r.quote.client.name} — {r.quote.title}
+                    {kindLabel[r.kind] && (
+                      <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded bg-surface text-foreground-muted align-middle">
+                        {kindLabel[r.kind]}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-foreground-muted mt-0.5">
                     {r.paidAt ? formatDate(r.paidAt) : ""} 收款
                   </p>
