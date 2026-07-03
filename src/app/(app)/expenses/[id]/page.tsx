@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
 import { ExpenseForm } from "@/components/ExpenseForm";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { updateExpenseAction, deleteExpenseAction } from "../actions";
@@ -27,6 +28,13 @@ export default async function EditExpensePage({
 
   if (!transaction) notFound();
 
+  let receiptSignedUrl: string | null = null;
+  if (transaction.receiptUrl) {
+    const supabase = await createClient();
+    const { data } = await supabase.storage.from("receipts").createSignedUrl(transaction.receiptUrl, 60);
+    receiptSignedUrl = data?.signedUrl ?? null;
+  }
+
   const updateAction = updateExpenseAction.bind(null, id);
   const deleteAction = deleteExpenseAction.bind(null, id);
 
@@ -48,6 +56,8 @@ export default async function EditExpensePage({
         defaultCategoryId={transaction.categoryId ?? undefined}
         defaultOccurredAt={transaction.occurredAt.toISOString().slice(0, 10)}
         defaultNote={transaction.note ?? undefined}
+        defaultReceiptUrl={transaction.receiptUrl}
+        defaultReceiptSignedUrl={receiptSignedUrl}
       />
 
       <div className="mt-4">

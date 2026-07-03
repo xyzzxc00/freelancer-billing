@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import Link from "next/link";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
+import { ReceiptField } from "@/components/ReceiptField";
 import { useBlurErrors } from "@/lib/use-blur-errors";
 import type { ActionResult } from "@/lib/action-state";
 
@@ -30,6 +31,8 @@ export function ExpenseForm({
   defaultCategoryId,
   defaultOccurredAt,
   defaultNote,
+  defaultReceiptUrl,
+  defaultReceiptSignedUrl,
 }: {
   action: (prevState: ActionResult, formData: FormData) => Promise<ActionResult>;
   categories: CategoryOption[];
@@ -38,6 +41,8 @@ export function ExpenseForm({
   defaultCategoryId?: string;
   defaultOccurredAt?: string;
   defaultNote?: string;
+  defaultReceiptUrl?: string | null;
+  defaultReceiptSignedUrl?: string | null;
 }) {
   const [state, formAction] = useActionState(action, undefined);
   const { fieldErrors, onBlur } = useBlurErrors(validators);
@@ -102,6 +107,8 @@ export function ExpenseForm({
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full"
         />
       </div>
+
+      <ReceiptField defaultReceiptUrl={defaultReceiptUrl} defaultPreviewUrl={defaultReceiptSignedUrl} />
 
       <FormError message={state?.error} />
       <SubmitButton>儲存</SubmitButton>
