@@ -2,7 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-// Middleware already validates the user via getUser() at the Edge.
+// src/proxy.ts already validates the user via getUser() on every request.
 // Here we use getSession() which reads from the cookie without a network round-trip,
 // making server component rendering significantly faster.
 export const requireUserId = cache(async (): Promise<string> => {

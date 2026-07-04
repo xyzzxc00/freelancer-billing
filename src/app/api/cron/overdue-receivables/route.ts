@@ -4,6 +4,7 @@ import { sendEmail } from "@/lib/email";
 import { serverEnv } from "@/lib/env";
 import { startOfTodayTaipei } from "@/lib/taipei";
 import { escapeHtml as esc } from "@/lib/html";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 const currency = new Intl.NumberFormat("zh-TW", {
   style: "currency",
@@ -12,8 +13,7 @@ const currency = new Intl.NumberFormat("zh-TW", {
 });
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(request)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

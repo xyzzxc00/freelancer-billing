@@ -1,10 +1,10 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { taipeiYearMonth, taipeiDayOfMonth, startOfTodayTaipei } from "@/lib/taipei";
+import { verifyCronAuth } from "@/lib/cron-auth";
 
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!verifyCronAuth(request)) {
     return new Response("Unauthorized", { status: 401 });
   }
 

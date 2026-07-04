@@ -35,7 +35,7 @@ async function Stats() {
   const today = startOfTodayTaipei();
   const { start: monthStart, end: monthEnd } = taipeiMonthRange();
 
-  const [incomeThisMonth, expenseThisMonth, receivables] = await Promise.all([
+  const [incomeThisMonth, expenseThisMonth, pending, overdue] = await Promise.all([
     prisma.transaction.aggregate({
       where: { userId, type: "INCOME", occurredAt: { gte: monthStart, lt: monthEnd } },
       _sum: { amount: true },
@@ -44,18 +44,20 @@ async function Stats() {
       where: { userId, type: "EXPENSE", occurredAt: { gte: monthStart, lt: monthEnd } },
       _sum: { amount: true },
     }),
-    prisma.receivable.findMany({
+    prisma.receivable.aggregate({
       where: { userId, status: "PENDING" },
-      select: { amount: true, dueDate: true },
+      _sum: { amount: true },
+    }),
+    prisma.receivable.aggregate({
+      where: { userId, status: "PENDING", dueDate: { lt: today } },
+      _sum: { amount: true },
     }),
   ]);
 
   const monthIncome = Number(incomeThisMonth._sum.amount ?? 0);
   const monthExpense = Number(expenseThisMonth._sum.amount ?? 0);
-  const pendingTotal = receivables.reduce((sum, r) => sum + Number(r.amount), 0);
-  const overdueTotal = receivables
-    .filter((r) => r.dueDate && r.dueDate < today)
-    .reduce((sum, r) => sum + Number(r.amount), 0);
+  const pendingTotal = Number(pending._sum.amount ?? 0);
+  const overdueTotal = Number(overdue._sum.amount ?? 0);
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">

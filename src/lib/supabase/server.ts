@@ -18,7 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // 在 Server Component 裡呼叫 set 會失敗，middleware 會處理刷新 session
+            // 在 Server Component 裡呼叫 set 會失敗，src/proxy.ts 會處理刷新 session
           }
         },
       },
