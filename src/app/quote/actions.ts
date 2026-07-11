@@ -62,6 +62,8 @@ export async function respondToQuoteAction(
     return { error: "請填寫姓名以確認接受這份報價單" };
   }
 
+  // 用 updateMany 帶 status: "SENT" 條件做原子鎖定，避免兩個併發請求都通過上面
+  // 的 quote.status 檢查、各自建立一份 receivable（重複收款紀錄）。
   try {
     if (response === "ACCEPTED") {
       const subtotal = quote.items.reduce(
@@ -72,35 +74,40 @@ export async function respondToQuoteAction(
       const finalDueDate = new Date();
       finalDueDate.setDate(finalDueDate.getDate() + 30);
 
-      const quoteUpdate = prisma.quote.update({
-        where: { id: quote.id },
-        data: { status: "ACCEPTED", respondedAt: new Date(), signerName },
+      const won = await prisma.$transaction(async (tx) => {
+        const updated = await tx.quote.updateMany({
+          where: { id: quote.id, status: "SENT" },
+          data: { status: "ACCEPTED", respondedAt: new Date(), signerName },
+        });
+        if (updated.count === 0) return false;
+
+        if (quote.depositPercent) {
+          const { depositAmount, finalAmount } = calculateDepositSplit(subtotal, quote.depositPercent);
+          await tx.receivable.create({
+            data: { userId: quote.userId, quoteId: quote.id, kind: "DEPOSIT", amount: depositAmount, dueDate: new Date() },
+          });
+          await tx.receivable.create({
+            data: { userId: quote.userId, quoteId: quote.id, kind: "FINAL", amount: finalAmount, dueDate: finalDueDate },
+          });
+        } else {
+          await tx.receivable.create({
+            data: { userId: quote.userId, quoteId: quote.id, kind: "FULL", amount: subtotal, dueDate: finalDueDate },
+          });
+        }
+        return true;
       });
 
-      if (quote.depositPercent) {
-        const { depositAmount, finalAmount } = calculateDepositSplit(subtotal, quote.depositPercent);
-        await prisma.$transaction([
-          quoteUpdate,
-          prisma.receivable.create({
-            data: { userId: quote.userId, quoteId: quote.id, kind: "DEPOSIT", amount: depositAmount, dueDate: new Date() },
-          }),
-          prisma.receivable.create({
-            data: { userId: quote.userId, quoteId: quote.id, kind: "FINAL", amount: finalAmount, dueDate: finalDueDate },
-          }),
-        ]);
-      } else {
-        await prisma.$transaction([
-          quoteUpdate,
-          prisma.receivable.create({
-            data: { userId: quote.userId, quoteId: quote.id, kind: "FULL", amount: subtotal, dueDate: finalDueDate },
-          }),
-        ]);
+      if (!won) {
+        return { error: "這份報價單已經回覆過了，請重新整理頁面查看最新狀態" };
       }
     } else {
-      await prisma.quote.update({
-        where: { id: quote.id },
+      const updated = await prisma.quote.updateMany({
+        where: { id: quote.id, status: "SENT" },
         data: { status: "REJECTED", respondedAt: new Date() },
       });
+      if (updated.count === 0) {
+        return { error: "這份報價單已經回覆過了，請重新整理頁面查看最新狀態" };
+      }
     }
   } catch (err) {
     console.error("回覆報價單失敗:", err);

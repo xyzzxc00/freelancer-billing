@@ -18,15 +18,16 @@ const kindLabel: Record<string, string> = {
 export default async function ReceivablesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; paidPage?: string }>;
 }) {
   const userId = await requireUserId();
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, paidPage: paidPageParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
+  const paidPage = Math.max(1, Number(paidPageParam) || 1);
   // 逾期以台灣日曆日為準：到期日當天還不算逾期
   const today = startOfTodayTaipei();
 
-  const [pending, pendingCount, pendingSum, overdueSum, paid] = await Promise.all([
+  const [pending, pendingCount, pendingSum, overdueSum, paid, paidCount] = await Promise.all([
     prisma.receivable.findMany({
       where: { userId, status: "PENDING" },
       orderBy: { dueDate: "asc" },
@@ -46,14 +47,27 @@ export default async function ReceivablesPage({
     prisma.receivable.findMany({
       where: { userId, status: "PAID" },
       orderBy: { paidAt: "desc" },
-      take: 50,
+      take: PAGE_SIZE,
+      skip: (paidPage - 1) * PAGE_SIZE,
       include: { quote: { include: { client: true } } },
     }),
+    prisma.receivable.count({ where: { userId, status: "PAID" } }),
   ]);
 
   const overdueTotal = Number(overdueSum._sum.amount ?? 0);
   const pendingTotal = Number(pendingSum._sum.amount ?? 0);
-  const pageHref = (p: number) => (p > 1 ? `/receivables?page=${p}` : "/receivables");
+
+  function buildHref(overrides: { page?: number; paidPage?: number }) {
+    const params = new URLSearchParams();
+    const p = overrides.page ?? page;
+    const pp = overrides.paidPage ?? paidPage;
+    if (p > 1) params.set("page", String(p));
+    if (pp > 1) params.set("paidPage", String(pp));
+    const qs = params.toString();
+    return qs ? `/receivables?${qs}` : "/receivables";
+  }
+  const pageHref = (p: number) => buildHref({ page: p });
+  const paidPageHref = (p: number) => buildHref({ paidPage: p });
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
@@ -180,6 +194,12 @@ export default async function ReceivablesPage({
             ))}
           </div>
         )}
+        <Pagination
+          currentPage={paidPage}
+          totalCount={paidCount}
+          pageSize={PAGE_SIZE}
+          buildHref={paidPageHref}
+        />
     </div>
   );
 }
