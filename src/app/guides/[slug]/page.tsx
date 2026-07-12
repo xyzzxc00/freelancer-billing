@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { getAllGuides, getGuide } from "@/lib/guides";
 import { siteName, siteUrl } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
+import { ShareRow } from "@/components/ShareRow";
 
 export async function generateStaticParams() {
   const guides = await getAllGuides();
@@ -40,10 +41,20 @@ export default async function GuidePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [guide, supabase] = await Promise.all([getGuide(slug), createClient()]);
+  const [guide, allGuides, supabase] = await Promise.all([
+    getGuide(slug),
+    getAllGuides(),
+    createClient(),
+  ]);
   if (!guide) notFound();
   const { data: { session } } = await supabase.auth.getSession();
   const isLoggedIn = !!session;
+
+  const others = allGuides.filter((g) => g.slug !== slug);
+  const curated = guide.related
+    .map((s) => others.find((g) => g.slug === s))
+    .filter((g): g is (typeof others)[number] => Boolean(g));
+  const relatedGuides = (curated.length > 0 ? curated : others).slice(0, 3);
 
   const articleSchema = {
     "@context": "https://schema.org",
@@ -159,6 +170,30 @@ export default async function GuidePage({
             </Link>
           )}
         </div>
+
+        <div className="border-t border-border mt-6 pt-6">
+          <ShareRow url={`${siteUrl}/guides/${slug}`} title={guide.title} />
+        </div>
+
+        {relatedGuides.length > 0 && (
+          <div className="border-t border-border mt-8 pt-6">
+            <h2 className="text-base font-medium mb-3">延伸閱讀</h2>
+            <div className="flex flex-col gap-3">
+              {relatedGuides.map((g) => (
+                <Link
+                  key={g.slug}
+                  href={`/guides/${g.slug}`}
+                  className="block border border-border rounded-lg p-4 hover:bg-surface transition-colors"
+                >
+                  <p className="text-sm font-medium">{g.title}</p>
+                  <p className="text-xs text-foreground-muted mt-1 leading-relaxed">
+                    {g.description}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
 
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted mt-auto">

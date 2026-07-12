@@ -6,6 +6,7 @@ export interface GuideMeta {
   title: string;
   description: string;
   date: string; // YYYY-MM-DD
+  related: string[]; // 手動指定的相關文章 slug，用於文章頁「延伸閱讀」區塊
 }
 
 export interface Guide extends GuideMeta {
@@ -38,6 +39,7 @@ async function readGuide(fileName: string): Promise<Guide> {
     title: data.title ?? fileName,
     description: data.description ?? "",
     date: data.date ?? "",
+    related: data.related ? data.related.split(",").map((s) => s.trim()).filter(Boolean) : [],
     content: body.trim(),
   };
 }
@@ -52,7 +54,7 @@ export async function getAllGuides(): Promise<GuideMeta[]> {
   const guides = await Promise.all(files.map(readGuide));
   // 日期新到舊
   return guides
-    .map(({ slug, title, description, date }) => ({ slug, title, description, date }))
+    .map(({ slug, title, description, date, related }) => ({ slug, title, description, date, related }))
     .sort((a, b) => (a.date < b.date ? 1 : -1));
 }
 

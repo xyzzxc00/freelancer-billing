@@ -1,7 +1,8 @@
 ---
 title: 自由接案者怎麼記帳？SOHO 族最簡單的收支管理入門
 description: 接案收入不固定、支出又雜，到底該怎麼記帳？這篇用最簡單的方式教自由工作者管理收支、追蹤待收款，年底報稅不再手忙腳亂。
-date: 2026-03-12
+date: 2026-01-12
+related: how-to-write-a-quote, freelancer-tax-filing-guide, client-payment-follow-up
 ---
 
 接案族最頭痛的問題之一就是記帳。收入這個月多、下個月少，支出又東一筆軟體訂閱、西一筆設備，到了年底要報稅才發現帳一團亂。其實只要建立幾個簡單習慣，記帳可以很輕鬆。

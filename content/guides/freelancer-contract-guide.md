@@ -1,7 +1,8 @@
 ---
 title: 接案前要簽合約嗎？自由工作者合約該包含哪些條款
 description: 很多接案新手覺得簽合約很麻煩，但一旦出問題才知道有多重要。這篇整理自由接案合約的必備條款、常見地雷，以及沒有合約時怎麼自保。
-date: 2026-05-06
+date: 2026-03-03
+related: how-to-write-a-quote, deposit-percentage-guide, client-payment-follow-up
 ---
 
 「這個客戶看起來很好談，應該不用簽合約吧？」

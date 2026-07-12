@@ -1,7 +1,8 @@
 ---
 title: 勞務報酬單是什麼？10% 代扣與二代健保怎麼算
 description: 客戶說會幫你「代扣 10%」，實拿金額卻比想像中少？搞懂勞務報酬單、10% 扣繳與二代健保補充保費的計算方式，報價前先算清楚。
-date: 2026-06-10
+date: 2026-04-18
+related: freelancer-tax-filing-guide, freelancer-income-tax-guide, freelancer-invoice-guide
 ---
 
 接案報價談好 5 萬，結果匯款只收到 4 萬多，第一次遇到的接案族常常嚇一跳。這不是客戶少給，而是「勞務報酬」的扣繳規則——這篇把計算方式講清楚，讓你報價時就能算出真正到手的金額。

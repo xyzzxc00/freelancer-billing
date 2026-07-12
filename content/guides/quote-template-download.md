@@ -1,7 +1,8 @@
 ---
 title: 接案報價單範本下載？其實你不一定需要 Word/Excel 檔
 description: 找報價單範本，多半是想省下自己排版的時間。這篇整理一張合格報價單該有哪些欄位，以及比下載範本更快的做法。
-date: 2026-06-26
+date: 2026-05-27
+related: how-to-write-a-quote, freelancer-contract-guide, deposit-percentage-guide
 ---
 
 搜尋「報價單範本」的人，通常不是想要一份漂亮的表格，而是不知道報價單該包含哪些內容、不想每次都重新排版。這篇先講清楚報價單該有什麼，再說一個比下載 Word/Excel 檔更省事的做法。

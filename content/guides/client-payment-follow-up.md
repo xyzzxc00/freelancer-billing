@@ -1,7 +1,8 @@
 ---
 title: 客戶拖款不付錢怎麼辦？接案催款步驟
 description: 案子做完了，款項卻遲遲沒進來。與其尷尬不知道怎麼開口，這篇整理一套接案族可以照做的催款步驟，從溫和提醒到最後手段都涵蓋。
-date: 2026-07-03
+date: 2026-06-15
+related: deposit-dispute-guide, deposit-percentage-guide, freelancer-bookkeeping-basics
 ---
 
 接案最怕的不是被殺價，而是做完之後客戶拖款不付。很多人不知道怎麼開口催款，怕破壞關係，結果一拖就是好幾個月。其實催款有一套循序漸進的步驟，照著做既專業又不失禮貌。
