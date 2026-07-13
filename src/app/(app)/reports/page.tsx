@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { ReportsBarChart } from "@/components/ReportsBarChart";
+import { CategoryBreakdown } from "@/components/CategoryBreakdown";
+import { buildCategoryBreakdown } from "@/lib/category-breakdown";
 
 import { currency } from "@/lib/currency";
 
@@ -28,10 +30,25 @@ export default async function ReportsPage({
   const rangeStart = new Date(year, fromMonth - 1, 1);
   const rangeEnd = new Date(year, toMonth, 1);
 
-  const yearTransactions = await prisma.transaction.findMany({
-    where: { userId, occurredAt: { gte: rangeStart, lt: rangeEnd } },
-    select: { type: true, amount: true, occurredAt: true },
-  });
+  const [yearTransactions, expenseByCategory, incomeByCategory, expenseCategories, incomeCategories] =
+    await Promise.all([
+      prisma.transaction.findMany({
+        where: { userId, occurredAt: { gte: rangeStart, lt: rangeEnd } },
+        select: { type: true, amount: true, occurredAt: true },
+      }),
+      prisma.transaction.groupBy({
+        by: ["categoryId"],
+        where: { userId, type: "EXPENSE", occurredAt: { gte: rangeStart, lt: rangeEnd } },
+        _sum: { amount: true },
+      }),
+      prisma.transaction.groupBy({
+        by: ["incomeCategoryId"],
+        where: { userId, type: "INCOME", occurredAt: { gte: rangeStart, lt: rangeEnd } },
+        _sum: { amount: true },
+      }),
+      prisma.expenseCategory.findMany({ where: { userId }, select: { id: true, name: true } }),
+      prisma.incomeCategory.findMany({ where: { userId }, select: { id: true, name: true } }),
+    ]);
 
   const monthly = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, income: 0, expense: 0 }));
   for (const t of yearTransactions) {
@@ -42,6 +59,17 @@ export default async function ReportsPage({
   const filtered = monthly.filter((m) => m.month >= fromMonth && m.month <= toMonth);
   const yearIncome = filtered.reduce((sum, m) => sum + m.income, 0);
   const yearExpense = filtered.reduce((sum, m) => sum + m.expense, 0);
+
+  const expenseCategoryNames = new Map(expenseCategories.map((c) => [c.id, c.name]));
+  const incomeCategoryNames = new Map(incomeCategories.map((c) => [c.id, c.name]));
+  const expenseBreakdown = buildCategoryBreakdown(
+    expenseByCategory.map((g) => ({ categoryId: g.categoryId, amount: Number(g._sum.amount ?? 0) })),
+    expenseCategoryNames
+  );
+  const incomeBreakdown = buildCategoryBreakdown(
+    incomeByCategory.map((g) => ({ categoryId: g.incomeCategoryId, amount: Number(g._sum.amount ?? 0) })),
+    incomeCategoryNames
+  );
 
   function quarterHref(q: { from: number; to: number }) {
     const p = new URLSearchParams({ year: String(year), from: String(q.from), to: String(q.to) });
@@ -131,6 +159,11 @@ export default async function ReportsPage({
       </div>
 
       <ReportsBarChart data={filtered} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-7">
+        <CategoryBreakdown title="支出分類佔比" data={expenseBreakdown} tone="danger" />
+        <CategoryBreakdown title="收入分類佔比" data={incomeBreakdown} tone="success" />
+      </div>
 
       <h2 className="text-base font-medium mb-3">月度彙整</h2>
 

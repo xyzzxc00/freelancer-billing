@@ -2,7 +2,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
-import { startOfTodayTaipei, taipeiMonthRange } from "@/lib/taipei";
+import { startOfTodayTaipei, taipeiMonthRange, taipeiNow } from "@/lib/taipei";
+import { buildCashFlowForecast } from "@/lib/cashflow-forecast";
 
 import { currency, formatDate } from "@/lib/currency";
 
@@ -86,6 +87,90 @@ async function Stats() {
           </p>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Cash Flow Forecast ──────────────────────────────────────────────────────────
+
+async function CashFlowForecast() {
+  const userId = await requireUserId();
+  const now = taipeiNow();
+  const monthCount = 3;
+
+  const [pendingReceivables, noDueDateCount, recurringIncomeAgg, recurringExpenseAgg] =
+    await Promise.all([
+      prisma.receivable.findMany({
+        where: { userId, status: "PENDING", dueDate: { not: null } },
+        select: { amount: true, dueDate: true },
+      }),
+      prisma.receivable.count({
+        where: { userId, status: "PENDING", dueDate: null },
+      }),
+      prisma.recurringIncome.aggregate({
+        where: { userId, active: true },
+        _sum: { amount: true },
+      }),
+      prisma.recurringExpense.aggregate({
+        where: { userId, active: true },
+        _sum: { amount: true },
+      }),
+    ]);
+
+  const recurringIncomeTotal = Number(recurringIncomeAgg._sum.amount ?? 0);
+  const recurringExpenseTotal = Number(recurringExpenseAgg._sum.amount ?? 0);
+  const currentYear = now.getUTCFullYear();
+
+  const forecast = buildCashFlowForecast({
+    now,
+    monthCount,
+    pendingReceivables: pendingReceivables
+      .filter((r) => r.dueDate !== null)
+      .map((r) => ({ amount: Number(r.amount), dueDate: r.dueDate as Date })),
+    recurringIncomeTotal,
+    recurringExpenseTotal,
+  });
+
+  return (
+    <div className="mb-8">
+      <div className="flex items-baseline justify-between mb-2.5">
+        <h2 className="text-lg font-medium">未來 3 個月現金流預測</h2>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {forecast.map((m, i) => (
+          <div key={i} className="bg-surface rounded-lg p-4">
+            <p className="text-xs text-foreground-muted mb-2">
+              {m.year === currentYear ? `${m.month + 1} 月` : `${m.year} / ${m.month + 1} 月`}
+              {i === 0 && "（本月）"}
+            </p>
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span className="text-foreground-muted">已知收入</span>
+              <span className="font-mono text-[color:var(--success-fg)]">
+                +{currency.format(m.knownIn)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-foreground-muted">已知支出</span>
+              <span className="font-mono text-[color:var(--danger-fg)]">
+                -{currency.format(m.knownOut)}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm pt-2 border-t border-border">
+              <span className="font-medium">預估淨額</span>
+              <span
+                className={`font-mono font-medium ${m.net < 0 ? "text-[color:var(--danger-fg)]" : ""}`}
+              >
+                {currency.format(m.net)}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-foreground-muted mt-2.5">
+        僅計入已設定到期日的待收款與目前啟用中的定期收支，不包含尚未成立的新案子。
+        {noDueDateCount > 0 &&
+          `另有 ${noDueDateCount} 筆待收款沒有設定到期日，未計入此預測。`}
+      </p>
     </div>
   );
 }
@@ -254,6 +339,23 @@ function StatsSkeleton() {
   );
 }
 
+function CashFlowSkeleton() {
+  return (
+    <div className="mb-8">
+      <div className="h-6 w-40 bg-foreground-muted/20 rounded mb-2.5 animate-pulse" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="bg-surface rounded-lg p-4 animate-pulse">
+            <div className="h-3 w-12 bg-foreground-muted/20 rounded mb-3" />
+            <div className="h-4 w-full bg-foreground-muted/20 rounded mb-2" />
+            <div className="h-4 w-full bg-foreground-muted/20 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function CardsSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div className="flex flex-col gap-2 mb-8">
@@ -274,6 +376,10 @@ export default function DashboardPage() {
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
       <Suspense fallback={<StatsSkeleton />}>
         <Stats />
+      </Suspense>
+
+      <Suspense fallback={<CashFlowSkeleton />}>
+        <CashFlowForecast />
       </Suspense>
 
       <Suspense fallback={null}>
