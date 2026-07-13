@@ -65,6 +65,29 @@ describe("sendEmail", () => {
     });
   });
 
+  it("resend.emails.send() 回傳 { error } 而非拋例外時（例如 429），仍要判定失敗並重試", async () => {
+    process.env.RESEND_API_KEY = "re_test_key";
+    // 真實的 Resend SDK 對 API 錯誤（含 429）不會 reject，而是 resolve 成 { data: null, error }
+    mockSend.mockResolvedValue({
+      data: null,
+      error: { name: "rate_limit_exceeded", message: "Too many requests" },
+    });
+
+    const { sendEmail } = await import("../email");
+    const result = await sendEmail({ to: "test@example.com", subject: "測試", html: "<p>內容</p>" });
+
+    expect(result).toBe(false);
+    expect(mockSend).toHaveBeenCalledTimes(2); // 有被判定失敗才會重試
+    expect(mockCreate).toHaveBeenCalledWith({
+      data: {
+        to: "test@example.com",
+        subject: "測試",
+        status: "failed",
+        error: expect.stringContaining("rate_limit_exceeded"),
+      },
+    });
+  });
+
   it("emailLog 寫入失敗時不影響寄信結果，也不會重寄", async () => {
     process.env.RESEND_API_KEY = "re_test_key";
     mockSend.mockResolvedValue({ id: "msg_123" });
