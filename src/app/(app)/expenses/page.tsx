@@ -28,7 +28,7 @@ export default async function ExpensesPage({
   };
 
   // 統計用的全年/全月資料只取必要欄位，避免一次撈整批完整紀錄
-  const [allForStats, totalCount, expenses] = await Promise.all([
+  const [allForStats, totalCount, expenses, activeRecurring] = await Promise.all([
     prisma.transaction.findMany({
       where,
       select: { amount: true, category: true, expenseCategory: { select: { name: true } } },
@@ -41,7 +41,12 @@ export default async function ExpensesPage({
       skip: (page - 1) * PAGE_SIZE,
       include: { expenseCategory: true },
     }),
+    prisma.recurringExpense.findMany({
+      where: { userId, active: true },
+      orderBy: { dayOfMonth: "asc" },
+    }),
   ]);
+  const recurringMonthlyTotal = activeRecurring.reduce((sum, r) => sum + Number(r.amount), 0);
 
   const total = allForStats.reduce((sum, e) => sum + Number(e.amount), 0);
 
@@ -127,6 +132,29 @@ export default async function ExpensesPage({
         </p>
         <p className="text-2xl font-medium">{currency.format(total)}</p>
       </div>
+
+      {activeRecurring.length > 0 && (
+        <div className="bg-surface rounded-lg p-4 mb-7">
+          <div className="flex items-baseline justify-between mb-2.5">
+            <p className="text-sm font-medium">
+              定期支出（每月合計 {currency.format(recurringMonthlyTotal)}）
+            </p>
+            <Link href="/expenses/recurring" className="text-xs text-foreground-muted hover:text-foreground">
+              管理 →
+            </Link>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {activeRecurring.map((r) => (
+              <div key={r.id} className="flex items-center justify-between text-sm">
+                <span className="text-foreground-muted truncate">
+                  {r.name} · 每月 {r.dayOfMonth} 號
+                </span>
+                <span className="font-mono shrink-0 ml-2">{currency.format(Number(r.amount))}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <h2 className="text-base font-medium mb-3">分類佔比</h2>
       {categoryRows.length === 0 ? (
