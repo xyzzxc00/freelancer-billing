@@ -35,6 +35,7 @@ export async function markReceivablePaidAction(receivableId: string) {
           category: "接案收入",
           note: receivable.quote.title,
           occurredAt: new Date(),
+          receivableId: receivable.id,
         },
       });
     });

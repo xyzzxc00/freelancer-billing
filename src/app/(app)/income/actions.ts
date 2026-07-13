@@ -76,9 +76,28 @@ export async function updateIncomeAction(
 
 export async function deleteIncomeAction(transactionId: string) {
   const userId = await requireUserId();
+  let revertedReceivable = false;
 
   try {
-    await prisma.transaction.deleteMany({ where: { id: transactionId, userId, type: "INCOME" } });
+    await prisma.$transaction(async (tx) => {
+      const transaction = await tx.transaction.findFirst({
+        where: { id: transactionId, userId, type: "INCOME" },
+        select: { receivableId: true },
+      });
+      if (!transaction) return;
+
+      await tx.transaction.delete({ where: { id: transactionId } });
+
+      // 這筆收入是標記應收款「已收款」時自動建立的，刪除收入等於撤銷那個標記，
+      // 應收款要跟著改回待收款，不然帳上會出現「已收款但找不到收入記錄」的斷層。
+      if (transaction.receivableId) {
+        await tx.receivable.update({
+          where: { id: transaction.receivableId },
+          data: { status: "PENDING", paidAt: null },
+        });
+        revertedReceivable = true;
+      }
+    });
   } catch (err) {
     console.error("刪除收入失敗:", err);
     redirectWithToast("/income", GENERIC_ACTION_ERROR, "error");
@@ -86,5 +105,9 @@ export async function deleteIncomeAction(transactionId: string) {
 
   revalidatePath("/income");
   revalidatePath("/dashboard");
-  redirectWithToast("/income", "已刪除收入");
+  revalidatePath("/receivables");
+  redirectWithToast(
+    "/income",
+    revertedReceivable ? "已刪除收入，對應的應收款已改回待收款" : "已刪除收入"
+  );
 }

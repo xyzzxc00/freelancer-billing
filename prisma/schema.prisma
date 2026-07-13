@@ -131,6 +131,7 @@ model Receivable {
 
   profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
   quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  transaction Transaction?
 
   @@index([userId])
   @@index([quoteId])
@@ -179,12 +180,14 @@ model Transaction {
   incomeCategoryId String? // 收入分類
   note            String?
   receiptUrl      String? // 支出憑證照片，Supabase Storage 的 object path（非完整 URL）
+  receivableId    String? @unique // 由 markReceivablePaidAction 建立時回填，用來讓刪除這筆收入時能連動把應收款改回待收款
   occurredAt      DateTime
   createdAt       DateTime        @default(now())
 
   profile         Profile          @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenseCategory ExpenseCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   incomeCategory  IncomeCategory?  @relation(fields: [incomeCategoryId], references: [id], onDelete: SetNull)
+  receivable      Receivable?      @relation(fields: [receivableId], references: [id], onDelete: SetNull)
 
   @@index([userId])
   @@index([occurredAt])
