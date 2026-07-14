@@ -13,11 +13,13 @@ description: 對這個 Next.js 記帳/接案系統做全面性程式碼與基礎
 
 ## 執行步驟
 
-1. 用 `Agent` 工具呼叫一個 `Explore`（或 `general-purpose`，視找到的檔案複雜度而定）agent，把下方「調查範圍」整段交給它作為 prompt。提醒它：
+0. **先讀記憶裡的 `completed-optimizations.md`**（在 memory 目錄，MEMORY.md 索引有連結）。那份清單記錄了已完成的優化、已查核過的安全結論、刻意不做的項目，以及**健檢誤判陷阱**（例如：此專案的 middleware 叫 `src/proxy.ts`，Next.js 16 改名；PDF/匯出路由在 `(app)` group 下有被保護）。清單上已列的項目不要重新調查、不要再列進報告；誤判陷阱要摘要進 Explore agent 的 prompt 裡，避免 agent 誤報。
+1. 用 `Agent` 工具呼叫一個 `Explore`（或 `general-purpose`，視找到的檔案複雜度而定）agent，把下方「調查範圍」整段（加上步驟 0 摘出的「已完成項目 + 誤判陷阱」）交給它作為 prompt。提醒它：
    - 只需要回報具體發現（檔案路徑 + 行號 + 簡短問題描述），不用修代碼。
    - 用條列式整理，每一大類底下列出發現，整體控制在合理長度（約 2000-2500 字），避免把整段程式碼貼回來。
-2. agent 完成後，根據它的結果在主對話中整理成最終報告（見下方「報告格式」），標出優先順序，並詢問使用者想先處理哪一塊。
+2. agent 完成後，根據它的結果在主對話中整理成最終報告（見下方「報告格式」），標出優先順序，並詢問使用者想先處理哪一塊。回報前再跟 completed-optimizations 清單比對一次，agent 若還是報了已完成項目就從報告裡剔除。
 3. 不要自動開始修復——這個 skill 的輸出是診斷報告，下一步交給使用者決定。
+4. 修復完成、使用者確認後，把新完成的項目補進記憶裡的 `completed-optimizations.md`，讓下次健檢不重工。
 
 ## 調查範圍（交給 Explore agent 的內容）
 
@@ -31,7 +33,7 @@ description: 對這個 Next.js 記帳/接案系統做全面性程式碼與基礎
    - 檢查 RLS migration 是否存在，以及是否有資料表缺少 RLS 保護。
    - 檢查環境變數使用方式（.env.example 是否完整對應）。
 
-3. **驗證/Auth**：OAuth、session 管理、middleware（或同等用途的檔案）的保護路由邏輯是否完整。
+3. **驗證/Auth**：OAuth、session 管理、`src/proxy.ts` 的保護路由邏輯是否完整（此專案的 Next.js 16 已把 middleware.ts 改名為 proxy.ts，不要因為找不到 middleware.ts 就判定缺認證層）。
 
 4. **API Routes / Server Actions**：列出所有 API routes 與主要 server actions，檢查輸入驗證、錯誤處理一致性、是否有敏感資訊洩漏。
 
