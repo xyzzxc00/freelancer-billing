@@ -27,12 +27,14 @@ export default async function ExpensesPage({
     occurredAt: { gte: rangeStart, lt: rangeEnd },
   };
 
-  // 統計用的全年/全月資料只取必要欄位，避免一次撈整批完整紀錄
-  const [allForStats, totalCount, expenses, activeRecurring] = await Promise.all([
-    prisma.transaction.findMany({
+  // 統計交給 DB groupBy，避免撈整年明細回來只為了加總
+  const [statsGroups, categories, totalCount, expenses, activeRecurring] = await Promise.all([
+    prisma.transaction.groupBy({
+      by: ["categoryId", "category"],
       where,
-      select: { amount: true, category: true, expenseCategory: { select: { name: true } } },
+      _sum: { amount: true },
     }),
+    prisma.expenseCategory.findMany({ where: { userId }, select: { id: true, name: true } }),
     prisma.transaction.count({ where }),
     prisma.transaction.findMany({
       where,
@@ -48,12 +50,15 @@ export default async function ExpensesPage({
   ]);
   const recurringMonthlyTotal = activeRecurring.reduce((sum, r) => sum + Number(r.amount), 0);
 
-  const total = allForStats.reduce((sum, e) => sum + Number(e.amount), 0);
-
+  const categoryNames = new Map(categories.map((c) => [c.id, c.name]));
+  let total = 0;
   const byCategory = new Map<string, number>();
-  for (const e of allForStats) {
-    const label = e.expenseCategory?.name ?? e.category ?? "未分類";
-    byCategory.set(label, (byCategory.get(label) ?? 0) + Number(e.amount));
+  for (const g of statsGroups) {
+    const amount = Number(g._sum.amount ?? 0);
+    total += amount;
+    const label =
+      (g.categoryId ? categoryNames.get(g.categoryId) : undefined) ?? g.category ?? "未分類";
+    byCategory.set(label, (byCategory.get(label) ?? 0) + amount);
   }
   const categoryRows = Array.from(byCategory.entries()).sort((a, b) => b[1] - a[1]);
 

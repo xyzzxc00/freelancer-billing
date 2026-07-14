@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { sendEmail } from "@/lib/email";
+import { escapeHtml } from "@/lib/html";
 import { extractEmail } from "@/lib/extract-email";
 import { currency } from "@/lib/currency";
 import { GENERIC_ACTION_ERROR } from "@/lib/action-state";
@@ -70,7 +71,7 @@ export async function sendDunningEmailAction(receivableId: string) {
   const ok = await sendEmail({
     to: clientEmail,
     subject: `款項提醒：${receivable.quote.title}${label}`,
-    html: `<p>您好，</p><p>提醒您「${receivable.quote.title}」${label}尚有 ${currency.format(Number(receivable.amount))} 款項待付款，麻煩撥空處理，謝謝！</p>`,
+    html: `<p>您好，</p><p>提醒您「${escapeHtml(receivable.quote.title)}」${label}尚有 ${currency.format(Number(receivable.amount))} 款項待付款，麻煩撥空處理，謝謝！</p>`,
   });
 
   revalidatePath("/receivables");

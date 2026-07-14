@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
+import { escapeHtml } from "@/lib/html";
 import { calculateDepositSplit } from "@/lib/deposit";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
@@ -23,7 +24,7 @@ export async function recordQuoteViewedAction(token: string) {
         await sendEmail({
           to: quote.profile.email,
           subject: `${quote.client.name} 已開啟你的報價單「${quote.title}」`,
-          html: `<p>${quote.client.name} 剛剛開啟了報價單「${quote.title}」的連結。</p>`,
+          html: `<p>${escapeHtml(quote.client.name)} 剛剛開啟了報價單「${escapeHtml(quote.title)}」的連結。</p>`,
         });
       }
     }
@@ -120,7 +121,7 @@ export async function respondToQuoteAction(
     await sendEmail({
       to: quote.profile.email,
       subject: `${quote.client.name} ${verb}你的報價單「${quote.title}」`,
-      html: `<p>${quote.client.name} 剛剛${verb}你的報價單「${quote.title}」。</p>`,
+      html: `<p>${escapeHtml(quote.client.name)} 剛剛${verb}你的報價單「${escapeHtml(quote.title)}」。</p>`,
     });
   } catch (err) {
     console.error("報價單回覆通知信寄送失敗:", err);

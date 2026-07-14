@@ -170,15 +170,23 @@ function LoginForm() {
         )}
 
         {mode === "signin" && (
-          <label className="flex items-center gap-2 text-sm text-foreground-muted cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={rememberMe}
-              onChange={(e) => setRememberMe(e.target.checked)}
-              className="w-4 h-4 accent-accent"
-            />
-            記住帳號
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-sm text-foreground-muted cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 accent-accent"
+              />
+              記住帳號
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-sm text-foreground-muted hover:text-foreground"
+            >
+              忘記密碼？
+            </Link>
+          </div>
         )}
 
         {error && <p className="text-sm text-[color:var(--danger-fg)]">{error}</p>}

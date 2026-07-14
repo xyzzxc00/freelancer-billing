@@ -7,10 +7,16 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { sendEmail } from "@/lib/email";
-import type { TaxMode } from "@/lib/tax";
+import { escapeHtml } from "@/lib/html";
+import { taxModeLabel, type TaxMode } from "@/lib/tax";
 import { calculateDepositSplit } from "@/lib/deposit";
 import { extractEmail } from "@/lib/extract-email";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
+
+function parseTaxMode(formData: FormData): TaxMode | null {
+  const raw = String(formData.get("taxMode") ?? "NONE");
+  return raw in taxModeLabel ? (raw as TaxMode) : null;
+}
 
 function parseDepositPercent(formData: FormData): { ok: true; value: number | null } | { ok: false; error: string } {
   const raw = String(formData.get("depositPercent") ?? "").trim();
@@ -85,7 +91,7 @@ export async function createQuoteAction(
 
   const clientId = String(formData.get("clientId") ?? "");
   const title = String(formData.get("title") ?? "").trim();
-  const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
+  const taxMode = parseTaxMode(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
@@ -95,6 +101,9 @@ export async function createQuoteAction(
   }
   if (!title) {
     return { error: "請填寫標題" };
+  }
+  if (!taxMode) {
+    return { error: "稅務方式不正確，請重新選擇" };
   }
   const parsed = parseItems(String(formData.get("items") ?? "[]"));
   if (!parsed.ok) {
@@ -106,6 +115,15 @@ export async function createQuoteAction(
     return { error: depositResult.error };
   }
   const depositPercent = depositResult.value;
+
+  // 確認客戶屬於目前使用者，避免把報價掛到別人的客戶上
+  const client = await prisma.client.findFirst({
+    where: { id: clientId, userId },
+    select: { id: true },
+  });
+  if (!client) {
+    return { error: "請選擇客戶" };
+  }
 
   let quote;
   try {
@@ -145,13 +163,16 @@ export async function updateQuoteItemsAction(
   const userId = await requireUserId();
 
   const title = String(formData.get("title") ?? "").trim();
-  const taxMode = String(formData.get("taxMode") ?? "NONE") as TaxMode;
+  const taxMode = parseTaxMode(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
 
   if (!title) {
     return { error: "請填寫標題" };
+  }
+  if (!taxMode) {
+    return { error: "稅務方式不正確，請重新選擇" };
   }
   const parsed = parseItems(String(formData.get("items") ?? "[]"));
   if (!parsed.ok) {
@@ -232,7 +253,7 @@ export async function markQuoteSentAction(quoteId: string) {
       await sendEmail({
         to: clientEmail,
         subject: `${senderName} 提供了一份報價單給你：${quote.title}`,
-        html: `<p>你好，</p><p>${senderName} 提供了一份報價單給你：<strong>${quote.title}</strong></p><p><a href="${shareUrl}">點此查看報價單並回覆</a></p>`,
+        html: `<p>你好，</p><p>${escapeHtml(senderName)} 提供了一份報價單給你：<strong>${escapeHtml(quote.title)}</strong></p><p><a href="${shareUrl}">點此查看報價單並回覆</a></p>`,
       });
     } catch (err) {
       console.error("報價單通知信寄送失敗:", err);

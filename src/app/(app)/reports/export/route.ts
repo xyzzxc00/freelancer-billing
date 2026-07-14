@@ -15,14 +15,16 @@ export async function GET(request: NextRequest) {
       occurredAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) },
     },
     orderBy: { occurredAt: "asc" },
-    include: { expenseCategory: true },
+    include: { expenseCategory: true, incomeCategory: true },
   });
 
   const header = ["日期", "類型", "分類", "金額", "備註"];
   const rows = transactions.map((t) => [
     t.occurredAt.toISOString().slice(0, 10),
     t.type === "INCOME" ? "收入" : "支出",
-    t.expenseCategory?.name ?? t.category ?? "",
+    (t.type === "INCOME" ? t.incomeCategory?.name : t.expenseCategory?.name) ??
+      t.category ??
+      "",
     String(t.amount),
     t.note ?? "",
   ]);

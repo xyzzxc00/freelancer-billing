@@ -10,6 +10,9 @@ export async function updateProfileAction(formData: FormData) {
   const userId = await requireUserId();
 
   const name = String(formData.get("name") ?? "").trim();
+  if (name.length > 100) {
+    redirectWithToast("/settings", "名稱請控制在 100 字以內", "error");
+  }
 
   try {
     await prisma.profile.update({
@@ -32,6 +35,13 @@ export async function updateBankInfoAction(formData: FormData) {
   const bankBranch = String(formData.get("bankBranch") ?? "").trim() || null;
   const bankAccount = String(formData.get("bankAccount") ?? "").trim() || null;
   const bankAccountHolder = String(formData.get("bankAccountHolder") ?? "").trim() || null;
+
+  const tooLong = [bankName, bankBranch, bankAccount, bankAccountHolder].some(
+    (v) => v !== null && v.length > 100
+  );
+  if (tooLong) {
+    redirectWithToast("/settings", "每個欄位請控制在 100 字以內", "error");
+  }
 
   try {
     await prisma.profile.update({
