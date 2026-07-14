@@ -47,12 +47,9 @@ const navItems = [
     label: "報表",
     icon: (<path d="M5 19V10M11 19V5M17 19v-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />),
   },
-  {
-    href: "/guides",
-    label: "知識庫",
-    icon: (<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></>),
-  },
 ];
+
+const guidesIcon = (<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></>);
 
 function Icon({ children }: { children: React.ReactNode }) {
   return (
@@ -197,6 +194,16 @@ export function Sidebar({
       <p className="px-3 py-2 text-sm font-medium truncate border-b border-border mb-1">
         {displayName}
       </p>
+      <a
+        href="/guides"
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => setUserMenuOpen(false)}
+        className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-surface transition-colors"
+      >
+        <Icon>{guidesIcon}</Icon>
+        知識庫
+      </a>
       <Link
         href="/settings"
         onClick={() => setUserMenuOpen(false)}
@@ -355,6 +362,15 @@ export function Sidebar({
                 {avatar("md")}
                 <span className="text-sm truncate text-foreground-muted">{displayName}</span>
               </div>
+              <a
+                href="/guides"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-muted hover:bg-surface rounded-lg transition-colors"
+              >
+                知識庫
+              </a>
               <Link href="/settings" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-muted hover:bg-surface rounded-lg transition-colors">
                 帳戶設定
               </Link>
