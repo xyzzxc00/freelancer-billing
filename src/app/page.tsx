@@ -35,31 +35,37 @@ const faqs = [
   },
 ];
 
+// SoftwareApplication 與 FAQPage 各自作為頂層節點，
+// FAQPage 巢狀在 mainEntity 底下的話 Google 不保證解析得到
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  name: siteName,
-  url: siteUrl,
-  applicationCategory: "BusinessApplication",
-  operatingSystem: "Web",
-  description:
-    "給自由接案者跟小型工作室的輕量記帳與報價工具：開報價單、線上簽署、追蹤待收款、記錄收支，年度報表一鍵匯出。",
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "TWD",
-  },
-  mainEntity: {
-    "@type": "FAQPage",
-    mainEntity: faqs.map((f) => ({
-      "@type": "Question",
-      name: f.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: f.answer,
+  "@graph": [
+    {
+      "@type": "SoftwareApplication",
+      name: siteName,
+      url: siteUrl,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "給自由接案者跟小型工作室的輕量記帳與報價工具：開報價單、線上簽署、追蹤待收款、記錄收支，年度報表一鍵匯出。",
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "TWD",
       },
-    })),
-  },
+    },
+    {
+      "@type": "FAQPage",
+      mainEntity: faqs.map((f) => ({
+        "@type": "Question",
+        name: f.question,
+        acceptedAnswer: {
+          "@type": "Answer",
+          text: f.answer,
+        },
+      })),
+    },
+  ],
 };
 
 const features = [

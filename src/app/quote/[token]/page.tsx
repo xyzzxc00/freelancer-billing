@@ -1,6 +1,12 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { calculateTax } from "@/lib/tax";
+
+// 分享頁含客戶名稱與報價金額，連結若外流不能被搜尋引擎收錄
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 import { QuoteViewTracker } from "@/components/QuoteViewTracker";
 import { QuoteResponseActions } from "@/components/QuoteResponseActions";
 import { respondToQuoteAction } from "../actions";

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { getAllGuides, getGuide } from "@/lib/guides";
+import { extractFaq } from "@/lib/guide-faq";
 import { siteName, siteUrl } from "@/lib/site";
 import { createClient } from "@/lib/supabase/server";
 import { ShareRow } from "@/components/ShareRow";
@@ -56,23 +57,51 @@ export default async function GuidePage({
     .filter((g): g is (typeof others)[number] => Boolean(g));
   const relatedGuides = (curated.length > 0 ? curated : others).slice(0, 3);
 
-  const articleSchema = {
+  const faq = extractFaq(guide.content);
+
+  // Article / BreadcrumbList / FAQPage 各自作為頂層節點放進 @graph，
+  // 巢狀在其他 schema 底下的話 Google 不保證解析得到
+  const structuredData = {
     "@context": "https://schema.org",
-    "@type": "Article",
-    headline: guide.title,
-    description: guide.description,
-    datePublished: guide.date || undefined,
-    dateModified: guide.date || undefined,
-    author: { "@type": "Organization", name: siteName },
-    publisher: { "@type": "Organization", name: siteName },
-    mainEntityOfPage: `${siteUrl}/guides/${slug}`,
+    "@graph": [
+      {
+        "@type": "Article",
+        headline: guide.title,
+        description: guide.description,
+        datePublished: guide.date || undefined,
+        dateModified: guide.date || undefined,
+        author: { "@type": "Organization", name: siteName },
+        publisher: { "@type": "Organization", name: siteName },
+        mainEntityOfPage: `${siteUrl}/guides/${slug}`,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          { "@type": "ListItem", position: 1, name: siteName, item: siteUrl },
+          { "@type": "ListItem", position: 2, name: "接案知識庫", item: `${siteUrl}/guides` },
+          { "@type": "ListItem", position: 3, name: guide.title },
+        ],
+      },
+      ...(faq.length > 0
+        ? [
+            {
+              "@type": "FAQPage",
+              mainEntity: faq.map((f) => ({
+                "@type": "Question",
+                name: f.question,
+                acceptedAnswer: { "@type": "Answer", text: f.answer },
+              })),
+            },
+          ]
+        : []),
+    ],
   };
 
   return (
     <div className="flex flex-col flex-1">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
         <Link href="/" className="text-base font-medium">
