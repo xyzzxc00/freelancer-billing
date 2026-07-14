@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [main]
 
+# 最小權限原則：這個 workflow 只需要讀取程式碼，不需要寫入權限
+permissions:
+  contents: read
+
 jobs:
   lint-and-typecheck:
     name: Lint & Type Check
