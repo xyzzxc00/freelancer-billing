@@ -322,6 +322,12 @@ async function Onboarding() {
           <span className="text-sm group-hover:text-accent">記一筆收入或支出，年底報表自動彙整</span>
         </Link>
       </div>
+      <p className="text-xs text-foreground-muted mt-4">
+        使用上遇到問題或有任何建議？
+        <Link href="/feedback" className="text-accent hover:underline ml-1">
+          隨時告訴我們
+        </Link>
+      </p>
     </div>
   );
 }
