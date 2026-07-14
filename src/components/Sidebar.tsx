@@ -194,16 +194,14 @@ export function Sidebar({
       <p className="px-3 py-2 text-sm font-medium truncate border-b border-border mb-1">
         {displayName}
       </p>
-      <a
+      <Link
         href="/guides"
-        target="_blank"
-        rel="noopener noreferrer"
         onClick={() => setUserMenuOpen(false)}
         className="flex items-center gap-2.5 px-3 py-2 text-sm hover:bg-surface transition-colors"
       >
         <Icon>{guidesIcon}</Icon>
         知識庫
-      </a>
+      </Link>
       <Link
         href="/settings"
         onClick={() => setUserMenuOpen(false)}
@@ -362,15 +360,13 @@ export function Sidebar({
                 {avatar("md")}
                 <span className="text-sm truncate text-foreground-muted">{displayName}</span>
               </div>
-              <a
+              <Link
                 href="/guides"
-                target="_blank"
-                rel="noopener noreferrer"
                 onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-muted hover:bg-surface rounded-lg transition-colors"
               >
                 知識庫
-              </a>
+              </Link>
               <Link href="/settings" onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 px-3 py-2 text-sm text-foreground-muted hover:bg-surface rounded-lg transition-colors">
                 帳戶設定
               </Link>
