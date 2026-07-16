@@ -3,6 +3,10 @@ import { siteUrl } from "@/lib/site";
 import { getAllGuides } from "@/lib/guides";
 import { prisma } from "@/lib/prisma";
 
+// 現在會查詢接案頁的 slug 清單，不能再靜態生成——build 環境（CI）沒有正式資料庫連線，
+// 一律改成 request-time 渲染，正式站上正常是 Vercel serverless function 即時查詢。
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [guides, publicProfiles] = await Promise.all([
     getAllGuides(),
