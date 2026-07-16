@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard": "總覽",
+  "/inquiries": "詢價",
   "/clients": "客戶",
   "/quotes": "報價單",
   "/receivables": "待收款",

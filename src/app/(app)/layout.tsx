@@ -17,10 +17,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     redirect("/login");
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { id: data.user.id },
-    select: { name: true, email: true },
-  });
+  const [profile, incomeCategories, expenseCategories] = await Promise.all([
+    prisma.profile.findUnique({
+      where: { id: data.user.id },
+      select: { name: true, email: true },
+    }),
+    prisma.incomeCategory.findMany({
+      where: { userId: data.user.id },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+    prisma.expenseCategory.findMany({
+      where: { userId: data.user.id },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
 
   const meta = data.user.user_metadata ?? {};
   const displayName =
@@ -32,7 +44,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <Suspense fallback={null}>
         <ToastListener />
       </Suspense>
-      <Sidebar displayName={displayName} avatarUrl={avatarUrl} />
+      <Sidebar
+        displayName={displayName}
+        avatarUrl={avatarUrl}
+        incomeCategories={incomeCategories}
+        expenseCategories={expenseCategories}
+      />
       <div className="flex-1 min-w-0 flex flex-col">
         <ContentHeader />
         <main className="flex-1">

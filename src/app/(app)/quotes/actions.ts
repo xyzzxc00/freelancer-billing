@@ -93,6 +93,7 @@ export async function createQuoteAction(
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = parseTaxMode(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const terms = String(formData.get("terms") ?? "").trim() || null;
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
 
@@ -104,6 +105,9 @@ export async function createQuoteAction(
   }
   if (!taxMode) {
     return { error: "稅務方式不正確，請重新選擇" };
+  }
+  if (terms && terms.length > 2000) {
+    return { error: "合約條款請控制在 2000 字以內" };
   }
   const parsed = parseItems(String(formData.get("items") ?? "[]"));
   if (!parsed.ok) {
@@ -134,6 +138,7 @@ export async function createQuoteAction(
         title,
         taxMode,
         notes,
+        terms,
         expiresAt,
         depositPercent,
         items: {
@@ -165,6 +170,7 @@ export async function updateQuoteItemsAction(
   const title = String(formData.get("title") ?? "").trim();
   const taxMode = parseTaxMode(formData);
   const notes = String(formData.get("notes") ?? "").trim() || null;
+  const terms = String(formData.get("terms") ?? "").trim() || null;
   const expiresAtRaw = String(formData.get("expiresAt") ?? "").trim();
   const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
 
@@ -173,6 +179,9 @@ export async function updateQuoteItemsAction(
   }
   if (!taxMode) {
     return { error: "稅務方式不正確，請重新選擇" };
+  }
+  if (terms && terms.length > 2000) {
+    return { error: "合約條款請控制在 2000 字以內" };
   }
   const parsed = parseItems(String(formData.get("items") ?? "[]"));
   if (!parsed.ok) {
@@ -199,6 +208,7 @@ export async function updateQuoteItemsAction(
           title,
           taxMode,
           notes,
+          terms,
           expiresAt,
           depositPercent,
           items: {

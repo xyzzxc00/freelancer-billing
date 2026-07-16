@@ -25,6 +25,7 @@ export async function GET(
     quoteDate: quote.sentAt ?? quote.createdAt,
     expiresAt: quote.expiresAt,
     notes: quote.notes,
+    terms: quote.terms,
     items: quote.items.map((item) => ({
       name: item.name,
       unitPrice: Number(item.unitPrice),

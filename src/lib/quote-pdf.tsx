@@ -73,12 +73,13 @@ interface QuotePdfProps {
   quoteDate: Date;
   expiresAt?: Date | null;
   notes?: string | null;
+  terms?: string | null;
   items: { name: string; unitPrice: number; quantity: number }[];
   taxMode: TaxMode;
   bankInfo?: BankInfo | null;
 }
 
-function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, expiresAt, notes, items, taxMode, bankInfo }: QuotePdfProps) {
+function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, expiresAt, notes, terms, items, taxMode, bankInfo }: QuotePdfProps) {
   const subtotal = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
   const breakdown = calculateTax(subtotal, taxMode);
 
@@ -139,6 +140,14 @@ function QuotePdfDocument({ title, clientName, freelancerName, quoteDate, expire
           <View style={styles.notesSection}>
             <Text style={styles.notesLabel}>備註</Text>
             <Text style={styles.notesText}>{notes}</Text>
+          </View>
+        )}
+
+        {/* Terms */}
+        {terms && (
+          <View style={styles.notesSection}>
+            <Text style={styles.notesLabel}>合約條款</Text>
+            <Text style={styles.notesText}>{terms}</Text>
           </View>
         )}
 

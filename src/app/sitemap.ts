@@ -1,9 +1,13 @@
 import type { MetadataRoute } from "next";
 import { siteUrl } from "@/lib/site";
 import { getAllGuides } from "@/lib/guides";
+import { prisma } from "@/lib/prisma";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const guides = await getAllGuides();
+  const [guides, publicProfiles] = await Promise.all([
+    getAllGuides(),
+    prisma.profile.findMany({ where: { slug: { not: null } }, select: { slug: true } }),
+  ]);
 
   return [
     {
@@ -32,5 +36,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "yearly",
       priority: 0.3,
     },
+    ...publicProfiles.map((p) => ({
+      url: `${siteUrl}/p/${p.slug}`,
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    })),
   ];
 }

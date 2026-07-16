@@ -20,6 +20,9 @@ model Profile {
   bankBranch        String? // 分行
   bankAccount       String? // 帳號
   bankAccountHolder String? // 戶名
+  slug              String?  @unique // 接案頁網址（/p/[slug]），有設定才會公開這個頁面
+  bio               String? // 接案頁的自我介紹
+  services          String? // 接案頁的服務項目說明
   createdAt         DateTime @default(now())
 
   clients           Client[]
@@ -31,8 +34,24 @@ model Profile {
   recurringExpenses RecurringExpense[]
   incomeCategories  IncomeCategory[]
   recurringIncomes  RecurringIncome[]
+  inquiries         Inquiry[]
 
   @@map("profiles")
+}
+
+// 接案頁（/p/[slug]）收到的詢價，讓客戶不需要先認識你就能主動聯絡
+model Inquiry {
+  id        String   @id @default(uuid())
+  userId    String
+  name      String
+  contact   String // email/電話/Line 等聯絡方式，自由文字，比照 Client.contact
+  message   String
+  createdAt DateTime @default(now())
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("inquiries")
 }
 
 model Client {
@@ -71,6 +90,7 @@ model Quote {
   status         QuoteStatus @default(DRAFT)
   taxMode        TaxMode     @default(NONE)
   notes          String?     // 備註，會顯示在報價單底部
+  terms          String?     // 合約條款（付款條件、修改次數、交付時程等），客戶接受報價視為一併同意
   expiresAt      DateTime?   // 報價有效期限
   shareToken     String      @unique @default(uuid()) // 給客戶看的公開分享連結用
   depositPercent Int?        // 訂金比例 1-99，NULL 代表不分期，接受後整筆入應收款

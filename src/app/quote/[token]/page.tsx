@@ -174,6 +174,14 @@ export default async function PublicQuotePage({
             </div>
           )}
 
+          {/* Terms */}
+          {quote.terms && (
+            <div className="px-8 pb-6 border-t border-gray-100 pt-6">
+              <p className="text-xs text-gray-400 mb-2">合約條款</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">{quote.terms}</p>
+            </div>
+          )}
+
           {/* Totals */}
           <div className="px-8 pb-8">
             <div className="ml-auto w-full sm:w-72 border-t border-gray-200 pt-4 flex flex-col gap-2">
@@ -210,7 +218,11 @@ export default async function PublicQuotePage({
           {/* Action */}
           {quote.status === "SENT" && (
             <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-sm text-gray-500">請確認報價內容後選擇接受或拒絕</p>
+              <p className="text-sm text-gray-500">
+                {quote.terms
+                  ? "請確認報價內容與上方合約條款後選擇接受或拒絕，接受即表示同意條款內容"
+                  : "請確認報價內容後選擇接受或拒絕"}
+              </p>
               <QuoteResponseActions acceptAction={acceptAction} rejectAction={rejectAction} />
             </div>
           )}

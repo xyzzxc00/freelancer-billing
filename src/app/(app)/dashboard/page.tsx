@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { startOfTodayTaipei, taipeiMonthRange, taipeiNow } from "@/lib/taipei";
 import { buildCashFlowForecast } from "@/lib/cashflow-forecast";
+import { PublicPageNudge } from "@/components/PublicPageNudge";
 
 import { currency, formatDate } from "@/lib/currency";
 
@@ -173,6 +174,22 @@ async function CashFlowForecast() {
       </p>
     </div>
   );
+}
+
+// ── Public Page Nudge ────────────────────────────────────────────────────────
+
+async function PublicPageBanner() {
+  const userId = await requireUserId();
+
+  const [clientCount, profile] = await Promise.all([
+    prisma.client.count({ where: { userId } }),
+    prisma.profile.findUnique({ where: { id: userId }, select: { slug: true } }),
+  ]);
+
+  // 已經有客戶（代表過了最初的 Onboarding 階段）且還沒設定接案頁才提示
+  if (clientCount === 0 || profile?.slug) return null;
+
+  return <PublicPageNudge />;
 }
 
 // ── Recent Quotes ─────────────────────────────────────────────────────────────
@@ -390,6 +407,10 @@ export default function DashboardPage() {
 
       <Suspense fallback={null}>
         <Onboarding />
+      </Suspense>
+
+      <Suspense fallback={null}>
+        <PublicPageBanner />
       </Suspense>
 
       <Suspense fallback={<CardsSkeleton count={3} />}>

@@ -14,7 +14,7 @@ function defaultExpiresAt() {
 export default async function NewQuotePage() {
   const userId = await requireUserId();
 
-  const [clients, templates] = await Promise.all([
+  const [clients, templates, profile] = await Promise.all([
     prisma.client.findMany({
       where: { userId },
       orderBy: { name: "asc" },
@@ -25,7 +25,9 @@ export default async function NewQuotePage() {
       orderBy: { name: "asc" },
       include: { items: { orderBy: { sortOrder: "asc" } } },
     }),
+    prisma.profile.findUnique({ where: { id: userId }, select: { bankName: true } }),
   ]);
+  const hasBankInfo = Boolean(profile?.bankName);
 
   const templateOptions = templates.map((t) => ({
     id: t.id,
@@ -47,6 +49,15 @@ export default async function NewQuotePage() {
               取消
             </Link>
           </div>
+
+          {!hasBankInfo && (
+            <div className="bg-warning-bg text-warning-fg rounded-lg px-4 py-3 text-sm mb-4">
+              還沒設定收款帳戶，報價單與請款單不會顯示匯款資訊。
+              <Link href="/settings" className="underline hover:no-underline ml-1">
+                前往設定
+              </Link>
+            </div>
+          )}
 
           {clients.length === 0 ? (
             <p className="text-sm text-foreground-muted">

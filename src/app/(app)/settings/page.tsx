@@ -5,7 +5,8 @@ import { createClient } from "@/lib/supabase/server";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
 import { LogoutButton } from "@/components/LogoutButton";
 import { TipPanel } from "@/components/TipPanel";
-import { updateProfileAction, updateBankInfoAction } from "./actions";
+import { siteUrl } from "@/lib/site";
+import { updateProfileAction, updateBankInfoAction, updatePublicPageAction } from "./actions";
 
 export default async function SettingsPage() {
   const userId = await requireUserId();
@@ -107,6 +108,75 @@ export default async function SettingsPage() {
               >
                 儲存
               </button>
+            </form>
+          </section>
+
+          <section className="mb-8">
+            <h2 className="text-sm font-medium mb-3">接案頁</h2>
+            <p className="text-xs text-foreground-muted mb-3">
+              設定網址代稱後會產生一個公開頁面，展示你的服務內容並讓潛在客戶直接留下詢價，不需要對方先認識你。留空代稱代表不公開這個頁面。
+              {profile?.slug && (
+                <>
+                  {" "}目前網址：
+                  <a
+                    href={`/p/${profile.slug}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-accent hover:underline"
+                  >
+                    {siteUrl.replace(/^https?:\/\//, "")}/p/{profile.slug}
+                  </a>
+                </>
+              )}
+            </p>
+            <form action={updatePublicPageAction} className="flex flex-col gap-3">
+              <div>
+                <label className="text-sm text-foreground-muted block mb-1">網址代稱</label>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-sm text-foreground-muted whitespace-nowrap">/p/</span>
+                  <input
+                    name="slug"
+                    defaultValue={profile?.slug ?? ""}
+                    placeholder="例如：wang-design"
+                    pattern="[a-z0-9]+(-[a-z0-9]+)*"
+                    className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
+                  />
+                </div>
+                <p className="text-xs text-foreground-muted mt-1">
+                  只能用小寫英文字母、數字與連字號（-），3-30 個字。
+                </p>
+              </div>
+              <div>
+                <label className="text-sm text-foreground-muted block mb-1">自我介紹</label>
+                <textarea
+                  name="bio"
+                  defaultValue={profile?.bio ?? ""}
+                  placeholder="簡單介紹你自己與擅長的領域"
+                  rows={3}
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
+                />
+              </div>
+              <div>
+                <label className="text-sm text-foreground-muted block mb-1">服務項目</label>
+                <textarea
+                  name="services"
+                  defaultValue={profile?.services ?? ""}
+                  placeholder="例如：品牌識別設計、網站前端開發、Logo 設計…"
+                  rows={3}
+                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium self-start px-4 hover:opacity-80 active:scale-95 transition-all cursor-pointer"
+                >
+                  儲存
+                </button>
+                <Link href="/inquiries" className="text-sm text-foreground-muted hover:text-foreground">
+                  查看收到的詢價 →
+                </Link>
+              </div>
             </form>
           </section>
 

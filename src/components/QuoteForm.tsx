@@ -100,6 +100,7 @@ export function QuoteForm({
   defaultTaxMode = "NONE",
   defaultItems = [{ name: "", unitPrice: "", quantity: "1" }],
   defaultNotes = "",
+  defaultTerms = "",
   defaultExpiresAt = "",
   defaultDepositPercent = "",
   showClientField = true,
@@ -112,6 +113,7 @@ export function QuoteForm({
   defaultTaxMode?: TaxMode;
   defaultItems?: ItemRow[];
   defaultNotes?: string;
+  defaultTerms?: string;
   defaultExpiresAt?: string;
   defaultDepositPercent?: string;
   showClientField?: boolean;
@@ -278,6 +280,17 @@ export function QuoteForm({
           name="notes"
           defaultValue={defaultNotes}
           placeholder="付款方式、有效期限、其他說明…（選填）"
+          rows={3}
+          className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
+        />
+      </div>
+
+      <div>
+        <label className="text-sm text-foreground-muted block mb-1">合約條款（選填）</label>
+        <textarea
+          name="terms"
+          defaultValue={defaultTerms}
+          placeholder="例如：付款條件、修改次數上限、交付時程…客戶接受報價視為一併同意這些條款"
           rows={3}
           className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
         />

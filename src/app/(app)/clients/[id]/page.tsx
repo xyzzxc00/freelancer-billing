@@ -5,6 +5,8 @@ import { requireUserId } from "@/lib/auth";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { ClientForm } from "@/components/ClientForm";
 import { currency } from "@/lib/currency";
+import { startOfTodayTaipei } from "@/lib/taipei";
+import { buildPaymentPunctuality } from "@/lib/client-insights";
 import { updateClientAction, deleteClientAction } from "../actions";
 
 const statusLabel: Record<string, string> = {
@@ -22,35 +24,54 @@ export default async function ClientDetailPage({
   const { id } = await params;
   const userId = await requireUserId();
 
-  const client = await prisma.client.findFirst({
-    where: { id, userId },
-    include: {
-      quotes: {
-        orderBy: { createdAt: "desc" },
-        take: 20,
-        include: { items: true, receivables: true },
-      },
-    },
-  });
-
+  const client = await prisma.client.findFirst({ where: { id, userId } });
   if (!client) {
     notFound();
   }
 
+  const today = startOfTodayTaipei();
 
-  const totalRevenue = client.quotes
-    .filter((q) => q.status === "ACCEPTED")
-    .reduce(
-      (sum, q) => sum + q.items.reduce((s, i) => s + Number(i.unitPrice) * Number(i.quantity), 0),
-      0
-    );
-  const receivables = client.quotes.flatMap((q) => q.receivables);
-  const pendingAmount = receivables
-    .filter((r) => r.status === "PENDING")
-    .reduce((sum, r) => sum + Number(r.amount), 0);
-  const paidAmount = receivables
-    .filter((r) => r.status === "PAID")
-    .reduce((sum, r) => sum + Number(r.amount), 0);
+  // 統計一律算全歷史（不受「案件歷史」清單的 take:20 截斷影響）
+  const [recentQuotes, acceptedItems, pendingAgg, paidReceivables, overdueAgg] = await Promise.all([
+    prisma.quote.findMany({
+      where: { clientId: id, userId },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+      include: { items: true },
+    }),
+    prisma.quoteItem.findMany({
+      where: { quote: { clientId: id, userId, status: "ACCEPTED" } },
+      select: { unitPrice: true, quantity: true },
+    }),
+    prisma.receivable.aggregate({
+      where: { quote: { clientId: id, userId }, status: "PENDING" },
+      _sum: { amount: true },
+    }),
+    prisma.receivable.findMany({
+      where: { quote: { clientId: id, userId }, status: "PAID" },
+      select: { amount: true, dueDate: true, paidAt: true },
+    }),
+    prisma.receivable.aggregate({
+      where: { quote: { clientId: id, userId }, status: "PENDING", dueDate: { lt: today } },
+      _sum: { amount: true },
+      _count: true,
+    }),
+  ]);
+
+  const totalRevenue = acceptedItems.reduce(
+    (sum, i) => sum + Number(i.unitPrice) * Number(i.quantity),
+    0
+  );
+  const pendingAmount = Number(pendingAgg._sum.amount ?? 0);
+  const paidAmount = paidReceivables.reduce((sum, r) => sum + Number(r.amount), 0);
+
+  const punctuality = buildPaymentPunctuality(
+    paidReceivables
+      .filter((r): r is typeof r & { dueDate: Date; paidAt: Date } => r.dueDate !== null && r.paidAt !== null)
+      .map((r) => ({ dueDate: r.dueDate, paidAt: r.paidAt }))
+  );
+  const currentOverdueCount = overdueAgg._count;
+  const currentOverdueAmount = Number(overdueAgg._sum.amount ?? 0);
 
   const updateAction = updateClientAction.bind(null, client.id);
   const deleteAction = deleteClientAction.bind(null, client.id);
@@ -82,6 +103,30 @@ export default async function ClientDetailPage({
           </div>
         )}
 
+        {(punctuality.count > 0 || currentOverdueCount > 0) && (
+          <div className="bg-surface rounded-lg p-3 mb-5">
+            <p className="text-xs text-foreground-muted mb-1.5">付款狀況</p>
+            {punctuality.count > 0 && (
+              <p className="text-sm">
+                平均
+                {punctuality.avgDaysLate! > 0
+                  ? `晚 ${punctuality.avgDaysLate} 天付款`
+                  : punctuality.avgDaysLate! < 0
+                    ? `提前 ${-punctuality.avgDaysLate!} 天付款`
+                    : "準時付款"}
+                <span className="text-foreground-muted">
+                  （準時 {punctuality.onTimeCount} 次・逾期 {punctuality.lateCount} 次）
+                </span>
+              </p>
+            )}
+            {currentOverdueCount > 0 && (
+              <p className="text-sm text-[color:var(--danger-fg)] mt-1">
+                目前有 {currentOverdueCount} 筆逾期，共 {currency.format(currentOverdueAmount)}
+              </p>
+            )}
+          </div>
+        )}
+
         <ClientForm
           action={updateAction}
           defaultName={client.name}
@@ -101,11 +146,11 @@ export default async function ClientDetailPage({
         </div>
 
         <h2 className="text-base font-medium mt-8 mb-3">案件歷史</h2>
-        {client.quotes.length === 0 ? (
+        {recentQuotes.length === 0 ? (
           <p className="text-sm text-foreground-muted">這位客戶還沒有報價單。</p>
         ) : (
           <div className="flex flex-col gap-2">
-            {client.quotes.map((quote) => {
+            {recentQuotes.map((quote) => {
               const total = quote.items.reduce(
                 (sum, item) => sum + Number(item.unitPrice) * Number(item.quantity),
                 0

@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { QuickAddModal } from "@/components/QuickAddModal";
+import { quickAddTransactionAction } from "@/lib/quick-add-action";
+
+interface CategoryOption {
+  id: string;
+  name: string;
+}
 
 type Theme = "light" | "dark";
 
@@ -16,6 +23,11 @@ const navItems = [
     href: "/dashboard",
     label: "總覽",
     icon: (<path d="M4 11.5 12 4l8 7.5M6 10v9h12v-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />),
+  },
+  {
+    href: "/inquiries",
+    label: "詢價",
+    icon: (<><rect x="4" y="6" width="16" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.8" /><path d="M4 7.5l8 5.5 8-5.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></>),
   },
   {
     href: "/clients",
@@ -50,6 +62,14 @@ const navItems = [
 ];
 
 const guidesIcon = (<><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></>);
+
+function PlusIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function Icon({ children }: { children: React.ReactNode }) {
   return (
@@ -97,9 +117,13 @@ function NavLink({
 export function Sidebar({
   displayName,
   avatarUrl,
+  incomeCategories,
+  expenseCategories,
 }: {
   displayName: string;
   avatarUrl?: string | null;
+  incomeCategories: CategoryOption[];
+  expenseCategories: CategoryOption[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -107,6 +131,9 @@ export function Sidebar({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [theme, setTheme] = useState<Theme | null>(null);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [quickAddType, setQuickAddType] = useState<"expense" | "income">("expense");
+  const [quickAddState, quickAddFormAction] = useActionState(quickAddTransactionAction, undefined);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const userBtnRef = useRef<HTMLButtonElement>(null);
   const [menuPos, setMenuPos] = useState({ bottom: 0, left: 0, width: 224 });
@@ -122,6 +149,9 @@ export function Sidebar({
 
   // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMobileOpen(false); }, [pathname]);
+  // 換頁（含快速記帳成功送出後的 redirect）就自動關閉
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setQuickAddOpen(false); }, [pathname]);
 
   function openUserMenu() {
     if (userBtnRef.current) {
@@ -286,6 +316,19 @@ export function Sidebar({
           </button>
         </div>
 
+        {/* Quick add */}
+        <button
+          type="button"
+          onClick={() => setQuickAddOpen(true)}
+          title="快速記一筆"
+          className={`flex items-center gap-2 mb-3 rounded-lg bg-accent text-accent-foreground text-sm font-medium hover:opacity-90 active:scale-95 transition-all ${
+            collapsed ? "justify-center w-9 h-9 mx-auto" : "px-3 py-2"
+          }`}
+        >
+          <PlusIcon />
+          {!collapsed && "快速記一筆"}
+        </button>
+
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1">
           {!collapsed && <p className="text-xs text-foreground-muted px-3 mb-1">主選單</p>}
@@ -316,16 +359,26 @@ export function Sidebar({
           <div className="w-6 h-6 rounded-md bg-accent flex items-center justify-center text-accent-foreground text-xs font-bold">帳</div>
           <span className="text-sm font-medium">接案帳本</span>
         </div>
-        <button
-          type="button"
-          aria-label="開啟選單"
-          onClick={() => setMobileOpen(true)}
-          className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface transition-colors"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            aria-label="快速記一筆"
+            onClick={() => setQuickAddOpen(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface transition-colors"
+          >
+            <PlusIcon size={20} />
+          </button>
+          <button
+            type="button"
+            aria-label="開啟選單"
+            onClick={() => setMobileOpen(true)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-surface transition-colors"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            </svg>
+          </button>
+        </div>
       </header>
 
       {/* ── Mobile drawer ── */}
@@ -386,6 +439,17 @@ export function Sidebar({
           </div>
         </div>
       )}
+
+      <QuickAddModal
+        open={quickAddOpen}
+        onClose={() => setQuickAddOpen(false)}
+        type={quickAddType}
+        onTypeChange={setQuickAddType}
+        incomeCategories={incomeCategories}
+        expenseCategories={expenseCategories}
+        formAction={quickAddFormAction}
+        error={quickAddState?.error}
+      />
     </>
   );
 }

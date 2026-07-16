@@ -12,8 +12,13 @@ const avatarTones = [
   "bg-[#FBEAF0] text-[#72243E]",
 ];
 
-export default async function NewClientPage() {
+export default async function NewClientPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ name?: string; contact?: string; note?: string }>;
+}) {
   const userId = await requireUserId();
+  const { name, contact, note } = await searchParams;
 
   const recentClients = await prisma.client.findMany({
     where: { userId },
@@ -33,7 +38,13 @@ export default async function NewClientPage() {
             </Link>
           </div>
 
-          <ClientForm action={createClientAction} submitLabel="新增客戶" />
+          <ClientForm
+            action={createClientAction}
+            defaultName={name ?? ""}
+            defaultContact={contact ?? ""}
+            defaultNote={note ?? ""}
+            submitLabel="新增客戶"
+          />
         </div>
 
         <TipPanel

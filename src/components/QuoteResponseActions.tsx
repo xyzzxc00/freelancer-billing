@@ -36,7 +36,7 @@ export function QuoteResponseActions({
             required
             placeholder="您的姓名"
             disabled={pending}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-0 flex-1 sm:w-32 disabled:opacity-50"
+            className="border border-gray-300 rounded-lg px-3 py-2 text-sm min-w-0 flex-1 sm:w-32 bg-white text-gray-900 placeholder:text-gray-400 disabled:opacity-50"
           />
           <button
             type="submit"

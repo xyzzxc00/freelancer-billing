@@ -11,6 +11,8 @@ const protectedPrefixes = [
   "/reports",
   "/settings",
   "/feedback",
+  "/transactions",
+  "/inquiries",
 ];
 
 export async function proxy(request: NextRequest) {

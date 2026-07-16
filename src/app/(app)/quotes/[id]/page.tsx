@@ -165,6 +165,7 @@ export default async function QuoteDetailPage({
             defaultTitle={quote.title}
             defaultTaxMode={quote.taxMode}
             defaultNotes={quote.notes ?? ""}
+            defaultTerms={quote.terms ?? ""}
             defaultExpiresAt={quote.expiresAt ? quote.expiresAt.toISOString().slice(0, 10) : ""}
             defaultDepositPercent={quote.depositPercent ? String(quote.depositPercent) : ""}
             defaultItems={quote.items.map((item) => ({
