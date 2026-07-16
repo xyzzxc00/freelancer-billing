@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import { siteUrl } from "@/lib/site";
+import { siteUrl, siteName } from "@/lib/site";
 import { InquiryForm } from "@/components/InquiryForm";
 import { submitInquiryAction } from "./actions";
 
@@ -84,6 +85,14 @@ export default async function PublicProfilePage({
               <InquiryForm action={inquiryAction} />
             </div>
           </div>
+
+          <p className="text-center text-xs text-gray-400 mt-6">
+            用{" "}
+            <Link href="/" className="text-gray-500 hover:text-gray-700 underline">
+              {siteName}
+            </Link>{" "}
+            打造你的接案頁
+          </p>
         </div>
       </div>
     </div>
