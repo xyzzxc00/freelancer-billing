@@ -37,6 +37,19 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/**": ["./src/fonts/**/*"],
   },
+  async redirects() {
+    return [
+      // 舊網址（改用自訂網域前的預設 Vercel 網址）沒有被自動導向新網域，
+      // 不小心分享到舊連結的人會直接看到網站正常運作、但網址沒有變成 jieanbook.com。
+      // 這裡統一把整站導去正式網域，保留原始路徑與 query string。
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "freelancer-billing.vercel.app" }],
+        destination: "https://www.jieanbook.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
