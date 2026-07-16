@@ -17,11 +17,15 @@ updates:
       # 不讓 Dependabot 自動開註定失敗的 PR（安全性修補仍會照開）：
       # - prisma / @prisma/client 7：schema 設定需搬到 prisma.config.ts
       # - eslint 10：eslint-config-next 尚未相容
+      # - typescript 6/7：typescript-eslint（eslint-config-next 內建）依賴 TS 編譯器內部結構，
+      #   TS 7 是全新原生編譯器重寫，內部結構不同，會讓 lint 直接壞掉（2026-07-16 實際踩過）
       - dependency-name: "prisma"
         update-types: ["version-update:semver-major"]
       - dependency-name: "@prisma/client"
         update-types: ["version-update:semver-major"]
       - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
 
   # GitHub Actions 本身的版本更新
