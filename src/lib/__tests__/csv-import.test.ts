@@ -112,6 +112,12 @@ describe("parseCsvAmount", () => {
     expect(parseCsvAmount("")).toBeNull();
     expect(parseCsvAmount("abc")).toBeNull();
   });
+
+  it("超出可匯入上限的極端值回傳 null，避免資料庫 Decimal(12,2) 溢位", () => {
+    expect(parseCsvAmount("99999999.99")).toBe(99999999.99);
+    expect(parseCsvAmount("100000000")).toBeNull();
+    expect(parseCsvAmount("999999999999")).toBeNull();
+  });
 });
 
 describe("buildImportRows", () => {

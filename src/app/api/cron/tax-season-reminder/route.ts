@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
-import { escapeHtml as esc } from "@/lib/html";
 import { verifyCronAuth } from "@/lib/cron-auth";
 
 // 每年報稅季（5 月）前提醒使用者去看去年度的報稅彙總。
@@ -40,7 +39,7 @@ export async function GET(request: NextRequest) {
         notified += 1;
       } else {
         failed += 1;
-        console.error(`報稅提醒寄信失敗 (${esc(email)})`);
+        console.error(`報稅提醒寄信失敗 (${email})`);
       }
     }
 

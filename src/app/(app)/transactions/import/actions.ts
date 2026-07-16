@@ -3,10 +3,8 @@
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
-import { buildImportRows, type CsvDateFormat, type ImportTypeMode } from "@/lib/csv-import";
+import { buildImportRows, MAX_IMPORT_ROWS, type CsvDateFormat, type ImportTypeMode } from "@/lib/csv-import";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
-
-const MAX_ROWS = 1000;
 
 export async function importTransactionsAction(
   _prevState: ActionResult,
@@ -23,8 +21,8 @@ export async function importTransactionsAction(
   if (!Array.isArray(dataRows) || dataRows.length === 0) {
     return { error: "沒有可匯入的資料列" };
   }
-  if (dataRows.length > MAX_ROWS) {
-    return { error: `一次最多匯入 ${MAX_ROWS} 筆，請分批匯入` };
+  if (dataRows.length > MAX_IMPORT_ROWS) {
+    return { error: `一次最多匯入 ${MAX_IMPORT_ROWS} 筆，請分批匯入` };
   }
 
   const dateColumn = Number(formData.get("dateColumn"));

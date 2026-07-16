@@ -12,6 +12,13 @@ const inquirySchema = z.object({
   message: z.string().min(10, "請簡單描述你的需求（至少 10 個字）").max(2000),
 });
 
+// 這個表單完全公開、不用登入，蜜罐擋不住蓄意繞過的機器人；每一筆送出成功都會觸發一封通知信，
+// 而 sendEmail 的每日額度是全站共用（見 src/lib/email.ts），單一接案頁被打爆會連累所有使用者
+// 當天的忘記密碼信、報價通知等都寄不出去。用資料庫做輕量頻率限制：同一個接案頁一小時內最多
+// 收 RATE_LIMIT_MAX 筆詢價，不需要額外的 IP 追蹤或第三方服務。
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const RATE_LIMIT_MAX = 10;
+
 export async function submitInquiryAction(
   slug: string,
   _prevState: ActionResult,
@@ -28,6 +35,13 @@ export async function submitInquiryAction(
   });
   if (!profile) {
     return { error: "找不到這個接案頁" };
+  }
+
+  const recentCount = await prisma.inquiry.count({
+    where: { userId: profile.id, createdAt: { gte: new Date(Date.now() - RATE_LIMIT_WINDOW_MS) } },
+  });
+  if (recentCount >= RATE_LIMIT_MAX) {
+    return { error: "這個接案頁短時間內收到太多次詢價，請稍後再試" };
   }
 
   const parsed = inquirySchema.safeParse({

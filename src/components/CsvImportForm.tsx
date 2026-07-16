@@ -3,7 +3,14 @@
 import { useActionState, useState } from "react";
 import { SubmitButton } from "@/components/SubmitButton";
 import { FormError } from "@/components/FormError";
-import { parseCsvText, dateFormatLabel, type CsvDateFormat, type ImportTypeMode } from "@/lib/csv-import";
+import {
+  parseCsvText,
+  dateFormatLabel,
+  MAX_FILE_SIZE_BYTES,
+  MAX_IMPORT_ROWS,
+  type CsvDateFormat,
+  type ImportTypeMode,
+} from "@/lib/csv-import";
 import { importTransactionsAction } from "@/app/(app)/transactions/import/actions";
 
 const PREVIEW_ROWS = 5;
@@ -25,13 +32,25 @@ export function CsvImportForm() {
   async function handleFile(file: File) {
     setFileError(null);
     setFileName(file.name);
+    setHeaders([]);
+    setDataRows([]);
+
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      setFileError(
+        `檔案太大了（${Math.round(file.size / 1024)}KB，上限約 ${Math.round(MAX_FILE_SIZE_BYTES / 1024)}KB），請分批匯入或先刪減不需要的欄位／列數`
+      );
+      return;
+    }
+
     try {
       const text = await file.text();
       const rows = parseCsvText(text);
       if (rows.length < 2) {
         setFileError("這個檔案看起來沒有資料列（至少需要表頭 + 1 筆資料）");
-        setHeaders([]);
-        setDataRows([]);
+        return;
+      }
+      if (rows.length - 1 > MAX_IMPORT_ROWS) {
+        setFileError(`這個檔案有 ${rows.length - 1} 列資料，一次最多匯入 ${MAX_IMPORT_ROWS} 筆，請分批匯入`);
         return;
       }
       setHeaders(rows[0]);
@@ -42,8 +61,6 @@ export function CsvImportForm() {
     } catch (err) {
       console.error("讀取 CSV 失敗:", err);
       setFileError("讀取檔案失敗，請確認是合法的 CSV 檔");
-      setHeaders([]);
-      setDataRows([]);
     }
   }
 
