@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
@@ -68,6 +69,10 @@ export async function importTransactionsAction(
     console.error("CSV 匯入失敗:", err);
     return { error: GENERIC_ACTION_ERROR };
   }
+
+  revalidatePath("/income");
+  revalidatePath("/expenses");
+  revalidatePath("/dashboard");
 
   const message =
     errors.length > 0

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
-import { GENERIC_ACTION_ERROR } from "@/lib/action-state";
+import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 // 避免接案頁網址跟站內既有路由（或未來會用到的路由）撞名
 const RESERVED_SLUGS = new Set([
@@ -73,7 +73,10 @@ export async function updateBankInfoAction(formData: FormData) {
   redirectWithToast("/settings", "已更新收款帳戶");
 }
 
-export async function updatePublicPageAction(formData: FormData) {
+export async function updatePublicPageAction(
+  _prevState: ActionResult,
+  formData: FormData
+): Promise<ActionResult> {
   const userId = await requireUserId();
 
   const slugRaw = String(formData.get("slug") ?? "").trim().toLowerCase();
@@ -84,19 +87,31 @@ export async function updatePublicPageAction(formData: FormData) {
   if (slugRaw) {
     const parsed = slugSchema.safeParse(slugRaw);
     if (!parsed.success) {
-      redirectWithToast("/settings", parsed.error.issues[0].message, "error");
+      return { error: parsed.error.issues[0].message };
     }
     if (RESERVED_SLUGS.has(slugRaw)) {
-      redirectWithToast("/settings", "這個網址代稱是系統保留字，請換一個", "error");
+      return { error: "這個網址代稱是系統保留字，請換一個" };
     }
     slug = slugRaw;
   }
 
   if (bio && bio.length > 1000) {
-    redirectWithToast("/settings", "自我介紹請控制在 1000 字以內", "error");
+    return { error: "自我介紹請控制在 1000 字以內" };
   }
   if (services && services.length > 1000) {
-    redirectWithToast("/settings", "服務項目請控制在 1000 字以內", "error");
+    return { error: "服務項目請控制在 1000 字以內" };
+  }
+
+  // 公開接案頁的標題以顯示名稱呈現；沒設名稱就開放 slug，
+  // 會讓登入 email 曝露在公開頁與搜尋結果上
+  if (slug) {
+    const profile = await prisma.profile.findUnique({
+      where: { id: userId },
+      select: { name: true },
+    });
+    if (!profile?.name) {
+      return { error: "請先在上方「個人資料」填寫顯示名稱並儲存，接案頁會以它作為公開標題" };
+    }
   }
 
   try {
@@ -106,10 +121,10 @@ export async function updatePublicPageAction(formData: FormData) {
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      redirectWithToast("/settings", "這個網址代稱已經有人使用了，請換一個", "error");
+      return { error: "這個網址代稱已經有人使用了，請換一個" };
     }
     console.error("更新接案頁失敗:", err);
-    redirectWithToast("/settings", GENERIC_ACTION_ERROR, "error");
+    return { error: GENERIC_ACTION_ERROR };
   }
 
   revalidatePath("/settings");

@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PasswordChangeForm } from "@/components/PasswordChangeForm";
+import { PublicPageForm } from "@/components/PublicPageForm";
 import { LogoutButton } from "@/components/LogoutButton";
 import { TipPanel } from "@/components/TipPanel";
 import { siteUrl } from "@/lib/site";
@@ -129,55 +130,12 @@ export default async function SettingsPage() {
                 </>
               )}
             </p>
-            <form action={updatePublicPageAction} className="flex flex-col gap-3">
-              <div>
-                <label className="text-sm text-foreground-muted block mb-1">網址代稱</label>
-                <div className="flex items-center gap-1.5">
-                  <span className="text-sm text-foreground-muted whitespace-nowrap">/p/</span>
-                  <input
-                    name="slug"
-                    defaultValue={profile?.slug ?? ""}
-                    placeholder="例如：wang-design"
-                    pattern="[a-z0-9]+(-[a-z0-9]+)*"
-                    className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
-                  />
-                </div>
-                <p className="text-xs text-foreground-muted mt-1">
-                  只能用小寫英文字母、數字與連字號（-），3-30 個字。
-                </p>
-              </div>
-              <div>
-                <label className="text-sm text-foreground-muted block mb-1">自我介紹</label>
-                <textarea
-                  name="bio"
-                  defaultValue={profile?.bio ?? ""}
-                  placeholder="簡單介紹你自己與擅長的領域"
-                  rows={3}
-                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
-                />
-              </div>
-              <div>
-                <label className="text-sm text-foreground-muted block mb-1">服務項目</label>
-                <textarea
-                  name="services"
-                  defaultValue={profile?.services ?? ""}
-                  placeholder="例如：品牌識別設計、網站前端開發、Logo 設計…"
-                  rows={3}
-                  className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full resize-none"
-                />
-              </div>
-              <div className="flex items-center gap-3">
-                <button
-                  type="submit"
-                  className="bg-accent text-accent-foreground rounded-md py-2 text-sm font-medium self-start px-4 hover:opacity-80 active:scale-95 transition-all cursor-pointer"
-                >
-                  儲存
-                </button>
-                <Link href="/inquiries" className="text-sm text-foreground-muted hover:text-foreground">
-                  查看收到的詢價 →
-                </Link>
-              </div>
-            </form>
+            <PublicPageForm
+              action={updatePublicPageAction}
+              defaultSlug={profile?.slug ?? ""}
+              defaultBio={profile?.bio ?? ""}
+              defaultServices={profile?.services ?? ""}
+            />
           </section>
 
           {isOAuthOnly ? (

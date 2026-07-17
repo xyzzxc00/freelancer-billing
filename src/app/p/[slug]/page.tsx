@@ -14,11 +14,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const profile = await prisma.profile.findUnique({
     where: { slug },
-    select: { name: true, email: true, bio: true },
+    select: { name: true, bio: true },
   });
   if (!profile) return {};
 
-  const displayName = profile.name ?? profile.email;
+  // 沒設顯示名稱時退回 slug，絕不能把登入 email 放上公開頁
+  const displayName = profile.name ?? slug;
   const description = profile.bio?.slice(0, 150) || `${displayName} 的接案服務介紹與詢價`;
 
   return {
@@ -43,18 +44,38 @@ export default async function PublicProfilePage({
 
   const profile = await prisma.profile.findUnique({
     where: { slug },
-    select: { name: true, email: true, bio: true, services: true },
+    select: { name: true, bio: true, services: true },
   });
 
   if (!profile) {
     notFound();
   }
 
-  const displayName = profile.name ?? profile.email;
+  const displayName = profile.name ?? slug;
   const inquiryAction = submitInquiryAction.bind(null, slug);
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url: `${siteUrl}/p/${slug}`,
+    mainEntity: {
+      "@type": "Person",
+      name: displayName,
+      url: `${siteUrl}/p/${slug}`,
+      ...(profile.bio ? { description: profile.bio } : {}),
+      ...(profile.services ? { knowsAbout: profile.services } : {}),
+    },
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* bio/services 是使用者輸入，轉義 < 防止 </script> 跳脫 */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(structuredData).replace(/</g, "\\u003c"),
+        }}
+      />
       <div className="flex-1 flex justify-center px-4 sm:px-6 py-12 sm:py-16">
         <div className="w-full max-w-xl">
           <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
