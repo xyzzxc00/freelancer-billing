@@ -2,14 +2,14 @@ import { ImageResponse } from "next/og";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-export const alt = "接案帳本 — 給自由接案者的記帳與報價工具";
+export const alt = "接案帳本 — 給自由接案者與一人公司的業務工具";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 const brand = "接案帳本";
-const line1 = "讓接案的記帳與報價，";
-const line2 = "都輕鬆一點";
-const sub = "報價單 · 線上簽署 · 待收款追蹤 · 收支報表";
+const line1 = "接案的錢，";
+const line2 = "一條線管好";
+const sub = "報價 · 簽署 · 訂金 · 催款 · 報稅";
 
 export default async function Image() {
   const [fontData, fontBoldData] = await Promise.all([
