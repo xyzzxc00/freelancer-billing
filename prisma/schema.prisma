@@ -35,6 +35,7 @@ model Profile {
   incomeCategories  IncomeCategory[]
   recurringIncomes  RecurringIncome[]
   inquiries         Inquiry[]
+  recurringReceivables RecurringReceivable[]
 
   @@map("profiles")
 }
@@ -64,6 +65,8 @@ model Client {
 
   profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
   quotes  Quote[]
+  receivables          Receivable[]
+  recurringReceivables RecurringReceivable[]
 
   @@index([userId])
   @@map("clients")
@@ -136,12 +139,15 @@ enum ReceivableKind {
   FULL // 未分期，整筆報價金額
   DEPOSIT // 訂金
   FINAL // 尾款
+  RECURRING // 定期請款自動產生
 }
 
 model Receivable {
   id        String           @id @default(uuid())
   userId    String
-  quoteId   String
+  quoteId   String? // 報價單來源的應收款；定期請款產生的沒有報價單
+  clientId  String? // 非報價單來源（定期請款）直接掛客戶
+  title     String? // 非報價單來源的標題，報價單來源的顯示 quote.title
   kind      ReceivableKind   @default(FULL)
   amount    Decimal          @db.Decimal(12, 2)
   status    ReceivableStatus @default(PENDING)
@@ -150,12 +156,34 @@ model Receivable {
   createdAt DateTime         @default(now())
 
   profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
-  quote   Quote   @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quote   Quote?  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  client  Client? @relation(fields: [clientId], references: [id], onDelete: Cascade)
   transaction Transaction?
 
   @@index([userId])
   @@index([quoteId])
+  @@index([clientId])
   @@map("receivables")
+}
+
+// 定期請款（retainer）：每月固定日期自動產生一筆應收款，適合維護約、顧問約等月費型客戶
+model RecurringReceivable {
+  id                     String   @id @default(uuid())
+  userId                 String
+  clientId               String
+  title                  String
+  amount                 Decimal  @db.Decimal(12, 2)
+  dayOfMonth             Int // 1-28，每月固定哪天自動產生應收款
+  dueInDays              Int      @default(14) // 產生後幾天到期（用於逾期提醒）
+  active                 Boolean  @default(true)
+  lastGeneratedYearMonth String? // "2026-07"，避免同月重複產生
+  createdAt              DateTime @default(now())
+
+  profile Profile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client  Client  @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("recurring_receivables")
 }
 
 model QuoteTemplate {

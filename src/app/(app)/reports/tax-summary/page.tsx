@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { calculateTax, taxModeLabel, type TaxMode } from "@/lib/tax";
+import { TaxEstimator } from "@/components/TaxEstimator";
 import { currency } from "@/lib/currency";
 
 export default async function TaxSummaryPage({
@@ -13,16 +14,27 @@ export default async function TaxSummaryPage({
   const { year: yearParam } = await searchParams;
   const year = yearParam ? Number(yearParam) : new Date().getFullYear();
 
-  const quotes = await prisma.quote.findMany({
-    where: {
-      userId,
-      status: "ACCEPTED",
-      taxMode: { not: "NONE" },
-      respondedAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) },
-    },
-    include: { client: true, items: true },
-    orderBy: { respondedAt: "asc" },
-  });
+  const [quotes, yearIncomeSum] = await Promise.all([
+    prisma.quote.findMany({
+      where: {
+        userId,
+        status: "ACCEPTED",
+        taxMode: { not: "NONE" },
+        respondedAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) },
+      },
+      include: { client: true, items: true },
+      orderBy: { respondedAt: "asc" },
+    }),
+    prisma.transaction.aggregate({
+      where: {
+        userId,
+        type: "INCOME",
+        occurredAt: { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) },
+      },
+      _sum: { amount: true },
+    }),
+  ]);
+  const yearIncome = Number(yearIncomeSum._sum.amount ?? 0);
 
   const rows = quotes.map((q) => {
     const subtotal = q.items.reduce((sum, item) => sum + Number(item.unitPrice) * Number(item.quantity), 0);
@@ -77,6 +89,10 @@ export default async function TaxSummaryPage({
       <p className="text-xs text-foreground-muted mb-6">
         以報價「接受」日期彙整需課稅的委託報酬，僅供試算參考，正式申報請以扣繳憑單為準。
       </p>
+
+      <div className="mb-7">
+        <TaxEstimator defaultGross={yearIncome} />
+      </div>
 
       {rows.length === 0 ? (
         <p className="text-sm text-foreground-muted">這一年還沒有需要課稅的已接受報價。</p>

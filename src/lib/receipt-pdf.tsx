@@ -48,6 +48,7 @@ const kindLabel: Record<string, string> = {
   FULL: "全額請款",
   DEPOSIT: "訂金請款",
   FINAL: "尾款請款",
+  RECURRING: "定期請款",
 };
 
 interface ReceiptPdfProps {

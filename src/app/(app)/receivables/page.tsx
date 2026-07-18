@@ -13,6 +13,7 @@ const PAGE_SIZE = 50;
 const kindLabel: Record<string, string> = {
   DEPOSIT: "訂金",
   FINAL: "尾款",
+  RECURRING: "定期",
 };
 
 export default async function ReceivablesPage({
@@ -33,7 +34,7 @@ export default async function ReceivablesPage({
       orderBy: { dueDate: "asc" },
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
-      include: { quote: { include: { client: true } } },
+      include: { quote: { include: { client: true } }, client: true },
     }),
     prisma.receivable.count({ where: { userId, status: "PENDING" } }),
     prisma.receivable.aggregate({
@@ -49,7 +50,7 @@ export default async function ReceivablesPage({
       orderBy: { paidAt: "desc" },
       take: PAGE_SIZE,
       skip: (paidPage - 1) * PAGE_SIZE,
-      include: { quote: { include: { client: true } } },
+      include: { quote: { include: { client: true } }, client: true },
     }),
     prisma.receivable.count({ where: { userId, status: "PAID" } }),
   ]);
@@ -71,7 +72,12 @@ export default async function ReceivablesPage({
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
-        <h1 className="text-lg font-medium mb-4">待收款</h1>
+        <div className="flex items-baseline justify-between mb-4">
+          <h1 className="text-lg font-medium">待收款</h1>
+          <Link href="/receivables/recurring" className="text-sm text-foreground-muted hover:text-foreground">
+            定期請款
+          </Link>
+        </div>
 
         <div className="grid grid-cols-2 gap-3 mb-7">
           <div className="bg-surface rounded-lg p-4">
@@ -103,10 +109,10 @@ export default async function ReceivablesPage({
                 >
                   <div className="min-w-0">
                     <Link
-                      href={`/quotes/${r.quote.id}`}
+                      href={r.quote ? `/quotes/${r.quote.id}` : "/receivables/recurring"}
                       className="text-sm font-medium truncate block hover:text-accent"
                     >
-                      {r.quote.client.name} — {r.quote.title}
+                      {r.quote ? `${r.quote.client.name} — ${r.quote.title}` : `${r.client?.name ?? ""} — ${r.title ?? ""}`}
                       {kindLabel[r.kind] && (
                         <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded bg-surface text-foreground-muted align-middle">
                           {kindLabel[r.kind]}
@@ -173,12 +179,12 @@ export default async function ReceivablesPage({
             {paid.map((r) => (
               <Link
                 key={r.id}
-                href={`/quotes/${r.quote.id}`}
+                href={r.quote ? `/quotes/${r.quote.id}` : "/receivables/recurring"}
                 className="border border-border rounded-lg px-4 py-3 flex items-center justify-between hover:bg-surface transition-colors"
               >
                 <div>
                   <p className="text-sm font-medium">
-                    {r.quote.client.name} — {r.quote.title}
+                    {r.quote ? `${r.quote.client.name} — ${r.quote.title}` : `${r.client?.name ?? ""} — ${r.title ?? ""}`}
                     {kindLabel[r.kind] && (
                       <span className="ml-1.5 text-xs px-1.5 py-0.5 rounded bg-surface text-foreground-muted align-middle">
                         {kindLabel[r.kind]}

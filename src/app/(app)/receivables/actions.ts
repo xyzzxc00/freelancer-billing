@@ -12,6 +12,11 @@ import { GENERIC_ACTION_ERROR } from "@/lib/action-state";
 
 const kindLabel: Record<string, string> = { DEPOSIT: "訂金", FINAL: "尾款" };
 
+// 報價單來源的應收款用 quote 的標題/客戶，定期請款產生的用自身欄位
+function receivableTitle(r: { title: string | null; quote: { title: string } | null }) {
+  return r.quote?.title ?? r.title ?? "定期請款";
+}
+
 export async function markReceivablePaidAction(receivableId: string) {
   const userId = await requireUserId();
 
@@ -34,7 +39,7 @@ export async function markReceivablePaidAction(receivableId: string) {
           type: "INCOME",
           amount: receivable.amount,
           category: "接案收入",
-          note: receivable.quote.title,
+          note: receivableTitle(receivable),
           occurredAt: new Date(),
           receivableId: receivable.id,
         },
@@ -56,22 +61,24 @@ export async function sendDunningEmailAction(receivableId: string) {
 
   const receivable = await prisma.receivable.findFirst({
     where: { id: receivableId, userId },
-    include: { quote: { include: { client: true } } },
+    include: { quote: { include: { client: true } }, client: true },
   });
   if (!receivable) {
     redirectWithToast("/receivables", GENERIC_ACTION_ERROR, "error");
   }
 
-  const clientEmail = extractEmail(receivable.quote.client.contact ?? "");
+  const client = receivable.quote?.client ?? receivable.client;
+  const clientEmail = extractEmail(client?.contact ?? "");
   if (!clientEmail) {
     redirectWithToast("/receivables", "這位客戶沒有留 email，無法寄送催款信", "error");
   }
 
+  const title = receivableTitle(receivable);
   const label = kindLabel[receivable.kind] ? `（${kindLabel[receivable.kind]}）` : "";
   const ok = await sendEmail({
     to: clientEmail,
-    subject: `款項提醒：${receivable.quote.title}${label}`,
-    html: `<p>您好，</p><p>提醒您「${escapeHtml(receivable.quote.title)}」${label}尚有 ${currency.format(Number(receivable.amount))} 款項待付款，麻煩撥空處理，謝謝！</p>`,
+    subject: `款項提醒：${title}${label}`,
+    html: `<p>您好，</p><p>提醒您「${escapeHtml(title)}」${label}尚有 ${currency.format(Number(receivable.amount))} 款項待付款，麻煩撥空處理，謝謝！</p>`,
   });
 
   revalidatePath("/receivables");

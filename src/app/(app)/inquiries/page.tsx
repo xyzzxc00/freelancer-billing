@@ -4,7 +4,7 @@ import { requireUserId } from "@/lib/auth";
 import { formatDate } from "@/lib/currency";
 import { Pagination } from "@/components/Pagination";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
-import { deleteInquiryAction } from "./actions";
+import { createQuoteFromInquiryAction, deleteInquiryAction } from "./actions";
 
 const PAGE_SIZE = 30;
 
@@ -61,6 +61,7 @@ export default async function InquiriesPage({
                 contact: inquiry.contact,
               })}`;
               const deleteAction = deleteInquiryAction.bind(null, inquiry.id);
+              const createQuoteAction = createQuoteFromInquiryAction.bind(null, inquiry.id);
               return (
                 <div key={inquiry.id} className="border border-border rounded-lg px-4 py-3.5">
                   <div className="flex items-baseline justify-between gap-3 mb-1.5">
@@ -72,8 +73,13 @@ export default async function InquiriesPage({
                   <p className="text-xs text-foreground-muted mb-2">{inquiry.contact}</p>
                   <p className="text-sm whitespace-pre-wrap mb-3">{inquiry.message}</p>
                   <div className="flex items-center gap-3">
-                    <Link href={newClientHref} className="text-sm text-accent hover:underline">
-                      新增為客戶 →
+                    <form action={createQuoteAction}>
+                      <button type="submit" className="text-sm text-accent hover:underline cursor-pointer">
+                        開報價單 →
+                      </button>
+                    </form>
+                    <Link href={newClientHref} className="text-sm text-foreground-muted hover:text-foreground">
+                      新增為客戶
                     </Link>
                     <ConfirmDeleteButton
                       action={deleteAction}

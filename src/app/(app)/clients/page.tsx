@@ -43,12 +43,20 @@ export default async function ClientsPage({
             userId,
             status: "PENDING",
             dueDate: { lt: startOfTodayTaipei() },
-            quote: { clientId: { in: clientIds } },
+            // 報價單來源的應收款掛在 quote 下，定期請款產生的直接掛 clientId
+            OR: [
+              { quote: { clientId: { in: clientIds } } },
+              { clientId: { in: clientIds } },
+            ],
           },
-          select: { quote: { select: { clientId: true } } },
+          select: { clientId: true, quote: { select: { clientId: true } } },
         })
       : [];
-  const overdueClientIds = new Set(overdueReceivables.map((r) => r.quote.clientId));
+  const overdueClientIds = new Set(
+    overdueReceivables
+      .map((r) => r.quote?.clientId ?? r.clientId)
+      .filter((id): id is string => id !== null)
+  );
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">

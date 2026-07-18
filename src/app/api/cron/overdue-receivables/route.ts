@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     // 到期日「當天」還不算逾期，過了台灣時間的那一天才算
     const overdue = await prisma.receivable.findMany({
       where: { status: "PENDING", dueDate: { lt: startOfTodayTaipei() } },
-      include: { profile: true, quote: { include: { client: true } } },
+      include: { profile: true, quote: { include: { client: true } }, client: true },
     });
 
     const byUser = new Map<string, typeof overdue>();
@@ -34,10 +34,11 @@ export async function GET(request: NextRequest) {
     for (const [, receivables] of byUser) {
       const profile = receivables[0].profile;
       const rows = receivables
-        .map(
-          (r) =>
-            `<li>${esc(r.quote.client.name)} — ${esc(r.quote.title)}：${currency.format(Number(r.amount))}</li>`
-        )
+        .map((r) => {
+          const clientName = r.quote?.client.name ?? r.client?.name ?? "";
+          const title = r.quote?.title ?? r.title ?? "定期請款";
+          return `<li>${esc(clientName)} — ${esc(title)}：${currency.format(Number(r.amount))}</li>`;
+        })
         .join("");
 
       const ok = await sendEmail({

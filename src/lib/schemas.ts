@@ -35,3 +35,19 @@ export const recurringSchema = z.object({
 export const categorySchema = z.object({
   name: z.string().min(1, "請輸入分類名稱").max(50),
 });
+
+export const recurringReceivableSchema = z.object({
+  title: z.string().min(1, "請輸入請款名稱").max(100),
+  amount: amountSchema,
+  clientId: z.string().min(1, "請選擇客戶"),
+  dayOfMonth: z
+    .number()
+    .int()
+    .min(1, "每月請款日請選擇 1-28 之間")
+    .max(28, "每月請款日請選擇 1-28 之間"),
+  dueInDays: z
+    .number()
+    .int()
+    .min(0, "付款期限請填 0-60 天")
+    .max(60, "付款期限請填 0-60 天"),
+});

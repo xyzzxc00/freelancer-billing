@@ -11,8 +11,13 @@ function defaultExpiresAt() {
   return d.toISOString().slice(0, 10);
 }
 
-export default async function NewQuotePage() {
+export default async function NewQuotePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ clientId?: string }>;
+}) {
   const userId = await requireUserId();
+  const { clientId } = await searchParams;
 
   const [clients, templates, profile] = await Promise.all([
     prisma.client.findMany({
@@ -28,6 +33,8 @@ export default async function NewQuotePage() {
     prisma.profile.findUnique({ where: { id: userId }, select: { bankName: true } }),
   ]);
   const hasBankInfo = Boolean(profile?.bankName);
+  // 只接受屬於自己的客戶 id，其他值一律忽略
+  const defaultClientId = clients.some((c) => c.id === clientId) ? clientId : undefined;
 
   const templateOptions = templates.map((t) => ({
     id: t.id,
@@ -68,7 +75,7 @@ export default async function NewQuotePage() {
               ，才能建立報價單。
             </p>
           ) : (
-            <QuoteForm clients={clients} action={createQuoteAction} templates={templateOptions} defaultExpiresAt={defaultExpiresAt()} />
+            <QuoteForm clients={clients} action={createQuoteAction} templates={templateOptions} defaultExpiresAt={defaultExpiresAt()} defaultClientId={defaultClientId} />
           )}
         </div>
 
