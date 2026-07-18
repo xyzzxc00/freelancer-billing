@@ -12,10 +12,11 @@ import {
   type ImportTypeMode,
 } from "@/lib/csv-import";
 import { importTransactionsAction } from "@/app/(app)/transactions/import/actions";
+import type { ImportSource } from "@/lib/import-source";
 
 const PREVIEW_ROWS = 5;
 
-export function CsvImportForm() {
+export function CsvImportForm({ from }: { from?: ImportSource }) {
   const [headers, setHeaders] = useState<string[]>([]);
   const [dataRows, setDataRows] = useState<string[][]>([]);
   const [fileError, setFileError] = useState<string | null>(null);
@@ -116,6 +117,7 @@ export function CsvImportForm() {
 
           <form action={formAction} className="flex flex-col gap-4">
             <input type="hidden" name="rows" value={JSON.stringify(dataRows)} />
+            {from && <input type="hidden" name="from" value={from} />}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>

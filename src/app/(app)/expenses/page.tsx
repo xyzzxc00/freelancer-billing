@@ -92,7 +92,7 @@ export default async function ExpensesPage({
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href="/transactions/import"
+            href="/transactions/import?from=expenses"
             className="text-sm text-foreground-muted hover:text-foreground"
           >
             CSV 匯入

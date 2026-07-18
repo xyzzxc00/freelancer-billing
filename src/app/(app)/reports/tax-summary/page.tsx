@@ -66,6 +66,9 @@ export default async function TaxSummaryPage({
 
   return (
     <div className="px-4 sm:px-6 py-6 mx-auto w-full max-w-7xl">
+      <Link href="/reports" className="text-sm text-foreground-muted hover:text-foreground inline-block mb-3">
+        ← 返回報表
+      </Link>
       <div className="flex items-baseline justify-between mb-1 flex-wrap gap-2">
         <div className="flex items-center gap-3">
           <h1 className="text-lg font-medium">報稅彙總</h1>

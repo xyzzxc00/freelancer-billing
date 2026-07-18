@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { buildImportRows, MAX_IMPORT_ROWS, type CsvDateFormat, type ImportTypeMode } from "@/lib/csv-import";
+import { resolveImportSourcePath } from "@/lib/import-source";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 export async function importTransactionsAction(
@@ -78,5 +79,6 @@ export async function importTransactionsAction(
     errors.length > 0
       ? `已匯入 ${rows.length} 筆，${errors.length} 筆格式錯誤已略過`
       : `已匯入 ${rows.length} 筆`;
-  redirectWithToast("/dashboard", message);
+  const backHref = resolveImportSourcePath(String(formData.get("from") ?? ""));
+  redirectWithToast(backHref, message);
 }
