@@ -7,10 +7,10 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: {
-    absolute: "接案帳本 - 讓接案這件事，記帳跟報價都輕鬆一點",
+    absolute: "接案帳本 - 接案的錢，一條線管好",
   },
   description:
-    "接案帳本是給自由接案者跟小型工作室的輕量工具：開報價單、線上簽署、追蹤待收款、記錄收支——不用再用 Excel 東拼西湊。",
+    "接案帳本是給自由接案者、一人公司與 SOHO 的接案業務工具：開報價單、線上簽署、訂金尾款拆分、追蹤催款、報稅試算——不用再用 Excel 東拼西湊。",
   alternates: {
     canonical: siteUrl,
   },
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 const faqs = [
   {
     question: "接案帳本適合誰使用？",
-    answer: "適合自由接案者、SOHO 工作者與小型工作室，用來管理客戶、報價單、收支與待收款項目。",
+    answer:
+      "適合自由接案者、SOHO、一人公司與接業配的創作者，用來管理客戶、報價單、收款與報稅。由一個人統一管理報價與收款的小型工作室也很適合。",
   },
   {
     question: "報價單可以線上簽署嗎？",
@@ -47,7 +48,7 @@ const structuredData = {
       applicationCategory: "BusinessApplication",
       operatingSystem: "Web",
       description:
-        "給自由接案者跟小型工作室的輕量記帳與報價工具：開報價單、線上簽署、追蹤待收款、記錄收支，年度報表一鍵匯出。",
+        "給自由接案者、一人公司與 SOHO 的接案業務工具：報價單線上簽署、訂金尾款拆分、待收款催款、收支記錄與報稅試算——接案的錢，一條線管好。",
       offers: {
         "@type": "Offer",
         price: "0",
@@ -86,7 +87,7 @@ const features = [
   },
   {
     title: "報價單與線上簽署",
-    description: "選客戶、加項目自動算總額，含稅/未稅/勞務報酬試算，產生連結讓客戶免安裝直接線上接受。",
+    description: "選客戶、加項目自動算總額，含稅/未稅/勞務報酬試算，可設定訂金比例，產生連結讓客戶免安裝直接線上接受。",
     icon: (
       <>
         <rect x="5" y="3.5" width="14" height="17" rx="1.5" stroke="currentColor" strokeWidth="1.6" />
@@ -95,8 +96,8 @@ const features = [
     ),
   },
   {
-    title: "收款追蹤",
-    description: "報價單一接受就自動轉成待收款項目，逾期沒收到款項會清楚標示提醒。",
+    title: "收款追蹤與催款",
+    description: "報價單一接受就自動拆成訂金與尾款待收款，逾期清楚標示，一鍵寄催款信；月費客戶可設定每月自動請款。",
     icon: (
       <>
         <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
@@ -105,8 +106,8 @@ const features = [
     ),
   },
   {
-    title: "收支記錄與報表",
-    description: "收入、支出各自分類管理，固定收入支出可設定自動產生，年度報表一鍵匯出 CSV 給會計師。",
+    title: "收支記錄與報稅",
+    description: "收款自動記進收入，年度報表一鍵匯出 CSV，內建勞務報酬與所得稅試算，報稅季不再手忙腳亂。",
     icon: (
       <path
         d="M5 19V10M11 19V5M17 19v-6"
@@ -114,6 +115,31 @@ const features = [
         strokeWidth="1.6"
         strokeLinecap="round"
       />
+    ),
+  },
+  {
+    title: "接案頁與詢價",
+    description: "一頁式公開接案頁展示你的服務，潛在客戶直接留下詢價，一鍵轉成客戶並開報價單。",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
+        <path
+          d="M4 12h16M12 4c2.5 2.5 2.5 13.5 0 16M12 4c-2.5 2.5-2.5 13.5 0 16"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+        />
+      </>
+    ),
+  },
+  {
+    title: "客戶付款狀況",
+    description: "每個客戶的平均回款天數、準時與逾期記錄一目了然，接新案前先看狀況再談條件。",
+    icon: (
+      <>
+        <circle cx="12" cy="12" r="8" stroke="currentColor" strokeWidth="1.6" />
+        <path d="M9 12.5l2 2 4-4.5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </>
     ),
   },
 ];
@@ -151,10 +177,10 @@ export default async function Home() {
       <main>
       <section className="flex flex-col items-center text-center px-4 sm:px-6 py-20">
         <h1 className="text-3xl sm:text-4xl font-medium leading-tight max-w-2xl">
-          讓接案這件事，記帳跟報價都輕鬆一點
+          接案的錢，一條線管好
         </h1>
         <p className="text-foreground-muted mt-4 max-w-lg leading-relaxed">
-          給自由接案者跟小型工作室的輕量工具。開報價單、追蹤待收款、記錄收支——不用再用 Excel 東拼西湊。
+          報價、簽署、訂金、催款、報稅——給自由接案者與一人公司的業務工具，不用再用 Excel 東拼西湊。
         </p>
         <div className="flex items-center gap-3 mt-8">
           <Link

@@ -30,7 +30,7 @@ const geistMono = Geist_Mono({
 });
 
 const description =
-  "給自由接案者跟小型工作室的輕量記帳與報價工具：開報價單、線上簽署、追蹤待收款、記錄收支，年度報表一鍵匯出。";
+  "給自由接案者、一人公司與 SOHO 的接案業務工具：報價單線上簽署、訂金尾款拆分、待收款催款、收支記錄與報稅試算——接案的錢，一條線管好。";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     template: `%s｜${siteName}`,
   },
   description,
-  keywords: ["記帳", "報價單", "接案", "自由業", "工作室", "收支管理", "發票", "報表"],
+  keywords: ["接案", "報價單", "自由工作者", "一人公司", "SOHO", "訂金", "勞務報酬", "記帳", "收支管理", "報表"],
   openGraph: {
     type: "website",
     locale: "zh_TW",
