@@ -164,6 +164,9 @@ export default async function Home() {
           <Link href="/guides" className="text-sm text-foreground-muted hover:text-foreground">
             接案知識庫
           </Link>
+          <Link href="/tools/tax-calculator" className="text-sm text-foreground-muted hover:text-foreground">
+            勞務報酬試算器
+          </Link>
           <ThemeToggle />
           <Link
             href="/login"
@@ -228,14 +231,9 @@ export default async function Home() {
       </main>
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted">
         <span>接案帳本</span>
-        <div className="flex items-center gap-4">
-          <Link href="/tools/tax-calculator" className="hover:text-foreground">
-            勞務報酬試算器
-          </Link>
-          <Link href="/privacy?from=home" className="hover:text-foreground">
-            隱私權政策
-          </Link>
-        </div>
+        <Link href="/privacy?from=home" className="hover:text-foreground">
+          隱私權政策
+        </Link>
       </footer>
     </div>
   );
