@@ -71,7 +71,7 @@ export function TaxEstimator({ defaultGross }: { defaultGross: number }) {
               className="border border-border rounded-md px-3 py-2 text-sm bg-background w-full font-mono"
             />
             <p className="text-xs text-foreground-muted mt-1">
-              依職業別不同（財政部每年公布費用標準），多數自由工作者適用 30%。
+              依職業別不同且每年公告（113 年度如程式設計 20%、撰稿類 30%），請對照財政部「執行業務者費用標準」填入自己的比例。
             </p>
           </div>
         )}
@@ -106,7 +106,7 @@ export function TaxEstimator({ defaultGross }: { defaultGross: number }) {
       </div>
 
       <p className="text-xs text-foreground-muted mt-3">
-        提醒：單筆勞務報酬達 2 萬元時，給付方會代扣 10% 所得稅與 2.11% 二代健保補充保費，代扣的所得稅可以在申報時抵減。此試算僅供參考，正式申報請以國稅局資料為準。
+        提醒：單筆勞務報酬達 2 萬元（含）會被扣 2.11% 二代健保補充保費、超過 2 萬元會再被代扣 10% 所得稅，代扣的所得稅可以在申報時抵減。此試算僅供參考，正式申報請以國稅局資料為準。
       </p>
     </div>
   );

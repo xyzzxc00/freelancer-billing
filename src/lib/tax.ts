@@ -31,12 +31,14 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
   }
 
   if (mode === "LABOR_INCOME_10PCT") {
-    // 依法單筆給付 ≤ 2 萬元時應扣繳稅額不到 2,000 元，免予扣繳；
-    // 二代健保補充保費的起扣點剛好也是 2 萬元，兩者同一門檻
+    // 兩個門檻都在 2 萬，但邊界不同：
+    // - 二代健保補充保費：單次給付「達」2 萬元（含）就要扣 2.11%
+    // - 所得稅扣繳：應扣繳稅額不超過 2,000 元免予扣繳，即單次「超過」2 萬元才扣 10%
+    // 所以剛好 2 萬元整時只扣健保、不扣所得稅
     const withholding =
       subtotal > HEALTH_SUPPLEMENT_THRESHOLD ? Math.round(subtotal * WITHHOLDING_RATE) : 0;
     const healthSupplement =
-      subtotal > HEALTH_SUPPLEMENT_THRESHOLD
+      subtotal >= HEALTH_SUPPLEMENT_THRESHOLD
         ? Math.round(subtotal * HEALTH_SUPPLEMENT_RATE)
         : 0;
     return {
@@ -50,7 +52,7 @@ export function calculateTax(subtotal: number, mode: TaxMode): TaxBreakdown {
           ? [{ label: "代扣勞務報酬所得稅 10%", amount: -withholding }]
           : []),
         ...(healthSupplement > 0
-          ? [{ label: "二代健保補充保費 2.11%（單筆逾 2 萬）", amount: -healthSupplement }]
+          ? [{ label: "二代健保補充保費 2.11%（單筆達 2 萬）", amount: -healthSupplement }]
           : []),
       ],
     };

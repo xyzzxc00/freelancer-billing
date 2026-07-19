@@ -24,6 +24,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.8,
     },
+    {
+      url: `${siteUrl}/tools/tax-calculator`,
+      changeFrequency: "yearly",
+      priority: 0.8,
+    },
     ...guides.map((g) => ({
       url: `${siteUrl}/guides/${g.slug}`,
       lastModified: g.date || undefined,

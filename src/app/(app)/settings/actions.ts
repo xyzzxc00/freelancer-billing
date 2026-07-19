@@ -12,7 +12,7 @@ import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 const RESERVED_SLUGS = new Set([
   "dashboard", "clients", "quotes", "quote", "income", "expenses", "receivables",
   "reports", "settings", "feedback", "transactions", "inquiries", "login", "signup",
-  "privacy", "guides", "api", "p", "auth", "forgot-password", "reset-password",
+  "privacy", "guides", "tools", "api", "p", "auth", "forgot-password", "reset-password",
   "llms.txt", "sitemap.xml", "robots.txt", "manifest.webmanifest",
 ]);
 

@@ -15,16 +15,18 @@ describe("calculateTax", () => {
     expect(r.freelancerNet).toBe(33333);
   });
 
-  it("LABOR_INCOME_10PCT：單筆 2 萬（含）以下免扣繳，代扣稅和二代健保都不收", () => {
+  it("LABOR_INCOME_10PCT：剛好 2 萬元整只扣二代健保、不扣所得稅", () => {
+    // 健保「達」2 萬（含）起扣：20000 × 2.11% = 422；
+    // 所得稅扣繳額 2,000 元「不超過」2,000 → 免扣
     const r = calculateTax(20000, "LABOR_INCOME_10PCT");
     expect(r.clientTotal).toBe(20000);
-    expect(r.freelancerNet).toBe(20000);
-    expect(r.freelancerLines).toHaveLength(1); // 只有總額，無代扣、無健保
+    expect(r.freelancerNet).toBe(20000 - 422);
+    expect(r.freelancerLines).toHaveLength(2); // 總額＋健保，無代扣稅
   });
 
-  it("LABOR_INCOME_10PCT：單筆遠低於 2 萬，完全免扣繳", () => {
-    const r = calculateTax(15000, "LABOR_INCOME_10PCT");
-    expect(r.freelancerNet).toBe(15000);
+  it("LABOR_INCOME_10PCT：未達 2 萬完全免扣繳", () => {
+    const r = calculateTax(19999, "LABOR_INCOME_10PCT");
+    expect(r.freelancerNet).toBe(19999);
     expect(r.freelancerLines).toHaveLength(1);
   });
 

@@ -228,9 +228,14 @@ export default async function Home() {
       </main>
       <footer className="px-4 sm:px-6 py-8 border-t border-border flex justify-between items-center text-sm text-foreground-muted">
         <span>接案帳本</span>
-        <Link href="/privacy?from=home" className="hover:text-foreground">
-          隱私權政策
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/tools/tax-calculator" className="hover:text-foreground">
+            勞務報酬試算器
+          </Link>
+          <Link href="/privacy?from=home" className="hover:text-foreground">
+            隱私權政策
+          </Link>
+        </div>
       </footer>
     </div>
   );
