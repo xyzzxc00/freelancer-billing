@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
@@ -6,16 +7,22 @@ import { siteUrl, siteName } from "@/lib/site";
 import { InquiryForm } from "@/components/InquiryForm";
 import { submitInquiryAction } from "./actions";
 
+// generateMetadata 跟頁面本體都要查同一筆 profile，包一層 React cache()
+// 讓同一次請求內只打一次資料庫
+const getPublicProfile = cache((slug: string) =>
+  prisma.profile.findUnique({
+    where: { slug },
+    select: { name: true, bio: true, services: true },
+  })
+);
+
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const profile = await prisma.profile.findUnique({
-    where: { slug },
-    select: { name: true, bio: true },
-  });
+  const profile = await getPublicProfile(slug);
   if (!profile) return {};
 
   // 沒設顯示名稱時退回 slug，絕不能把登入 email 放上公開頁
@@ -42,10 +49,7 @@ export default async function PublicProfilePage({
 }) {
   const { slug } = await params;
 
-  const profile = await prisma.profile.findUnique({
-    where: { slug },
-    select: { name: true, bio: true, services: true },
-  });
+  const profile = await getPublicProfile(slug);
 
   if (!profile) {
     notFound();

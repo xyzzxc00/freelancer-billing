@@ -34,7 +34,8 @@ const description =
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  manifest: "/manifest.json",
+  // manifest 不用在這裡宣告：src/app/manifest.ts 會自動產生 /manifest.webmanifest 並注入 <link>，
+  // 之前手動指到 /manifest.json 反而是個 404
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",

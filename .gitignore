@@ -43,6 +43,9 @@ supabase/.temp
 # claude code local settings
 .claude/settings.local.json
 
+# 工具端自動產生的 .claude/skills 鏡像副本，真正版本控管的是 .claude/ 底下那份
+.agents/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

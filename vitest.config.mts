@@ -11,7 +11,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      // .mts 以 ESM 載入，沒有 __dirname，用 import.meta.dirname（Node 20.11+）
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
 });

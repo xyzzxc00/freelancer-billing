@@ -32,7 +32,6 @@ function LoginForm() {
     if (saved) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(saved);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRememberMe(true);
     }
   }, []);

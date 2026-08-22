@@ -52,6 +52,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // 已登入者進首頁直接導向儀表板。判斷放在 proxy（本來就對每個請求跑 getUser）
+  // 而不是首頁 server component 裡，首頁才能維持靜態渲染、由 CDN 直接回應。
+  if (request.nextUrl.pathname === "/" && user) {
+    const url = request.nextUrl.clone();
+    url.pathname = "/dashboard";
+    return NextResponse.redirect(url);
+  }
+
   return supabaseResponse;
 }
 

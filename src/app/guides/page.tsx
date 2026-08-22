@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllGuides } from "@/lib/guides";
-import { siteUrl } from "@/lib/site";
-import { createClient } from "@/lib/supabase/server";
+import { siteName, siteUrl } from "@/lib/site";
+import { AuthNavButton } from "@/components/AuthNavButton";
 
 export const metadata: Metadata = {
   title: "接案知識庫 — 報價、記帳、接案實用指南",
@@ -14,31 +14,38 @@ export const metadata: Metadata = {
 };
 
 export default async function GuidesPage() {
-  const [guides, supabase] = await Promise.all([getAllGuides(), createClient()]);
-  const { data: { session } } = await supabase.auth.getSession();
-  const isLoggedIn = !!session;
+  const guides = await getAllGuides();
+
+  // CollectionPage + ItemList：讓搜尋引擎知道這是文章列表頁，以及涵蓋哪些文章
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name: "接案知識庫",
+    description: "報價、記帳、追款——把接案會遇到的金流問題講清楚。",
+    url: `${siteUrl}/guides`,
+    isPartOf: { "@type": "WebSite", name: siteName, url: siteUrl },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: guides.map((g, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        name: g.title,
+        url: `${siteUrl}/guides/${g.slug}`,
+      })),
+    },
+  };
 
   return (
     <div className="flex flex-col flex-1">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
       <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-border">
         <Link href="/" className="text-base font-medium">
           接案帳本
         </Link>
-        {isLoggedIn ? (
-          <Link
-            href="/dashboard"
-            className="border border-border rounded-md px-4 py-2 text-sm font-medium hover:bg-surface"
-          >
-            返回總覽
-          </Link>
-        ) : (
-          <Link
-            href="/login"
-            className="bg-accent text-accent-foreground rounded-md px-4 py-2 text-sm font-medium"
-          >
-            登入
-          </Link>
-        )}
+        <AuthNavButton />
       </header>
 
       <section className="px-4 sm:px-6 py-12 max-w-3xl w-full mx-auto">

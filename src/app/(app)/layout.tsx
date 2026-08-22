@@ -11,30 +11,34 @@ import { FeedbackFab } from "@/components/FeedbackFab";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
+  // proxy.ts 已對每個請求跑過 getUser() 驗證，這裡用 getSession()（只讀 cookie）
+  // 就好，避免每次頁面導覽都多一次 Supabase 網路往返——與 lib/auth.ts 的
+  // requireUserId 是同一套理由
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!data.user) {
+  if (!session?.user) {
     redirect("/login");
   }
+  const user = session.user;
 
   const [profile, incomeCategories, expenseCategories] = await Promise.all([
     prisma.profile.findUnique({
-      where: { id: data.user.id },
+      where: { id: user.id },
       select: { name: true, email: true },
     }),
     prisma.incomeCategory.findMany({
-      where: { userId: data.user.id },
+      where: { userId: user.id },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
     prisma.expenseCategory.findMany({
-      where: { userId: data.user.id },
+      where: { userId: user.id },
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
   ]);
 
-  const meta = data.user.user_metadata ?? {};
+  const meta = user.user_metadata ?? {};
   const displayName =
     profile?.name || meta.full_name || meta.name || profile?.email || "U";
   const avatarUrl: string | null = meta.avatar_url || meta.picture || null;

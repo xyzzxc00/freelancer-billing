@@ -7,7 +7,7 @@ import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { calculateTax } from "@/lib/tax";
-import { currency, formatDate } from "@/lib/currency";
+import { currency } from "@/lib/currency";
 import {
   updateQuoteItemsAction,
   markQuoteSentAction,

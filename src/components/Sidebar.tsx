@@ -143,7 +143,6 @@ export function Sidebar({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setTheme(stored === "light" || stored === "dark" ? stored : getSystemTheme());
     const c = localStorage.getItem("sidebar-collapsed");
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (c === "1") setCollapsed(true);
   }, []);
 

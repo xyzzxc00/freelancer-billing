@@ -12,6 +12,11 @@ export default function manifest(): MetadataRoute.Manifest {
     background_color: "#181715",
     theme_color: "#181715",
     lang: "zh-Hant",
+    // 沒有 icons 的 manifest 不符合 PWA 可安裝條件
+    icons: [
+      { src: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { src: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
     screenshots: [
       {
         src: "/screenshots/desktop.png",

@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
 import { siteName, siteUrl } from "@/lib/site";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -144,14 +142,9 @@ const features = [
   },
 ];
 
-export default async function Home() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getUser();
-
-  if (data.user) {
-    redirect("/dashboard");
-  }
-
+// 已登入者的 /dashboard 重導在 src/proxy.ts 處理，這裡不讀 cookie，
+// 整頁才能靜態生成、由 CDN 直接回應（對 SEO 與首訪速度都重要）
+export default function Home() {
   return (
     <div className="flex flex-col flex-1">
       <script

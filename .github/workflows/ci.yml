@@ -32,11 +32,13 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: 20
+          # 對齊 Vercel 專案設定的 Node 24.x，CI 才測得到正式環境實際跑的版本
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        # npm ci 嚴格按 package-lock.json 安裝，CI 綠燈才代表鎖定版本組合沒問題
+        run: npm ci
 
       - name: Generate Prisma client
         run: npx prisma generate
