@@ -37,8 +37,12 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        # npm ci 嚴格按 package-lock.json 安裝，CI 綠燈才代表鎖定版本組合沒問題
-        run: npm ci
+        # 原本改成 npm ci 想要更嚴格的鎖定版本保證，但這個相依樹裡 sharp/tailwindcss
+        # oxide/unrs-resolver 都帶了 wasm32-wasi 平台的 optionalDependencies 子樹，
+        # npm 寫 lockfile 時不保證每次都把未用到平台的子樹完整收斂進去（npm 已知行為，
+        # 非本專案特有），導致 npm ci 在 Linux runner 上間歇性誤判 lockfile 不同步、
+        # 即使本機剛驗證過 npm ci 通過也一樣會炸。改回 npm install。
+        run: npm install
 
       - name: Generate Prisma client
         run: npx prisma generate
