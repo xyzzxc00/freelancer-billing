@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { currency, formatDate } from "@/lib/currency";
+import { parseYearParam, parseMonthParam } from "@/lib/date-params";
 import { Pagination } from "@/components/Pagination";
 
 const PAGE_SIZE = 50;
@@ -14,9 +15,8 @@ export default async function IncomePage({
   const userId = await requireUserId();
   const { year: yearParam, month: monthParam, page: pageParam } = await searchParams;
 
-  const now = new Date();
-  const year = yearParam ? Number(yearParam) : now.getFullYear();
-  const month = monthParam ? Number(monthParam) : null;
+  const year = parseYearParam(yearParam);
+  const month = parseMonthParam(monthParam);
   const page = Math.max(1, Number(pageParam) || 1);
   const rangeStart = month ? new Date(year, month - 1, 1) : new Date(year, 0, 1);
   const rangeEnd = month ? new Date(year, month, 1) : new Date(year + 1, 0, 1);

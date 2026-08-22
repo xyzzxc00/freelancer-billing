@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { sendEmail } from "@/lib/email";
 import { escapeHtml } from "@/lib/html";
 import { calculateDepositSplit } from "@/lib/deposit";
+import { startOfTodayTaipei } from "@/lib/taipei";
 import { GENERIC_ACTION_ERROR, type ActionResult } from "@/lib/action-state";
 
 export async function recordQuoteViewedAction(token: string) {
@@ -58,9 +59,22 @@ export async function respondToQuoteAction(
     return { error: "這份報價單已經回覆過了，請重新整理頁面查看最新狀態" };
   }
 
+  // 有效期限「當天」仍可接受，過了台灣時間的那一天才算過期（與逾期應收款同一套規則）。
+  // 拒絕不受限制——過期後客戶明確回絕仍是有用的資訊。
+  if (
+    response === "ACCEPTED" &&
+    quote.expiresAt &&
+    quote.expiresAt < startOfTodayTaipei()
+  ) {
+    return { error: "這份報價單已超過有效期限，請聯絡報價提供者重新報價" };
+  }
+
   const signerName = String(formData.get("signerName") ?? "").trim();
   if (response === "ACCEPTED" && !signerName) {
     return { error: "請填寫姓名以確認接受這份報價單" };
+  }
+  if (signerName.length > 100) {
+    return { error: "姓名請控制在 100 字以內" };
   }
 
   // 用 updateMany 帶 status: "SENT" 條件做原子鎖定，避免兩個併發請求都通過上面

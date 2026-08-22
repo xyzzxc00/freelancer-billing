@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { toCsvResponse } from "@/lib/csv";
+import { parseYearParam } from "@/lib/date-params";
 
 export async function GET(request: NextRequest) {
   const userId = await requireUserId();
 
-  const yearParam = request.nextUrl.searchParams.get("year");
-  const year = yearParam ? Number(yearParam) : new Date().getFullYear();
+  const year = parseYearParam(request.nextUrl.searchParams.get("year"));
 
   const transactions = await prisma.transaction.findMany({
     where: {

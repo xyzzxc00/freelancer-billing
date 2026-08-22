@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { calculateTax } from "@/lib/tax";
+import { startOfTodayTaipei } from "@/lib/taipei";
 
 // 分享頁含客戶名稱與報價金額，連結若外流不能被搜尋引擎收錄
 export const metadata: Metadata = {
@@ -56,7 +57,12 @@ export default async function PublicQuotePage({
   const acceptAction = respondToQuoteAction.bind(null, token, "ACCEPTED");
   const rejectAction = respondToQuoteAction.bind(null, token, "REJECTED");
 
-  const status = statusConfig[quote.status];
+  // 有效期限當天仍可接受，過了台灣時間的那一天才算過期（與 respondToQuoteAction 同一套規則）
+  const isExpired =
+    quote.status === "SENT" && !!quote.expiresAt && quote.expiresAt < startOfTodayTaipei();
+  const status = isExpired
+    ? { label: "已過期", className: "bg-gray-200 text-gray-600" }
+    : statusConfig[quote.status];
   const quoteDate = quote.sentAt ?? quote.createdAt;
 
   return (
@@ -114,7 +120,10 @@ export default async function PublicQuotePage({
               {quote.expiresAt && (
                 <div>
                   <p className="text-xs text-gray-400 mb-1">有效期限</p>
-                  <p className="text-sm font-medium text-gray-800">{formatDate(quote.expiresAt)}</p>
+                  <p className={`text-sm font-medium ${isExpired ? "text-red-600" : "text-gray-800"}`}>
+                    {formatDate(quote.expiresAt)}
+                    {isExpired && "（已過期）"}
+                  </p>
                 </div>
               )}
             </div>
@@ -216,7 +225,7 @@ export default async function PublicQuotePage({
           )}
 
           {/* Action */}
-          {quote.status === "SENT" && (
+          {quote.status === "SENT" && !isExpired && (
             <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-sm text-gray-500">
                 {quote.terms
@@ -224,6 +233,14 @@ export default async function PublicQuotePage({
                   : "請確認報價內容後選擇接受或拒絕"}
               </p>
               <QuoteResponseActions acceptAction={acceptAction} rejectAction={rejectAction} />
+            </div>
+          )}
+
+          {isExpired && (
+            <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 text-center">
+              <p className="text-sm text-gray-500">
+                此報價單已超過有效期限。如仍有合作意願，請直接聯絡報價提供者重新報價。
+              </p>
             </div>
           )}
 

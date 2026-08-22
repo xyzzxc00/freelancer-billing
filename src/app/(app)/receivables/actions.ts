@@ -20,18 +20,23 @@ function receivableTitle(r: { title: string | null; quote: { title: string } | n
 export async function markReceivablePaidAction(receivableId: string) {
   const userId = await requireUserId();
 
+  let outcome: "paid" | "missing" | "already" = "missing";
   try {
-    await prisma.$transaction(async (tx) => {
+    outcome = await prisma.$transaction(async (tx) => {
       const receivable = await tx.receivable.findFirst({
         where: { id: receivableId, userId },
         include: { quote: true },
       });
-      if (!receivable) return;
+      if (!receivable) return "missing" as const;
 
-      await tx.receivable.update({
-        where: { id: receivableId },
+      // 帶 status: "PENDING" 條件的原子鎖定：連點兩下時第二次落到「已處理過」的
+      // 明確訊息，而不是靠 transactions.receivableId 的 unique constraint
+      // 讓整筆交易 rollback、只顯示看不懂的通用錯誤
+      const updated = await tx.receivable.updateMany({
+        where: { id: receivableId, status: "PENDING" },
         data: { status: "PAID", paidAt: new Date() },
       });
+      if (updated.count === 0) return "already" as const;
 
       await tx.transaction.create({
         data: {
@@ -44,10 +49,18 @@ export async function markReceivablePaidAction(receivableId: string) {
           receivableId: receivable.id,
         },
       });
+      return "paid" as const;
     });
   } catch (err) {
     console.error("標記已收款失敗:", err);
     redirectWithToast("/receivables", GENERIC_ACTION_ERROR, "error");
+  }
+
+  if (outcome === "missing") {
+    redirectWithToast("/receivables", "找不到這筆款項", "error");
+  }
+  if (outcome === "already") {
+    redirectWithToast("/receivables", "這筆款項先前已標記為已收款", "error");
   }
 
   revalidatePath("/receivables");
@@ -75,9 +88,22 @@ export async function sendDunningEmailAction(receivableId: string) {
 
   const title = receivableTitle(receivable);
   const label = kindLabel[receivable.kind] ? `（${kindLabel[receivable.kind]}）` : "";
+  const subject = `款項提醒：${title}${label}`;
+
+  // 24 小時冷卻：同一筆款項不重複寄催款信（防連點、也保護全站共用的
+  // Resend 每日額度）。用既有的 EmailLog 判斷，不用加新欄位。
+  const cooldownStart = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const recentlySent = await prisma.emailLog.findFirst({
+    where: { to: clientEmail, subject, status: "sent", sentAt: { gte: cooldownStart } },
+    select: { id: true },
+  });
+  if (recentlySent) {
+    redirectWithToast("/receivables", "這筆款項 24 小時內已寄過催款信，請稍後再寄", "error");
+  }
+
   const ok = await sendEmail({
     to: clientEmail,
-    subject: `款項提醒：${title}${label}`,
+    subject,
     html: `<p>您好，</p><p>提醒您「${escapeHtml(title)}」${label}尚有 ${currency.format(Number(receivable.amount))} 款項待付款，麻煩撥空處理，謝謝！</p>`,
   });
 
@@ -94,6 +120,9 @@ export async function setReceivableDueDateAction(receivableId: string, formData:
 
   const dueDateRaw = String(formData.get("dueDate") ?? "");
   const dueDate = dueDateRaw ? new Date(dueDateRaw) : null;
+  if (dueDate && Number.isNaN(dueDate.getTime())) {
+    redirectWithToast("/receivables", "日期格式不正確", "error");
+  }
 
   let result;
   try {
@@ -109,4 +138,5 @@ export async function setReceivableDueDateAction(receivableId: string, formData:
   if (result.count === 0) return;
 
   revalidatePath("/receivables");
+  redirectWithToast("/receivables", dueDate ? "已更新收款期限" : "已清除收款期限");
 }

@@ -23,6 +23,9 @@ function throttledSend<T>(fn: () => Promise<T>): Promise<T> {
 // Resend 免費方案每日上限 100 封，留緩衝避免卡在邊界
 const DAILY_LIMIT = Number(process.env.RESEND_DAILY_LIMIT ?? 90);
 
+// 用來把「已達每日上限」跟一般寄送失敗區分開：不重試、不寫 failed log（沒有真的呼叫 API）
+class DailyLimitReachedError extends Error {}
+
 async function todaySentCount(): Promise<number> {
   const startOfDay = new Date();
   startOfDay.setHours(0, 0, 0, 0);
@@ -60,23 +63,29 @@ export async function sendEmail({
     return false;
   }
 
-  const sentToday = await todaySentCount();
-  if (sentToday >= DAILY_LIMIT) {
-    console.error(
-      `今日寄信量已達 ${sentToday}/${DAILY_LIMIT}，略過寄送以避免超過 Resend 方案限制：${subject}`
-    );
-    return false;
-  }
-
   const MAX_RETRIES = 2;
   let lastError: unknown;
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       // resend.emails.send() 不會對 API 錯誤（含 429）拋例外，一律回傳 { data, error }，
-      // 要自己檢查 error 欄位並手動 throw，下面的 catch/重試邏輯才抓得到
-      const { error } = await throttledSend(() => resend.emails.send({ from: FROM, to, subject, html }));
+      // 要自己檢查 error 欄位並手動 throw，下面的 catch/重試邏輯才抓得到。
+      // 每日上限檢查放在節流佇列「裡面」：cron 用 Promise.all 平行呼叫時，
+      // 若在佇列外先檢查，所有呼叫會在任何 log 寫入前讀到同一個 count，實際寄送量會衝過上限。
+      const { error } = await throttledSend(async () => {
+        const sentToday = await todaySentCount();
+        if (sentToday >= DAILY_LIMIT) {
+          throw new DailyLimitReachedError(`${sentToday}/${DAILY_LIMIT}`);
+        }
+        return resend.emails.send({ from: FROM, to, subject, html });
+      });
       if (error) throw new Error(`${error.name ?? "resend_error"}: ${error.message ?? "unknown error"}`);
     } catch (error) {
+      if (error instanceof DailyLimitReachedError) {
+        console.error(
+          `今日寄信量已達 ${error.message}，略過寄送以避免超過 Resend 方案限制：${subject}`
+        );
+        return false;
+      }
       lastError = error;
       console.warn(`寄送 email 第 ${attempt}/${MAX_RETRIES} 次嘗試失敗：${subject}`, error);
       if (attempt < MAX_RETRIES) {

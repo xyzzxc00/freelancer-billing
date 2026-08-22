@@ -2,8 +2,8 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { siteUrl } from "@/lib/site";
 import { requireUserId } from "@/lib/auth";
 import { redirectWithToast } from "@/lib/toast";
 import { sendEmail } from "@/lib/email";
@@ -44,11 +44,16 @@ type ParseItemsResult =
   | { ok: true; items: ItemInput[] }
   | { ok: false; error: string };
 
+const MAX_ITEMS = 100;
+
 function parseItems(raw: string): ParseItemsResult {
   let parsed: RawItem[];
   try {
     parsed = JSON.parse(raw) as RawItem[];
   } catch {
+    return { ok: false, error: "項目資料格式錯誤" };
+  }
+  if (!Array.isArray(parsed)) {
     return { ok: false, error: "項目資料格式錯誤" };
   }
 
@@ -62,12 +67,18 @@ function parseItems(raw: string): ParseItemsResult {
   if (rows.length === 0) {
     return { ok: false, error: "請至少新增一個項目" };
   }
+  if (rows.length > MAX_ITEMS) {
+    return { ok: false, error: `項目最多 ${MAX_ITEMS} 筆` };
+  }
 
   const items: ItemInput[] = [];
   for (const item of rows) {
     const name = String(item.name ?? "").trim();
     if (!name) {
       return { ok: false, error: "每個項目都要填寫名稱" };
+    }
+    if (name.length > 200) {
+      return { ok: false, error: "項目名稱請控制在 200 字以內" };
     }
     const unitPrice = Number(item.unitPrice);
     if (!Number.isFinite(unitPrice) || unitPrice <= 0) {
@@ -103,8 +114,14 @@ export async function createQuoteAction(
   if (!title) {
     return { error: "請填寫標題" };
   }
+  if (title.length > 200) {
+    return { error: "標題請控制在 200 字以內" };
+  }
   if (!taxMode) {
     return { error: "稅務方式不正確，請重新選擇" };
+  }
+  if (notes && notes.length > 2000) {
+    return { error: "備註請控制在 2000 字以內" };
   }
   if (terms && terms.length > 2000) {
     return { error: "合約條款請控制在 2000 字以內" };
@@ -177,8 +194,14 @@ export async function updateQuoteItemsAction(
   if (!title) {
     return { error: "請填寫標題" };
   }
+  if (title.length > 200) {
+    return { error: "標題請控制在 200 字以內" };
+  }
   if (!taxMode) {
     return { error: "稅務方式不正確，請重新選擇" };
+  }
+  if (notes && notes.length > 2000) {
+    return { error: "備註請控制在 2000 字以內" };
   }
   if (terms && terms.length > 2000) {
     return { error: "合約條款請控制在 2000 字以內" };
@@ -251,10 +274,9 @@ export async function markQuoteSentAction(quoteId: string) {
     redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
   }
 
-  const headerList = await headers();
-  const host = headerList.get("host") ?? "";
-  const protocol = host.startsWith("localhost") ? "http" : "https";
-  const shareUrl = `${protocol}://${host}/quote/${quote.shareToken}`;
+  // 用 siteUrl 而不是 Host header：從 preview 部署操作時，寄給客戶的連結
+  // 不該指向 preview 網域（其他寄信處也都用 siteUrl）
+  const shareUrl = `${siteUrl}/quote/${quote.shareToken}`;
   const senderName = quote.profile.name ?? quote.profile.email;
 
   const clientEmail = extractEmail(quote.client.contact ?? "");
@@ -296,35 +318,39 @@ export async function acceptQuoteAction(quoteId: string) {
   const finalDueDate = new Date();
   finalDueDate.setDate(finalDueDate.getDate() + 30);
 
+  // 與公開端 respondToQuoteAction 相同的原子鎖定：updateMany 帶 status: "SENT"
+  // 條件，擋下連點或重複觸發時重複建立應收款（訂金模式一次會多出兩筆）
+  let won = false;
   try {
-    if (quote.depositPercent) {
-      const { depositAmount, finalAmount } = calculateDepositSplit(subtotal, quote.depositPercent);
-      await prisma.$transaction([
-        prisma.quote.update({
-          where: { id: quoteId },
-          data: { status: "ACCEPTED", respondedAt: new Date() },
-        }),
-        prisma.receivable.create({
+    won = await prisma.$transaction(async (tx) => {
+      const updated = await tx.quote.updateMany({
+        where: { id: quoteId, userId, status: "SENT" },
+        data: { status: "ACCEPTED", respondedAt: new Date() },
+      });
+      if (updated.count === 0) return false;
+
+      if (quote.depositPercent) {
+        const { depositAmount, finalAmount } = calculateDepositSplit(subtotal, quote.depositPercent);
+        await tx.receivable.create({
           data: { userId, quoteId, kind: "DEPOSIT", amount: depositAmount, dueDate: new Date() },
-        }),
-        prisma.receivable.create({
+        });
+        await tx.receivable.create({
           data: { userId, quoteId, kind: "FINAL", amount: finalAmount, dueDate: finalDueDate },
-        }),
-      ]);
-    } else {
-      await prisma.$transaction([
-        prisma.quote.update({
-          where: { id: quoteId },
-          data: { status: "ACCEPTED", respondedAt: new Date() },
-        }),
-        prisma.receivable.create({
+        });
+      } else {
+        await tx.receivable.create({
           data: { userId, quoteId, kind: "FULL", amount: subtotal, dueDate: finalDueDate },
-        }),
-      ]);
-    }
+        });
+      }
+      return true;
+    });
   } catch (err) {
     console.error("接受報價單失敗:", err);
     redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
+  }
+
+  if (!won) {
+    redirectWithToast(`/quotes/${quoteId}`, "這份報價單已經回覆過了，請重新整理頁面查看最新狀態", "error");
   }
 
   revalidatePath(`/quotes/${quoteId}`);
@@ -336,14 +362,20 @@ export async function acceptQuoteAction(quoteId: string) {
 export async function rejectQuoteAction(quoteId: string) {
   const userId = await requireUserId();
 
+  // 帶 status: "SENT" 條件：已接受的報價單有關聯的應收款，不能再被改成拒絕
+  let updated;
   try {
-    await prisma.quote.updateMany({
-      where: { id: quoteId, userId },
+    updated = await prisma.quote.updateMany({
+      where: { id: quoteId, userId, status: "SENT" },
       data: { status: "REJECTED", respondedAt: new Date() },
     });
   } catch (err) {
     console.error("拒絕報價單失敗:", err);
     redirectWithToast(`/quotes/${quoteId}`, GENERIC_ACTION_ERROR, "error");
+  }
+
+  if (updated.count === 0) {
+    redirectWithToast(`/quotes/${quoteId}`, "這份報價單已經回覆過了，請重新整理頁面查看最新狀態", "error");
   }
 
   revalidatePath(`/quotes/${quoteId}`);

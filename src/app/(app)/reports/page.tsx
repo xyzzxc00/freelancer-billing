@@ -4,6 +4,7 @@ import { requireUserId } from "@/lib/auth";
 import { ReportsBarChart } from "@/components/ReportsBarChart";
 import { CategoryBreakdown } from "@/components/CategoryBreakdown";
 import { buildCategoryBreakdown } from "@/lib/category-breakdown";
+import { parseYearParam } from "@/lib/date-params";
 
 import { currency } from "@/lib/currency";
 
@@ -22,10 +23,9 @@ export default async function ReportsPage({
   const userId = await requireUserId();
   const { year: yearParam, from: fromParam, to: toParam } = await searchParams;
 
-  const now = new Date();
-  const year = yearParam ? Number(yearParam) : now.getFullYear();
-  const fromMonth = fromParam ? Math.max(1, Math.min(12, Number(fromParam))) : 1;
-  const toMonth = toParam ? Math.max(1, Math.min(12, Number(toParam))) : 12;
+  const year = parseYearParam(yearParam);
+  const fromMonth = fromParam ? Math.max(1, Math.min(12, Number(fromParam) || 1)) : 1;
+  const toMonth = toParam ? Math.max(1, Math.min(12, Number(toParam) || 12)) : 12;
 
   const rangeStart = new Date(year, fromMonth - 1, 1);
   const rangeEnd = new Date(year, toMonth, 1);

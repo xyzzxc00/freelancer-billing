@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { calculateTax, taxModeLabel, type TaxMode } from "@/lib/tax";
+import { parseYearParam } from "@/lib/date-params";
 import { TaxEstimator } from "@/components/TaxEstimator";
 import { currency } from "@/lib/currency";
 
@@ -12,7 +13,7 @@ export default async function TaxSummaryPage({
 }) {
   const userId = await requireUserId();
   const { year: yearParam } = await searchParams;
-  const year = yearParam ? Number(yearParam) : new Date().getFullYear();
+  const year = parseYearParam(yearParam);
 
   const [quotes, yearIncomeSum] = await Promise.all([
     prisma.quote.findMany({

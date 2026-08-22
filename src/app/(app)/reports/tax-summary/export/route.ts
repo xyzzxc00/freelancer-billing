@@ -3,12 +3,12 @@ import { prisma } from "@/lib/prisma";
 import { requireUserId } from "@/lib/auth";
 import { calculateTax, taxModeLabel, type TaxMode } from "@/lib/tax";
 import { toCsvResponse } from "@/lib/csv";
+import { parseYearParam } from "@/lib/date-params";
 
 export async function GET(request: NextRequest) {
   const userId = await requireUserId();
 
-  const yearParam = request.nextUrl.searchParams.get("year");
-  const year = yearParam ? Number(yearParam) : new Date().getFullYear();
+  const year = parseYearParam(request.nextUrl.searchParams.get("year"));
 
   const quotes = await prisma.quote.findMany({
     where: {
