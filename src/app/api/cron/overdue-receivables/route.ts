@@ -12,6 +12,16 @@ const currency = new Intl.NumberFormat("zh-TW", {
   maximumFractionDigits: 0,
 });
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// 逾期第 1、7、14 天各提醒一次，之後每 30 天一次——不是每天寄到收款為止
+// （每天寄既騷擾使用者，也會無上限消耗全站共用的 Resend 每日額度）。
+// 若 cron 某天沒跑，該次提醒會順延到下一個命中的提醒日，屬可接受的取捨。
+function shouldRemind(daysOverdue: number): boolean {
+  if (daysOverdue === 1 || daysOverdue === 7 || daysOverdue === 14) return true;
+  return daysOverdue >= 30 && daysOverdue % 30 === 0;
+}
+
 export async function GET(request: NextRequest) {
   if (!verifyCronAuth(request)) {
     return new Response("Unauthorized", { status: 401 });
@@ -19,8 +29,9 @@ export async function GET(request: NextRequest) {
 
   try {
     // 到期日「當天」還不算逾期，過了台灣時間的那一天才算
+    const today = startOfTodayTaipei();
     const overdue = await prisma.receivable.findMany({
-      where: { status: "PENDING", dueDate: { lt: startOfTodayTaipei() } },
+      where: { status: "PENDING", dueDate: { lt: today } },
       include: { profile: true, quote: { include: { client: true } }, client: true },
     });
 
@@ -31,7 +42,20 @@ export async function GET(request: NextRequest) {
 
     let notified = 0;
     let failed = 0;
+    let held = 0;
     for (const [, receivables] of byUser) {
+      // 任一筆命中提醒日才寄；信中仍列出該使用者全部逾期款項，一次看到完整狀況。
+      // 天數以「台北今天零點 − 到期日」推算，cron 每天跑，同一天內結果固定。
+      const hitsReminderDay = receivables.some((r) => {
+        if (!r.dueDate) return false;
+        const daysOverdue = Math.floor((today.getTime() - r.dueDate.getTime()) / DAY_MS) + 1;
+        return shouldRemind(daysOverdue);
+      });
+      if (!hitsReminderDay) {
+        held += 1;
+        continue;
+      }
+
       const profile = receivables[0].profile;
       const rows = receivables
         .map((r) => {
@@ -67,7 +91,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return Response.json({ notified, failed, overdueCount: overdue.length });
+    return Response.json({ notified, failed, held, overdueCount: overdue.length });
   } catch (err) {
     console.error("overdue-receivables cron 失敗:", err);
     return new Response("Internal Server Error", { status: 500 });

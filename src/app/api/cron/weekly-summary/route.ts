@@ -15,11 +15,24 @@ export async function GET(request: NextRequest) {
 
   const profiles = await prisma.profile.findMany({ select: { id: true, email: true } });
 
-  const results = await Promise.all(profiles.map((profile) => sendSummaryFor(profile, start, end, today)));
-  const sent = results.filter(Boolean).length;
-  const failed = results.length - sent;
+  // 分批處理：一次全開會對資料庫 pooler 同時打 5×N 個查詢；
+  // 寄信本身已由 email.ts 的節流佇列序列化，這裡只需要控查詢並發
+  const CHUNK_SIZE = 5;
+  let sent = 0;
+  let failed = 0;
+  let skipped = 0;
+  for (let i = 0; i < profiles.length; i += CHUNK_SIZE) {
+    const results = await Promise.all(
+      profiles.slice(i, i + CHUNK_SIZE).map((profile) => sendSummaryFor(profile, start, end, today))
+    );
+    for (const r of results) {
+      if (r === "sent") sent += 1;
+      else if (r === "failed") failed += 1;
+      else skipped += 1;
+    }
+  }
 
-  return Response.json({ sent, failed, total: profiles.length });
+  return Response.json({ sent, failed, skipped, total: profiles.length });
 }
 
 async function sendSummaryFor(
@@ -27,7 +40,7 @@ async function sendSummaryFor(
   start: Date,
   end: Date,
   today: Date
-): Promise<boolean> {
+): Promise<"sent" | "failed" | "skipped"> {
   const userId = profile.id;
 
   const [income, expense, pending, overdue, awaitingQuotes] = await Promise.all([
@@ -57,6 +70,12 @@ async function sendSummaryFor(
   const pendingTotal = Number(pending._sum.amount ?? 0);
   const overdueTotal = Number(overdue._sum.amount ?? 0);
 
+  // 上週沒有任何收支、也沒有待收款或待回覆報價的使用者，寄「全部為零」的摘要
+  // 只是騷擾，也浪費全站共用的每日寄信額度
+  if (weekIncome === 0 && weekExpense === 0 && pending._count === 0 && awaitingQuotes === 0) {
+    return "skipped";
+  }
+
   const html = `
     <p>上週經營摘要：</p>
     <ul>
@@ -68,9 +87,10 @@ async function sendSummaryFor(
     </ul>
   `;
 
-  return sendEmail({
+  const ok = await sendEmail({
     to: profile.email,
     subject: "本週經營摘要",
     html,
   });
+  return ok ? "sent" : "failed";
 }
