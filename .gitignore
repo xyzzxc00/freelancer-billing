@@ -23,6 +23,16 @@
 # misc
 .DS_Store
 *.pem
+*.key
+*.p12
+*.pfx
+
+# 本機私密備份與帳務匯出；SQL migrations 仍需版本控制
+/backups/
+/private-backup/
+/exports/
+*.dump
+*.backup
 
 # debug
 npm-debug.log*
